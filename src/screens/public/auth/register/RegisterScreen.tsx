@@ -10,35 +10,42 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useLoginLogic } from './useLoginLogic';
+import { useRegisterLogic } from './useRegisterLogic';
 import styles from './styles';
 
 /**
- * LoginScreen
+ * RegisterScreen
  *
- * Pantalla de inicio de sesión
- * - Separa lógica (hooks) del renderizado
- * - Maneja validación de formulario
+ * Pantalla de registro
+ * - Separación lógica (hooks) y renderizado
+ * - Validación de formulario
  * - Integración con Firebase Auth
  */
 
-const LoginScreen = ({ navigation }: any) => {
+const RegisterScreen = ({ navigation }: any) => {
   // 1️⃣ IMPORTS Y HOOKS - Toda la lógica aquí
   const {
+    displayName,
     email,
     password,
+    passwordConfirm,
     showPassword,
+    showPasswordConfirm,
+    displayNameError,
     emailError,
     passwordError,
+    passwordConfirmError,
     generalError,
     successMessage,
     isLoading,
+    handleDisplayNameChange,
     handleEmailChange,
     handlePasswordChange,
-    handleLogin,
+    handlePasswordConfirmChange,
+    handleRegister,
     setShowPassword,
-    clearErrors,
-  } = useLoginLogic();
+    setShowPasswordConfirm,
+  } = useRegisterLogic();
 
   // 2️⃣ RENDERIZADO
   return (
@@ -53,8 +60,8 @@ const LoginScreen = ({ navigation }: any) => {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Bienvenido</Text>
-            <Text style={styles.subtitle}>Inicia sesión en tu cuenta</Text>
+            <Text style={styles.title}>Crear Cuenta</Text>
+            <Text style={styles.subtitle}>Únete a nuestra comunidad</Text>
           </View>
 
           {/* Errores Generales */}
@@ -73,14 +80,27 @@ const LoginScreen = ({ navigation }: any) => {
 
           {/* Formulario */}
           <View style={styles.form}>
+            {/* Display Name Input */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Nombre Completo</Text>
+              <TextInput
+                style={[styles.input, displayNameError && styles.inputError]}
+                placeholder="Tu nombre completo"
+                placeholderTextColor="#999"
+                value={displayName}
+                onChangeText={handleDisplayNameChange}
+                editable={!isLoading}
+              />
+              {displayNameError && (
+                <Text style={styles.fieldErrorText}>{displayNameError}</Text>
+              )}
+            </View>
+
             {/* Email Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
               <TextInput
-                style={[
-                  styles.input,
-                  emailError && styles.inputError,
-                ]}
+                style={[styles.input, emailError && styles.inputError]}
                 placeholder="tu@email.com"
                 placeholderTextColor="#999"
                 value={email}
@@ -88,7 +108,6 @@ const LoginScreen = ({ navigation }: any) => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!isLoading}
-                accessibilityLabel="Email input"
               />
               {emailError && (
                 <Text style={styles.fieldErrorText}>{emailError}</Text>
@@ -100,23 +119,18 @@ const LoginScreen = ({ navigation }: any) => {
               <Text style={styles.label}>Contraseña</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
-                  style={[
-                    styles.passwordInput,
-                    passwordError && styles.inputError,
-                  ]}
+                  style={[styles.passwordInput, passwordError && styles.inputError]}
                   placeholder="••••••••"
                   placeholderTextColor="#999"
                   value={password}
                   onChangeText={handlePasswordChange}
                   secureTextEntry={!showPassword}
                   editable={!isLoading}
-                  accessibilityLabel="Password input"
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
                   style={styles.showPasswordBtn}
-                  accessibilityLabel="Toggle password visibility"
                 >
                   <Text style={styles.showPasswordText}>
                     {showPassword ? '👁' : '👁‍🗨'}
@@ -128,44 +142,57 @@ const LoginScreen = ({ navigation }: any) => {
               )}
             </View>
 
-            {/* Forgot Password Link */}
-            <TouchableOpacity
-              onPress={() => navigation?.navigate('ForgotPassword')}
-              disabled={isLoading}
-              style={styles.forgotPasswordBtn}
-            >
-              <Text style={styles.forgotPasswordText}>
-                ¿Olvidaste tu contraseña?
-              </Text>
-            </TouchableOpacity>
+            {/* Password Confirm Input */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Confirmar Contraseña</Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={[styles.passwordInput, passwordConfirmError && styles.inputError]}
+                  placeholder="••••••••"
+                  placeholderTextColor="#999"
+                  value={passwordConfirm}
+                  onChangeText={handlePasswordConfirmChange}
+                  secureTextEntry={!showPasswordConfirm}
+                  editable={!isLoading}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                  disabled={isLoading}
+                  style={styles.showPasswordBtn}
+                >
+                  <Text style={styles.showPasswordText}>
+                    {showPasswordConfirm ? '👁' : '👁‍🗨'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {passwordConfirmError && (
+                <Text style={styles.fieldErrorText}>{passwordConfirmError}</Text>
+              )}
+            </View>
           </View>
 
-          {/* Login Button */}
+          {/* Register Button */}
           <TouchableOpacity
-            style={[
-              styles.loginButton,
-              isLoading && styles.loginButtonDisabled,
-            ]}
-            onPress={handleLogin}
+            style={[styles.registerButton, isLoading && styles.registerButtonDisabled]}
+            onPress={handleRegister}
             disabled={isLoading}
             activeOpacity={0.7}
-            accessibilityLabel="Login button"
           >
             {isLoading ? (
               <ActivityIndicator size="large" color="#fff" />
             ) : (
-              <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+              <Text style={styles.registerButtonText}>Crear Cuenta</Text>
             )}
           </TouchableOpacity>
 
-          {/* Register Link */}
-          <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>¿No tienes cuenta? </Text>
+          {/* Login Link */}
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>¿Ya tienes cuenta? </Text>
             <TouchableOpacity
-              onPress={() => navigation?.navigate('Register')}
+              onPress={() => navigation?.navigate('Login')}
               disabled={isLoading}
             >
-              <Text style={styles.signupLink}>Regístrate aquí</Text>
+              <Text style={styles.loginLink}>Inicia sesión</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -174,4 +201,4 @@ const LoginScreen = ({ navigation }: any) => {
   );
 };
 
-export default LoginScreen;
+export default RegisterScreen;
