@@ -73,3 +73,14 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Firebase
+.firebaserc
+firebase-debug.log*
+google-services.json
+GoogleService-Info.plist
