@@ -7,6 +7,8 @@ Proyecto de **React Native + Firebase** con arquitectura limpia, separación cla
 
 ## 📁 Estructura de Carpetas
 
+### 📱 Mobile App (React Native)
+
 ```
 src/
 ├── public/                    # Pantallas públicas (sin autenticación)
@@ -14,9 +16,15 @@ src/
 │   │   ├── login/
 │   │   │   ├── LoginScreen.tsx
 │   │   │   ├── useLoginLogic.ts
-│   │   │   └── types.ts
-│   │   ├── signup/
-│   │   └── recovery/
+│   │   │   └── styles.ts
+│   │   ├── register/
+│   │   │   ├── RegisterScreen.tsx
+│   │   │   ├── useRegisterLogic.ts
+│   │   │   └── styles.ts
+│   │   └── forgot-password/
+│   │       ├── ForgotPasswordScreen.tsx
+│   │       ├── useForgotPasswordLogic.ts
+│   │       └── styles.ts
 │   └── onboarding/
 │
 ├── private/                   # Pantallas privadas (requieren autenticación)
@@ -44,11 +52,11 @@ src/
 ├── services/                  # Servicios y configuración
 │   ├── firebase/
 │   │   ├── firebaseConfig.ts
-│   │   ├── auth.ts           # Funciones de autenticación
-│   │   ├── firestore.ts      # Operaciones con Firestore
+│   │   ├── auth.ts           # Autenticación Firebase
+│   │   ├── users.ts          # Operaciones CRUD usuarios
 │   │   └── storage.ts        # Almacenamiento
-│   ├── notifications/        # Configuración de push notifications
-│   └── deeplinks/            # Configuración de deep links
+│   ├── notifications/        # Push notifications
+│   └── deeplinks/            # Deep linking
 │
 ├── utils/                     # Funciones utilitarias
 │   ├── validators.ts         # Validación de datos
@@ -57,34 +65,86 @@ src/
 │   └── errorHandler.ts       # Manejo de errores
 │
 ├── types/                     # Tipos TypeScript globales
-│   ├── index.ts
-│   ├── user.ts
-│   └── api.ts
+│   └── index.ts              # User, UserRole, CreateUserCredentials, etc
 │
 ├── navigation/                # Configuración de navegación
-│   ├── RootNavigator.tsx
-│   ├── AuthNavigator.tsx
-│   └── AppNavigator.tsx
+│   ├── RootNavigator.tsx     # Navegador raíz (condicional auth)
+│   ├── AuthNavigator.tsx     # Pantallas públicas
+│   ├── AppNavigator.tsx      # Pantallas privadas
+│   └── linking.ts            # Deep linking config
+│
+├── redux/                     # Estado global con Redux Toolkit
+│   ├── store.ts
+│   └── slices/
+│       └── authSlice.ts      # Estado de autenticación
 │
 ├── assets/                    # Recursos estáticos
 │   ├── images/
 │   ├── icons/
 │   ├── fonts/
-│   └── lottie/               # Animaciones
+│   └── lottie/
 │
-├── context/                   # Context API para estado global
-│   ├── AuthContext.tsx
-│   └── AppContext.tsx
-│
-├── redux/ (opcional)          # O Redux Toolkit si se necesita estado complejo
-│   ├── store.ts
-│   └── slices/
-│
-└── App.tsx                    # Punto de entrada principal
+└── App.tsx                    # Punto de entrada
 
 .env                          # Variables de entorno (NO incluir en git)
-.env.example                  # Plantilla de variables de entorno
+.env.example                  # Plantilla de variables
 google-services.json          # Firebase config (NO incluir en git)
+```
+
+### 🌐 Web App (Vite + React)
+
+```
+web/
+├── src/
+│   ├── pages/                 # Páginas principales
+│   │   ├── Users.tsx          # Gestión de usuarios (CRUD)
+│   │   ├── Users.css
+│   │   ├── Dashboard.tsx
+│   │   └── Dashboard.css
+│   │
+│   ├── components/            # Componentes reutilizables
+│   │   ├── UserForm.tsx       # Formulario create/edit usuarios
+│   │   ├── UserForm.css
+│   │   ├── UsersList.tsx      # Tabla de usuarios
+│   │   ├── UsersList.css
+│   │   ├── common/
+│   │   │   ├── Header.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   └── Button.tsx
+│   │   ├── layout/
+│   │   └── ui/
+│   │
+│   ├── hooks/                 # Custom hooks
+│   │   ├── useUsers.ts        # Lógica CRUD usuarios
+│   │   ├── useAuth.ts         # Autenticación
+│   │   └── useFetch.ts        # Fetch genérico
+│   │
+│   ├── services/              # Servicios
+│   │   ├── firebaseConfig.ts  # Config Firebase web
+│   │   └── usersService.ts    # CRUD usuarios en Firestore
+│   │
+│   ├── types/                 # Tipos TypeScript
+│   │   └── index.ts           # User, UserRole, etc (sincronizado con mobile)
+│   │
+│   ├── utils/                 # Utilitarios
+│   │   ├── validators.ts
+│   │   ├── formatters.ts
+│   │   └── constants.ts
+│   │
+│   ├── assets/                # Recursos
+│   │   ├── images/
+│   │   ├── icons/
+│   │   └── styles/
+│   │
+│   ├── App.tsx
+│   └── main.tsx
+│
+├── .env                       # Variables de entorno
+├── .env.example               # Plantilla
+├── vite.config.ts
+├── tsconfig.json
+├── ADMIN_GUIDE.md             # Documentación del panel admin
+└── public/
 ```
 
 ---
@@ -160,9 +220,86 @@ export const useLoginLogic = () => {
 
 ---
 
+## 👥 Sistema de Usuarios y Roles
+
+### Tipos de Usuarios (UserRole)
+
+```typescript
+type UserRole = 'admin' | 'familia' | 'preceptor';
+```
+
+| Rol | Acceso | Descripción |
+|-----|--------|-------------|
+| **admin** | Email + Contraseña | Personal administrativo del instituto |
+| **familia** | DNI + Contraseña | Padres/tutores de estudiantes |
+| **preceptor** | Email + Contraseña | Docentes/preceptores |
+
+### Interfaz User
+
+```typescript
+interface User {
+  id: string;                    // ID único
+  role: UserRole;                // admin, familia, preceptor
+  email?: string;                // Para admin/preceptor
+  dni?: string;                  // Para familia
+  displayName: string;           // Nombre completo
+  photoURL?: string;             // Foto de perfil
+  createdAt: Date;              // Fecha creación
+  updatedAt: Date;              // Última actualización
+  enabledAt?: Date;             // Fecha habilitación
+  pushTokens: string[];         // Tokens FCM (notificaciones)
+  isEnabled: boolean;           // Cuenta activa/inactiva
+  lastLogin?: Date;             // Último acceso
+}
+```
+
+### Operaciones CRUD
+
+#### Mobile (`src/services/firebase/users.ts`)
+```typescript
+createUser(userId, credentials)    // Crear usuario
+getUser(userId)                    // Obtener por ID
+getAllUsers()                      // Listar todos
+getUsersByRole(role)               // Filtrar por rol
+getUserByEmail(email)              // Buscar por email
+getUserByDNI(dni)                  // Buscar por DNI
+updateUser(userId, data)           // Actualizar
+deleteUser(userId)                 // Eliminar
+addPushToken(userId, token)        // Agregar token FCM
+removePushToken(userId, token)     // Remover token FCM
+```
+
+#### Web (`web/src/services/usersService.ts`)
+- Mismo conjunto de funciones que mobile
+- Acceso desde panel admin
+
+### Hook de Usuarios (Web)
+
+```typescript
+// web/src/hooks/useUsers.ts
+const {
+  users,                   // Array de usuarios
+  filteredUsers,          // Usuarios filtrados
+  selectedUser,           // Usuario seleccionado
+  isLoading,              // Estado de carga
+  error,                  // Mensaje de error
+  success,                // Mensaje de éxito
+  filter,                 // Filtro activo
+  
+  loadUsers(),            // Cargar usuarios
+  createUser(),           // Crear nuevo usuario
+  updateUserData(),       // Actualizar usuario
+  deleteUserData(),       // Eliminar usuario
+  selectUser(),           // Seleccionar usuario
+  setFilter(),            // Cambiar filtro
+} = useUsers();
+```
+
+---
+
 ## 🔐 Configuración de Credenciales
 
-### Variables de Entorno (.env)
+### Variables de Entorno - Mobile (.env)
 ```
 REACT_APP_FIREBASE_API_KEY=xxx
 REACT_APP_FIREBASE_AUTH_DOMAIN=xxx
@@ -171,6 +308,18 @@ REACT_APP_FIREBASE_STORAGE_BUCKET=xxx
 REACT_APP_FIREBASE_MESSAGING_SENDER_ID=xxx
 REACT_APP_FIREBASE_APP_ID=xxx
 REACT_APP_FIREBASE_MEASUREMENT_ID=xxx
+```
+
+### Variables de Entorno - Web (web/.env)
+```
+VITE_FIREBASE_API_KEY=xxx
+VITE_FIREBASE_AUTH_DOMAIN=xxx
+VITE_FIREBASE_PROJECT_ID=xxx
+VITE_FIREBASE_STORAGE_BUCKET=xxx
+VITE_FIREBASE_MESSAGING_SENDER_ID=xxx
+VITE_FIREBASE_APP_ID=xxx
+VITE_API_BASE_URL=http://localhost:3000
+VITE_APP_NAME=Instituto
 ```
 
 ### google-services.json
@@ -186,11 +335,31 @@ REACT_APP_FIREBASE_MEASUREMENT_ID=xxx
 - `src/services/notifications/pushNotifications.ts`
 - Hook: `useNotifications.ts`
 - Usar: **Firebase Cloud Messaging (FCM)**
+- Los tokens se almacenan en `User.pushTokens[]` en Firestore
 
 ### Deep Linking
 - `src/services/deeplinks/deepLinkingConfig.ts`
 - Hook: `useDeepLinks.ts`
 - Patrones de URL definidos en `src/navigation/linking.ts`
+
+### Panel Admin Web
+- **Ubicación**: `web/src/pages/Users.tsx`
+- **Funcionalidades**: CRUD completo de usuarios
+- **Componentes**:
+  - `UserForm.tsx` - Formulario crear/editar
+  - `UsersList.tsx` - Tabla de usuarios
+- **Hook**: `useUsers.ts` - Lógica de usuarios
+- **Guía**: `web/ADMIN_GUIDE.md`
+
+#### Características del Panel:
+✅ Crear usuario con rol específico
+✅ Listar usuarios con filtros
+✅ Editar datos de usuario (sin cambiar password)
+✅ Eliminar usuarios
+✅ Filtrar por rol
+✅ Validación de email/DNI únicos
+✅ Formulario dinámico según rol
+✅ Estadísticas en tiempo real
 
 ---
 
@@ -228,5 +397,18 @@ REACT_APP_FIREBASE_MEASUREMENT_ID=xxx
 
 ---
 
-**Última actualización**: 2026-09-07
+## 📌 Cambios Recientes
+
+### 2026-09-08
+- ✅ Implementado panel admin para gestión de usuarios
+- ✅ Actualizado sistema de roles (admin, familia, preceptor)
+- ✅ Creado CRUD completo en web app
+- ✅ Añadidas nuevas estructuras de datos (enabledAt, pushTokens, etc)
+- ✅ Formulario dinámico según rol del usuario
+- ✅ Tabla con filtros y acciones
+- ✅ Documentación completa en ADMIN_GUIDE.md
+
+---
+
+**Última actualización**: 2026-09-08
 **Responsable**: Proyecto Institucion App
