@@ -9,5 +9,12 @@ module.exports = {
         },
       },
     ],
+    // Inline environment variables
+    'transform-inline-environment-variables',
   ],
+  env: {
+    production: {
+      plugins: ['transform-remove-console'],
+    },
+  },
 };

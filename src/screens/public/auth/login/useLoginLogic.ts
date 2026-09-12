@@ -1,25 +1,22 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { LoginCredentials, UserRole } from '@/types';
-import {
-  isValidEmail,
-  getEmailErrorMessage,
-} from '@/utils/validators';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { VALIDATION } from '@/utils/constants';
 
 /**
- * Hook de lógica para LoginScreen
- * Soporta 3 roles:
- * - Admin: email + password
- * - Preceptor: email + password
- * - Familia: DNI + password
+ * Hook de lógica para LoginScreen - SIMPLIFICADO
+ *
+ * Flujo:
+ * 1. Usuario ingresa email/dni + password
+ * 2. Detecta si es email o DNI automáticamente
+ * 3. Consulta Firebase para obtener el rol
+ * 4. Redirige según el rol
  */
 
 export const useLoginLogic = () => {
   // Estado del formulario
   const [credential, setCredential] = useState(''); // email o DNI
   const [password, setPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState<UserRole>('familia');
   const [showPassword, setShowPassword] = useState(false);
 
   // Estado de validación
@@ -29,44 +26,26 @@ export const useLoginLogic = () => {
   // Estado de carga
   const [isLoading, setIsLoading] = useState(false);
   const [generalError, setGeneralError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
 
   // Hook de autenticación
-  const { login, loginWithDNI } = useAuth();
+  const { loginWithCredential } = useAuth();
 
   /**
-   * Detectar automáticamente el rol según lo que escribe
-   * Email → admin/preceptor
-   * DNI (8+ dígitos) → familia
+   * Detectar si es email o DNI
    */
-  const detectRoleFromCredential = (value: string): UserRole | null => {
-    if (!value) return null;
+  const isEmail = (value: string): boolean => {
+    return VALIDATION.EMAIL_REGEX.test(value);
+  };
 
-    // Si tiene @ es email
-    if (value.includes('@')) {
-      return 'admin'; // Asume admin, el usuario puede cambiar
-    }
-
-    // Si es solo números y tiene 8+ caracteres, es DNI
-    if (/^\d{8,}$/.test(value)) {
-      return 'familia';
-    }
-
-    return null;
+  const isDNI = (value: string): boolean => {
+    return VALIDATION.DNI_REGEX.test(value);
   };
 
   /**
-   * Maneja cambios en la credencial (email o DNI)
+   * Maneja cambios en la credencial
    */
   const handleCredentialChange = (value: string) => {
     setCredential(value);
-
-    // Auto-detectar rol
-    const detectedRole = detectRoleFromCredential(value);
-    if (detectedRole) {
-      setSelectedRole(detectedRole);
-    }
-
     if (credentialError) {
       setCredentialError('');
     }
@@ -83,46 +62,28 @@ export const useLoginLogic = () => {
   };
 
   /**
-   * Cambia el rol manualmente
-   */
-  const handleRoleChange = (role: UserRole) => {
-    setSelectedRole(role);
-    setCredential('');
-    setCredentialError('');
-  };
-
-  /**
-   * Valida los datos según el rol
+   * Valida los datos
    */
   const validateForm = (): boolean => {
     let isValid = true;
 
-    // Validar credencial según el rol
-    if (selectedRole === 'familia') {
-      // DNI: debe ser números, mínimo 8 caracteres
-      if (!credential) {
-        setCredentialError('DNI requerido');
-        isValid = false;
-      } else if (!/^\d{8,}$/.test(credential)) {
-        setCredentialError('DNI inválido (números solamente)');
-        isValid = false;
-      } else {
-        setCredentialError('');
-      }
+    // Validar credencial
+    if (!credential.trim()) {
+      setCredentialError('Email o DNI requerido');
+      isValid = false;
+    } else if (!isEmail(credential) && !isDNI(credential)) {
+      setCredentialError('Ingresa un email o DNI válido');
+      isValid = false;
     } else {
-      // Email para admin y preceptor
-      const emailError = getEmailErrorMessage(credential);
-      if (emailError) {
-        setCredentialError(emailError);
-        isValid = false;
-      } else {
-        setCredentialError('');
-      }
+      setCredentialError('');
     }
 
     // Validar contraseña
     if (!password) {
       setPasswordError('Contraseña requerida');
+      isValid = false;
+    } else if (password.length < VALIDATION.MIN_PASSWORD_LENGTH) {
+      setPasswordError(`Mínimo ${VALIDATION.MIN_PASSWORD_LENGTH} caracteres`);
       isValid = false;
     } else {
       setPasswordError('');
@@ -132,12 +93,12 @@ export const useLoginLogic = () => {
   };
 
   /**
-   * Maneja el envío del formulario de login
+   * Maneja el login
+   * Firebase determinará el rol según el tipo de credencial
    */
   const handleLogin = async () => {
     try {
       setGeneralError('');
-      setSuccessMessage('');
 
       // Validar formulario
       if (!validateForm()) {
@@ -146,20 +107,16 @@ export const useLoginLogic = () => {
 
       setIsLoading(true);
 
-      // Login según el rol
-      if (selectedRole === 'familia') {
-        // Login por DNI
-        await loginWithDNI(credential.trim(), password, selectedRole);
-      } else {
-        // Login por email (admin/preceptor)
-        const credentials: LoginCredentials = {
-          email: credential.trim().toLowerCase(),
-          password,
-        };
-        await login(credentials, selectedRole);
-      }
+      // Determinar tipo de credencial
+      const isEmailLogin = isEmail(credential);
 
-      setSuccessMessage('¡Login exitoso!');
+      // Llamar al login con credencial
+      await loginWithCredential({
+        credential: credential.trim().toLowerCase(),
+        password,
+        type: isEmailLogin ? 'email' : 'dni',
+      });
+
     } catch (error: any) {
       const errorMessage = getErrorMessage(error);
       setGeneralError(errorMessage);
@@ -168,37 +125,24 @@ export const useLoginLogic = () => {
     }
   };
 
-  /**
-   * Limpia los errores
-   */
-  const clearErrors = () => {
-    setCredentialError('');
-    setPasswordError('');
-    setGeneralError('');
-  };
-
   return {
-    // Estado del formulario
+    // Estado
     credential,
     password,
-    selectedRole,
     showPassword,
 
     // Errores
     credentialError,
     passwordError,
     generalError,
-    successMessage,
 
-    // Estado de carga
+    // Loading
     isLoading,
 
-    // Manejadores
+    // Handlers
     handleCredentialChange,
     handlePasswordChange,
-    handleRoleChange,
     handleLogin,
     setShowPassword,
-    clearErrors,
   };
 };

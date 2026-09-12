@@ -133,15 +133,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  forgotPasswordBtn: {
-    alignSelf: 'flex-end',
-    paddingVertical: 8,
+  // Role Selector
+  roleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
   },
 
-  forgotPasswordText: {
+  roleButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  roleButtonActive: {
+    borderColor: '#007AFF',
+    backgroundColor: '#f0f8ff',
+  },
+
+  roleButtonText: {
     fontSize: 12,
-    color: '#007AFF',
     fontWeight: '600',
+    color: '#666',
+  },
+
+  roleButtonTextActive: {
+    color: '#007AFF',
+    fontWeight: '700',
   },
 
   // Login Button

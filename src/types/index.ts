@@ -21,17 +21,17 @@ export interface User {
   displayName: string;
   photoURL?: string;
 
-  // Timestamps
-  createdAt: Date;
-  updatedAt: Date;
-  enabledAt?: Date;      // Cuándo se habilitó la cuenta
+  // Timestamps (pueden ser Date o string ISO cuando vienen de Redux)
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  enabledAt?: Date | string;      // Cuándo se habilitó la cuenta
 
   // Tokens para notificaciones push
   pushTokens: string[];  // Array de tokens FCM
 
   // Metadata
   isEnabled: boolean;    // Cuenta habilitada/deshabilitada
-  lastLogin?: Date;
+  lastLogin?: Date | string;
 }
 
 export interface AuthState {

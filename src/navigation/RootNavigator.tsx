@@ -30,8 +30,18 @@ const SplashScreen = () => (
 
 export const RootNavigator = () => {
   const dispatch = useDispatch();
-  const { isAuthenticated, isLoading } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, isLoading, user } = useSelector((state: RootState) => state.auth);
   const [isReady, setIsReady] = React.useState(false);
+
+  // Log cambios de autenticación
+  useEffect(() => {
+    console.log('🔐 RootNavigator - Estado auth:', {
+      isAuthenticated: !!isAuthenticated,
+      user: user?.displayName,
+      isLoading,
+    });
+    console.log('📱 Renderizando:', isAuthenticated ? 'AppNavigator' : 'AuthNavigator');
+  }, [isAuthenticated, user, isLoading]);
 
   /**
    * 1. Al iniciar la app, recuperar usuario de AsyncStorage

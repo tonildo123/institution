@@ -20,13 +20,35 @@ const initialState: AuthState = {
   error: null,
 };
 
+/**
+ * Convierte fechas de Date a ISO strings para que sean serializables en Redux
+ * Maneja tanto Date objects como strings que ya vienen serializados
+ */
+const serializeUser = (user: any): User => {
+  if (!user) return user;
+
+  const dateToString = (date: any): string | undefined => {
+    if (!date) return undefined;
+    if (date instanceof Date) return date.toISOString();
+    if (typeof date === 'string') return date;
+    return undefined;
+  };
+
+  return {
+    ...user,
+    createdAt: dateToString(user.createdAt) || user.createdAt,
+    updatedAt: dateToString(user.updatedAt) || user.updatedAt,
+    enabledAt: user.enabledAt ? dateToString(user.enabledAt) : undefined,
+  } as User;
+};
+
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
     // Recuperar usuario del almacenamiento
     setUser: (state, action: PayloadAction<User | null>) => {
-      state.user = action.payload;
+      state.user = action.payload ? serializeUser(action.payload) : null;
       state.isAuthenticated = !!action.payload;
     },
 
@@ -42,7 +64,7 @@ export const authSlice = createSlice({
 
     // Login exitoso
     loginSuccess: (state, action: PayloadAction<User>) => {
-      state.user = action.payload;
+      state.user = serializeUser(action.payload);
       state.isAuthenticated = true;
       state.isLoading = false;
       state.error = null;

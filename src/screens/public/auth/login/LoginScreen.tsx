@@ -14,33 +14,30 @@ import { useLoginLogic } from './useLoginLogic';
 import styles from './styles';
 
 /**
- * LoginScreen
+ * LoginScreen - SIMPLE
  *
- * Pantalla de inicio de sesión
- * - Separa lógica (hooks) del renderizado
- * - Maneja validación de formulario
- * - Integración con Firebase Auth
+ * Flujo:
+ * 1. Ingresa email o DNI
+ * 2. Ingresa contraseña
+ * 3. Toca "Iniciar Sesión"
+ * 4. Firebase detecta el rol automáticamente
  */
 
-const LoginScreen = ({ navigation }: any) => {
-  // 1️⃣ IMPORTS Y HOOKS - Toda la lógica aquí
+const LoginScreen = () => {
   const {
-    email,
+    credential,
     password,
     showPassword,
-    emailError,
+    credentialError,
     passwordError,
     generalError,
-    successMessage,
     isLoading,
-    handleEmailChange,
+    handleCredentialChange,
     handlePasswordChange,
     handleLogin,
     setShowPassword,
-    clearErrors,
   } = useLoginLogic();
 
-  // 2️⃣ RENDERIZADO
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -53,49 +50,40 @@ const LoginScreen = ({ navigation }: any) => {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Bienvenido</Text>
+            <Text style={styles.title}>📚 Instituto</Text>
             <Text style={styles.subtitle}>Inicia sesión en tu cuenta</Text>
           </View>
 
-          {/* Errores Generales */}
+          {/* Error General */}
           {generalError && (
             <View style={styles.errorContainer}>
               <Text style={styles.errorText}>❌ {generalError}</Text>
             </View>
           )}
 
-          {/* Mensaje de Éxito */}
-          {successMessage && (
-            <View style={styles.successContainer}>
-              <Text style={styles.successText}>✅ {successMessage}</Text>
-            </View>
-          )}
-
           {/* Formulario */}
           <View style={styles.form}>
-            {/* Email Input */}
+            {/* Email o DNI */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>Email o DNI</Text>
               <TextInput
                 style={[
                   styles.input,
-                  emailError && styles.inputError,
+                  credentialError && styles.inputError,
                 ]}
-                placeholder="tu@email.com"
+                placeholder="tu@email.com o 12345678"
                 placeholderTextColor="#999"
-                value={email}
-                onChangeText={handleEmailChange}
-                keyboardType="email-address"
+                value={credential}
+                onChangeText={handleCredentialChange}
                 autoCapitalize="none"
                 editable={!isLoading}
-                accessibilityLabel="Email input"
               />
-              {emailError && (
-                <Text style={styles.fieldErrorText}>{emailError}</Text>
+              {credentialError && (
+                <Text style={styles.fieldErrorText}>{credentialError}</Text>
               )}
             </View>
 
-            {/* Password Input */}
+            {/* Contraseña */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Contraseña</Text>
               <View style={styles.passwordContainer}>
@@ -110,13 +98,11 @@ const LoginScreen = ({ navigation }: any) => {
                   onChangeText={handlePasswordChange}
                   secureTextEntry={!showPassword}
                   editable={!isLoading}
-                  accessibilityLabel="Password input"
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
                   style={styles.showPasswordBtn}
-                  accessibilityLabel="Toggle password visibility"
                 >
                   <Text style={styles.showPasswordText}>
                     {showPassword ? '👁' : '👁‍🗨'}
@@ -127,20 +113,9 @@ const LoginScreen = ({ navigation }: any) => {
                 <Text style={styles.fieldErrorText}>{passwordError}</Text>
               )}
             </View>
-
-            {/* Forgot Password Link */}
-            <TouchableOpacity
-              onPress={() => navigation?.navigate('ForgotPassword')}
-              disabled={isLoading}
-              style={styles.forgotPasswordBtn}
-            >
-              <Text style={styles.forgotPasswordText}>
-                ¿Olvidaste tu contraseña?
-              </Text>
-            </TouchableOpacity>
           </View>
 
-          {/* Login Button */}
+          {/* Botón Login */}
           <TouchableOpacity
             style={[
               styles.loginButton,
@@ -149,7 +124,6 @@ const LoginScreen = ({ navigation }: any) => {
             onPress={handleLogin}
             disabled={isLoading}
             activeOpacity={0.7}
-            accessibilityLabel="Login button"
           >
             {isLoading ? (
               <ActivityIndicator size="large" color="#fff" />
@@ -157,17 +131,6 @@ const LoginScreen = ({ navigation }: any) => {
               <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
             )}
           </TouchableOpacity>
-
-          {/* Register Link */}
-          <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>¿No tienes cuenta? </Text>
-            <TouchableOpacity
-              onPress={() => navigation?.navigate('Register')}
-              disabled={isLoading}
-            >
-              <Text style={styles.signupLink}>Regístrate aquí</Text>
-            </TouchableOpacity>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

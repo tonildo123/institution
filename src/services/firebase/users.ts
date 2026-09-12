@@ -147,15 +147,25 @@ export const getUsersByRole = async (role: string): Promise<User[]> => {
  */
 export const getUserByEmail = async (email: string): Promise<User | null> => {
   try {
+    console.log('🔍 Buscando usuario por email:', email);
+
     const q = query(
       collection(db, USERS_COLLECTION),
       where('email', '==', email)
     );
     const snapshot = await getDocs(q);
-    if (snapshot.empty) return null;
+
+    console.log('📊 Resultados encontrados:', snapshot.size);
+
+    if (snapshot.empty) {
+      console.log('❌ No hay documentos con email:', email);
+      return null;
+    }
 
     const doc = snapshot.docs[0];
     const data = doc.data();
+    console.log('✅ Usuario encontrado:', data);
+
     return {
       ...data,
       id: doc.id,
@@ -177,15 +187,25 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
  */
 export const getUserByDNI = async (dni: string): Promise<User | null> => {
   try {
+    console.log('🔍 Buscando usuario por DNI:', dni);
+
     const q = query(
       collection(db, USERS_COLLECTION),
       where('dni', '==', dni)
     );
     const snapshot = await getDocs(q);
-    if (snapshot.empty) return null;
+
+    console.log('📊 Resultados encontrados:', snapshot.size);
+
+    if (snapshot.empty) {
+      console.log('❌ No hay documentos con DNI:', dni);
+      return null;
+    }
 
     const doc = snapshot.docs[0];
     const data = doc.data();
+    console.log('✅ Usuario encontrado:', data);
+
     return {
       ...data,
       id: doc.id,

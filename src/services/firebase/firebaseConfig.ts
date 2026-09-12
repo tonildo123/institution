@@ -2,22 +2,23 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { ENV } from '@/config/env';
 
 /**
  * Firebase Configuration
- * Las credenciales se cargan desde variables de entorno (.env)
+ * Las credenciales se cargan desde src/config/env.ts
  */
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyDemoKey123456789012345678901234567',
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || 'institucion-demo.firebaseapp.com',
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || 'institucion-demo',
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || 'institucion-demo.appspot.com',
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || '123456789012',
-  appId: process.env.REACT_APP_FIREBASE_APP_ID || '1:123456789012:web:abcdef1234567890abcdef',
+  apiKey: ENV.FIREBASE_API_KEY,
+  authDomain: ENV.FIREBASE_AUTH_DOMAIN,
+  projectId: ENV.FIREBASE_PROJECT_ID,
+  storageBucket: ENV.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: ENV.FIREBASE_MESSAGING_SENDER_ID,
+  appId: ENV.FIREBASE_APP_ID,
 };
 
-console.log('🔥 Firebase Config:', {
+console.log('🔥 Firebase Config loaded:', {
   projectId: firebaseConfig.projectId,
   authDomain: firebaseConfig.authDomain,
 });
