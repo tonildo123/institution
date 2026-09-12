@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, View } from 'react-native';
+import DashboardScreen from '@/screens/private/dashboard/DashboardScreen';
 
 /**
  * App Navigator
@@ -18,14 +19,6 @@ export type AppStackParamList = {
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 const Tab = createBottomTabNavigator();
-
-// Pantalla temporal Dashboard
-const DashboardScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Dashboard 🏠</Text>
-    <Text style={{ marginTop: 10 }}>Pantalla protegida - Solo usuarios autenticados</Text>
-  </View>
-);
 
 // Pantalla temporal Profile
 const ProfileScreen = ({ route }: any) => (

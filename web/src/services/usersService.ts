@@ -36,7 +36,6 @@ export const createUser = async (
       role: credentials.role,
       email: credentials.email,
       dni: credentials.dni,
-      photoURL: undefined,
       createdAt: now,
       updatedAt: now,
       enabledAt: credentials.isEnabled ? now : undefined,
@@ -44,12 +43,33 @@ export const createUser = async (
       isEnabled: credentials.isEnabled ?? true,
     };
 
-    await setDoc(doc(db, USERS_COLLECTION, userId), {
-      ...userData,
+    // Construir documento sin valores undefined
+    const docData: any = {
+      id: userId,
+      displayName: credentials.displayName,
+      role: credentials.role,
       createdAt: Timestamp.fromDate(now),
       updatedAt: Timestamp.fromDate(now),
-      enabledAt: credentials.isEnabled ? Timestamp.fromDate(now) : null,
-    });
+      pushTokens: [],
+      isEnabled: credentials.isEnabled ?? true,
+    };
+
+    // Agregar email solo si existe
+    if (credentials.email) {
+      docData.email = credentials.email;
+    }
+
+    // Agregar DNI solo si existe
+    if (credentials.dni) {
+      docData.dni = credentials.dni;
+    }
+
+    // Agregar enabledAt solo si está habilitado
+    if (credentials.isEnabled) {
+      docData.enabledAt = Timestamp.fromDate(now);
+    }
+
+    await setDoc(doc(db, USERS_COLLECTION, userId), docData);
 
     return userData;
   } catch (error: any) {
@@ -192,10 +212,25 @@ export const updateUser = async (
 ): Promise<void> => {
   try {
     const updateData: any = {
-      ...data,
       updatedAt: Timestamp.fromDate(new Date()),
     };
 
+    // Agregar solo los campos que tienen valor
+    if (data.displayName) {
+      updateData.displayName = data.displayName;
+    }
+    if (data.email) {
+      updateData.email = data.email;
+    }
+    if (data.dni) {
+      updateData.dni = data.dni;
+    }
+    if (data.photoURL) {
+      updateData.photoURL = data.photoURL;
+    }
+    if (data.isEnabled !== undefined) {
+      updateData.isEnabled = data.isEnabled;
+    }
     if (data.enabledAt) {
       updateData.enabledAt = Timestamp.fromDate(data.enabledAt);
     }

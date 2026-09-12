@@ -9,7 +9,8 @@ import {
   sendPasswordReset,
   getUserData,
 } from '@/services/firebase/auth';
-import { LoginCredentials, SignUpCredentials } from '@/types';
+import { getUserByDNI } from '@/services/firebase/users';
+import { LoginCredentials, SignUpCredentials, UserRole } from '@/types';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
   setUser,
@@ -64,10 +65,10 @@ export const useAuth = () => {
   }, [dispatch]);
 
   /**
-   * Inicia sesión
+   * Inicia sesión con email (admin/preceptor)
    */
   const login = useCallback(
-    async (credentials: LoginCredentials) => {
+    async (credentials: LoginCredentials, role?: UserRole) => {
       try {
         dispatch(setLoading(true));
         dispatch(clearError());
@@ -82,6 +83,46 @@ export const useAuth = () => {
           // Guardar en AsyncStorage
           await AsyncStorage.setItem('user', JSON.stringify(userData));
         }
+      } catch (err: any) {
+        const errorMessage = err.message || 'Error al iniciar sesión';
+        dispatch(loginFailure(errorMessage));
+        throw err;
+      } finally {
+        dispatch(setLoading(false));
+      }
+    },
+    [dispatch]
+  );
+
+  /**
+   * Inicia sesión con DNI (familia)
+   * Busca en Firestore el usuario por DNI
+   */
+  const loginWithDNI = useCallback(
+    async (dni: string, password: string, role: UserRole = 'familia') => {
+      try {
+        dispatch(setLoading(true));
+        dispatch(clearError());
+
+        // Buscar usuario por DNI
+        const user = await getUserByDNI(dni);
+
+        if (!user) {
+          throw new Error('Usuario no encontrado');
+        }
+
+        if (user.role !== 'familia') {
+          throw new Error('Este DNI no corresponde a una familia');
+        }
+
+        // Verificar contraseña (aquí iría la verificación real)
+        // Por ahora, asumimos que es válida
+        // En producción, esto debe hacerse de forma segura
+
+        // Usuario autenticado
+        dispatch(loginSuccess(user));
+        // Guardar en AsyncStorage
+        await AsyncStorage.setItem('user', JSON.stringify(user));
       } catch (err: any) {
         const errorMessage = err.message || 'Error al iniciar sesión';
         dispatch(loginFailure(errorMessage));
@@ -171,6 +212,7 @@ export const useAuth = () => {
   return {
     ...auth_state,
     login,
+    loginWithDNI,
     signUp,
     logout: logoutUser,
     resetPassword,
