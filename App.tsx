@@ -11,6 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import { store } from '@/redux/store';
 import RootNavigator from '@/navigation/RootNavigator';
+import { NotificationProvider } from '@/components/NotificationProvider';
 
 /**
  * App Principal
@@ -19,6 +20,7 @@ import RootNavigator from '@/navigation/RootNavigator';
  * 1. Provider (Redux)
  * 2. SafeAreaProvider (React Native Safe Area)
  * 3. RootNavigator (Navegación con lógica de autenticación)
+ * 4. NotificationProvider (Manejo de notificaciones FCM)
  */
 
 function App() {
@@ -30,7 +32,9 @@ function App() {
         <StatusBar
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         />
-        <RootNavigator />
+        <NotificationProvider>
+          <RootNavigator />
+        </NotificationProvider>
       </SafeAreaProvider>
     </Provider>
   );

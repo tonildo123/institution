@@ -1,0 +1,274 @@
+.communications-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.communications-header {
+  background: linear-gradient(135deg, #25d366 0%, #20b85c 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+}
+
+.communications-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.communications-header p {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.communications-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .communications-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Formulario */
+.form-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-section h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 18px;
+  color: #1a1a1a;
+}
+
+.communication-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #25d366;
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+}
+
+.form-group small {
+  font-size: 12px;
+  color: #999;
+}
+
+.file-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-input-wrapper input[type='file'] {
+  padding: 8px;
+  border: 2px dashed #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.file-input-wrapper input[type='file']:hover {
+  border-color: #25d366;
+  background: #f9fdf7;
+}
+
+.file-info {
+  padding: 10px 12px;
+  background: #f9fdf7;
+  border: 1px solid #e8f5e0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #25d366;
+}
+
+/* Botones */
+.btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #25d366;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #20b85c;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Alertas */
+.alert {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  border-left: 4px solid;
+}
+
+.alert-error {
+  background: #fff5f5;
+  color: #c00;
+  border-left-color: #c00;
+}
+
+.alert-success {
+  background: #f0f8f0;
+  color: #060;
+  border-left-color: #060;
+}
+
+/* Historial */
+.history-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.history-section h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #1a1a1a;
+}
+
+.communications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px 20px;
+  color: #999;
+  font-size: 14px;
+}
+
+.communication-item {
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fafafa;
+  transition: all 0.2s;
+}
+
+.communication-item:hover {
+  border-color: #25d366;
+  background: #f9fdf7;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.1);
+}
+
+.comm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.comm-header h3 {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  color: #1a1a1a;
+}
+
+.sender {
+  margin: 0;
+  font-size: 12px;
+  color: #999;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-enviado {
+  background: #e3f2fd;
+  color: #0066cc;
+}
+
+.status-visto {
+  background: #e8f5e0;
+  color: #25d366;
+}
+
+.description {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.file-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.timestamp {
+  margin: 0;
+  font-size: 12px;
+  color: #999;
+}

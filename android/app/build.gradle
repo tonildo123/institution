@@ -116,4 +116,12 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // Firebase
+    implementation("com.google.firebase:firebase-messaging:23.3.1")
+    implementation("com.google.firebase:firebase-analytics:21.5.0")
+    implementation("com.google.firebase:firebase-bom:32.7.0")
 }
+
+// Aplicar plugin de Google Services
+apply plugin: 'com.google.gms.google-services'

@@ -27,7 +27,10 @@ export interface User {
   enabledAt?: Date | string;      // Cuándo se habilitó la cuenta
 
   // Tokens para notificaciones push
-  pushTokens: string[];  // Array de tokens FCM
+  pushTokens: Array<{
+    token: string;           // Token FCM
+    savedAt: string;         // Fecha en ISO string (cuándo se registró)
+  }>;
 
   // Metadata
   isEnabled: boolean;    // Cuenta habilitada/deshabilitada
