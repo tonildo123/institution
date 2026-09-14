@@ -30,4 +30,4 @@ try {
   throw error;
 }
 
-export { auth, db };
+export { app, auth, db };

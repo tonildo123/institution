@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { sendCommunicationToAll } from '../services/communicationsService';
 import './Communications.css';
 
 interface Communication {
@@ -11,6 +11,8 @@ interface Communication {
   sentAt: string;
   sentBy: string;
   status: 'enviado' | 'visto';
+  delivered?: number;
+  failed?: number;
 }
 
 /**
@@ -19,15 +21,13 @@ interface Communication {
  */
 
 export const Communications = () => {
-  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-
-  const [communications] = useState<Communication[]>([
+  const [communications, setCommunications] = useState<Communication[]>([
     {
       id: '1',
       title: 'Aviso importante',
@@ -37,6 +37,8 @@ export const Communications = () => {
       sentAt: '2026-09-13 10:30',
       sentBy: 'Directora María',
       status: 'visto',
+      delivered: 145,
+      failed: 2,
     },
   ]);
 
@@ -70,22 +72,62 @@ export const Communications = () => {
     setSuccess('');
 
     try {
-      // 1. Guardar comunicación en Firestore
       console.log('📤 Enviando comunicación...');
-      console.log({ title, description, file: selectedFile?.name });
 
-      // 2. Llamar Cloud Function para enviar notificaciones push
-      // La Cloud Function enviará notificaciones a todos los usuarios con tokens
+      // Llamar Cloud Function
+      const result = await sendCommunicationToAll({
+        title: title.trim(),
+        body: description.trim(),
+        description: description.trim(),
+        data: {
+          type: 'communication',
+          timestamp: new Date().toISOString(),
+        },
+      });
 
-      // Simulación (en producción, llamar a Cloud Function)
-      setTimeout(() => {
-        setSuccess('✅ Comunicación enviada a todos los usuarios');
-        setTitle('');
-        setDescription('');
-        setSelectedFile(null);
-      }, 1000);
+      console.log('✅ Respuesta de Cloud Function:', result);
+
+      // Agregar a la lista
+      const newCommunication: Communication = {
+        id: result.communicationId,
+        title,
+        description,
+        sentAt: new Date().toLocaleString('es-AR'),
+        sentBy: 'Usuario Actual',
+        status: 'enviado',
+        delivered: result.delivered,
+        failed: result.failed,
+      };
+
+      setCommunications([newCommunication, ...communications]);
+
+      setSuccess(
+        `✅ ${result.message}\n📊 Entregados: ${result.delivered}/${result.totalUsers}`
+      );
+
+      // Limpiar formulario
+      setTitle('');
+      setDescription('');
+      setSelectedFile(null);
+
+      // Limpiar mensaje de éxito después de 5 segundos
+      setTimeout(() => setSuccess(''), 5000);
     } catch (err: any) {
-      setError('❌ Error al enviar: ' + err.message);
+      console.error('❌ Error:', err);
+
+      // Extraer mensaje de error amigable
+      let errorMessage = 'Error al enviar la comunicación';
+      if (err.message?.includes('unauthenticated')) {
+        errorMessage = 'Debes estar autenticado para enviar comunicaciones';
+      } else if (err.message?.includes('permission')) {
+        errorMessage = 'No tienes permisos para enviar comunicaciones';
+      } else if (err.code === 'functions/internal') {
+        errorMessage = err.message || 'Error interno en el servidor';
+      } else {
+        errorMessage = err.message || errorMessage;
+      }
+
+      setError(`❌ ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -104,8 +146,20 @@ export const Communications = () => {
           <h2>Enviar Nueva Comunicación</h2>
 
           <form onSubmit={handleSend} className="communication-form">
-            {error && <div className="alert alert-error">{error}</div>}
-            {success && <div className="alert alert-success">{success}</div>}
+            {error && (
+              <div className="alert alert-error">
+                {error.split('\n').map((line, i) => (
+                  <div key={i}>{line}</div>
+                ))}
+              </div>
+            )}
+            {success && (
+              <div className="alert alert-success">
+                {success.split('\n').map((line, i) => (
+                  <div key={i}>{line}</div>
+                ))}
+              </div>
+            )}
 
             <div className="form-group">
               <label htmlFor="title">Título *</label>
@@ -179,6 +233,12 @@ export const Communications = () => {
                       <p className="sender">
                         Enviado por: <strong>{comm.sentBy}</strong>
                       </p>
+                      {comm.delivered !== undefined && (
+                        <p className="stats">
+                          📊 Entregados: <strong>{comm.delivered}</strong>
+                          {comm.failed ? ` | ❌ Fallidos: ${comm.failed}` : ''}
+                        </p>
+                      )}
                     </div>
                     <span className={`status status-${comm.status}`}>
                       {comm.status === 'visto' ? '✓✓ Visto' : '✓ Enviado'}
