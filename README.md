@@ -95,3 +95,20 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+
+
+### agregar
+
+- rol de adminisrtador total
+- rol equipo directivo - equipo de conduccion
+- rol directivo con nombre
+- rol docente - comunicacion - perfil - ver mensajes recibidos y enviados
+- rol docente tutor - 
+- rol padre - ya esta 
+- rol preceptor - ya esta
+- rol administrador - ya esta
+- centro de estudiantes imep
+- para perfil de padre / recibir mescladoz mensajes de todos sus hijos
+- recibir notificaciones con colores segun nivel inicial
+- cambiar todos por institucional

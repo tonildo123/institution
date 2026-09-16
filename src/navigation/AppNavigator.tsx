@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import DashboardScreen from '@/screens/private/dashboard/DashboardScreen';
 import { CommunicationsScreen } from '@/screens/private/communications/CommunicationsScreen';
 import { ProfileScreen } from '@/screens/private/profile/ProfileScreen';
 import { HistoryScreen } from '@/screens/private/history/HistoryScreen';
@@ -60,10 +59,11 @@ const FamiliaTabNavigator = () => {
 };
 
 /**
- * ADMIN TABS (3 tabs)
+ * ADMIN TABS (4 tabs)
  * - Comunicaciones (envía)
  * - Historial
  * - CRUD de Usuarios
+ * - Perfil
  */
 const AdminTabNavigator = () => {
   return (
@@ -103,6 +103,15 @@ const AdminTabNavigator = () => {
         options={{
           title: 'Usuarios',
           tabBarLabel: '👥 Usuarios',
+          tabBarIcon: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="PerfilAdmin"
+        component={ProfileScreen}
+        options={{
+          title: 'Perfil',
+          tabBarLabel: '👤 Perfil',
           tabBarIcon: () => null,
         }}
       />
