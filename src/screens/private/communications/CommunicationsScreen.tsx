@@ -6,7 +6,12 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from 'react-native';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { store } from '@/redux/store';
+import { sendCommunicationToAll } from '@/services/communicationsService';
 import { styles } from './styles';
 
 /**
@@ -31,8 +36,12 @@ interface CommunicationsScreenProps {
 export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   type,
 }) => {
+  const user = useSelector((state: RootState) => state.auth.user);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -52,11 +61,75 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     },
   ]);
 
+  const handleSend = async () => {
+    if (!title.trim() || !description.trim()) {
+      setError('Título y descripción son requeridos');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      console.log('📤 Enviando comunicación...');
+
+      const result = await sendCommunicationToAll(
+        {
+          title: title.trim(),
+          body: description.trim(),
+          description: description.trim(),
+          data: {
+            type: 'communication',
+            timestamp: new Date().toISOString(),
+          },
+        },
+        store
+      );
+
+      console.log('✅ Respuesta:', result);
+
+      const newMessage: Message = {
+        id: result.communicationId || Date.now().toString(),
+        title,
+        description,
+        sender: user?.displayName || 'Yo',
+        date: new Date().toLocaleString('es-AR'),
+        attachment: undefined,
+      };
+
+      setMessages([newMessage, ...messages]);
+      setSuccess(`✅ Enviado a ${result.delivered}/${result.totalUsers} usuarios`);
+
+      setTitle('');
+      setDescription('');
+
+      setTimeout(() => setSuccess(''), 5000);
+    } catch (err: any) {
+      console.error('❌ Error:', err);
+      setError(err.message || 'Error al enviar la comunicación');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (type === 'send') {
     return (
       <ScrollView style={styles.container}>
         <View style={styles.formContainer}>
           <Text style={styles.formTitle}>Nueva Comunicación</Text>
+
+          {error && (
+            <View style={[styles.inputGroup, { backgroundColor: '#ffebee', borderLeftColor: '#ff3b30', borderLeftWidth: 4, padding: 10, borderRadius: 4 }]}>
+              <Text style={{ color: '#c62828' }}>❌ {error}</Text>
+            </View>
+          )}
+
+          {success && (
+            <View style={[styles.inputGroup, { backgroundColor: '#f0f8f0', borderLeftColor: '#25d366', borderLeftWidth: 4, padding: 10, borderRadius: 4 }]}>
+              <Text style={{ color: '#25d366' }}>{success}</Text>
+            </View>
+          )}
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Título</Text>
@@ -66,7 +139,12 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
               value={title}
               onChangeText={setTitle}
               placeholderTextColor="#999"
+              maxLength={100}
+              editable={!loading}
             />
+            <Text style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
+              {title.length}/100
+            </Text>
           </View>
 
           <View style={styles.inputGroup}>
@@ -79,18 +157,22 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
               multiline
               numberOfLines={5}
               placeholderTextColor="#999"
+              maxLength={1000}
+              editable={!loading}
             />
+            <Text style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
+              {description.length}/1000
+            </Text>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Adjunto (opcional)</Text>
-            <TouchableOpacity style={styles.attachButton}>
-              <Text style={styles.attachButtonText}>📎 Seleccionar archivo</Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity style={styles.sendButton}>
-            <Text style={styles.sendButtonText}>Enviar</Text>
+          <TouchableOpacity
+            style={[styles.sendButton, loading && { opacity: 0.6 }]}
+            onPress={handleSend}
+            disabled={loading}
+          >
+            <Text style={styles.sendButtonText}>
+              {loading ? '⏳ Enviando...' : '📤 Enviar a Todos'}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

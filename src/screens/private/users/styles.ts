@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#FF3B30',
     paddingHorizontal: 16,
     paddingVertical: 12,
     flexDirection: 'row',
@@ -235,6 +235,27 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#666',
+  },
+
+  roleButtonActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+
+  roleButtonActiveText: {
+    color: '#fff',
+  },
+
+  toggleButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+
+  toggleButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 12,
   },
 
   saveButton: {
