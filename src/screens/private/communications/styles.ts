@@ -17,6 +17,7 @@ export const styles = StyleSheet.create({
   },
 
   chatContainerWithHeader: {
+    marginTop: 40,
     flex: 1,
     backgroundColor: '#efeae2',
     display: 'flex',

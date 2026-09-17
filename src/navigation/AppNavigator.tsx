@@ -78,6 +78,7 @@ const AdminTabNavigator = () => {
           borderTopColor: '#eee',
         },
       }}
+      initialRouteName="HistorialAdmin"
     >
       <Tab.Screen
         name="ComunicacionesAdmin"
@@ -138,6 +139,7 @@ const PreceptorTabNavigator = () => {
           borderTopColor: '#eee',
         },
       }}
+      initialRouteName="HistorialPreceptor"
     >
       <Tab.Screen
         name="ComunicacionesPreceptor"

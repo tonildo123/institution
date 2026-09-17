@@ -110,7 +110,13 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       <View style={styles.chatContainerWithHeader}>
         {/* Header */}
         <View style={styles.chatHeader}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => {
+            // Restaurar tabs al volver
+            navigation.getParent()?.setOptions({
+              tabBarStyle: undefined,
+            });
+            navigation.goBack();
+          }}>
             <Text style={styles.headerBackArrow}>←</Text>
           </TouchableOpacity>
 
