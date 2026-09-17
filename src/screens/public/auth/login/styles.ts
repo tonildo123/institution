@@ -88,7 +88,8 @@ export const styles = StyleSheet.create({
     color: '#1f1f1f',
     fontSize: 22,
     fontWeight: '700',
-    marginBottom: 14,
+    marginVertical: 14,
+    
   },
 
   input: {

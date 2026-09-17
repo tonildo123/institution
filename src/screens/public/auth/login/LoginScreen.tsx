@@ -97,10 +97,6 @@ const LoginScreen = () => {
             {credentialError && (
               <Text style={styles.fieldErrorText}>{credentialError}</Text>
             )}
-          </View>
-
-          {/* Contraseña */}
-          <View style={styles.field}>
             <Text style={styles.fieldLabel}>Contraseña</Text>
             <View style={styles.passwordWrap}>
               <TextInput
@@ -124,6 +120,7 @@ const LoginScreen = () => {
               <Text style={styles.fieldErrorText}>{passwordError}</Text>
             )}
           </View>
+
 
           {/* Botón Login */}
           <TouchableOpacity
