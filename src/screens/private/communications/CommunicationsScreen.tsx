@@ -89,8 +89,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
           {/* Message input label */}
           <View style={styles.messageRow}>
-            <View style={[styles.chatBubble, styles.receivedBubble]}>
-              <Text style={styles.bubbleText}>Escribe el mensaje...</Text>
+            <View style={[styles.chatBubble, styles.sentBubble]}>
+              <Text style={styles.bubbleText}>Escribe el mensaje</Text>
             </View>
           </View>
 
