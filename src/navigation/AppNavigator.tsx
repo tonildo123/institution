@@ -40,7 +40,11 @@ const HistoryStackNavigator = () => {
       />
       <Stack.Screen
         name="CommunicationDetail"
-        component={CommunicationDetailScreen}
+        component={() => (
+          <ScreenWrapper>
+            <CommunicationDetailScreen />
+          </ScreenWrapper>
+        )}
       />
     </Stack.Navigator>
   );
@@ -67,7 +71,11 @@ const CommunicationsStackNavigator = () => {
       />
       <Stack.Screen
         name="CommunicationDetail"
-        component={CommunicationDetailScreen}
+        component={() => (
+          <ScreenWrapper>
+            <CommunicationDetailScreen />
+          </ScreenWrapper>
+        )}
       />
     </Stack.Navigator>
   );

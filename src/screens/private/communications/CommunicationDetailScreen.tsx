@@ -5,9 +5,12 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { getCommunication, Communication } from '@/services/firebase/communications';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { getCommunication, deleteCommunication, Communication } from '@/services/firebase/communications';
 import { styles } from './detailStyles';
 
 /**
@@ -18,10 +21,12 @@ import { styles } from './detailStyles';
 export const CommunicationDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const user = useSelector((state: RootState) => state.auth.user);
   const { communicationId } = route.params as { communicationId: string };
 
   const [communication, setCommunication] = useState<Communication | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const [hasRead, setHasRead] = useState(false);
 
   useEffect(() => {
@@ -39,6 +44,38 @@ export const CommunicationDetailScreen = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = () => {
+    if (user?.role !== 'admin') return;
+
+    Alert.alert(
+      '🗑️ Eliminar Comunicación',
+      '¿Estás seguro de que deseas eliminar este mensaje? Esta acción no se puede deshacer.',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          onPress: async () => {
+            try {
+              setDeleting(true);
+              await deleteCommunication(communicationId);
+              Alert.alert('✅ Éxito', 'Comunicación eliminada correctamente');
+              navigation.goBack();
+            } catch (error: any) {
+              Alert.alert('❌ Error', error.message || 'Error al eliminar la comunicación');
+            } finally {
+              setDeleting(false);
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   if (loading) {
@@ -82,7 +119,16 @@ export const CommunicationDetailScreen = () => {
           <Text style={styles.headerSub}>Comunicación</Text>
         </View>
 
-        <Text style={styles.menuDots}>⋮</Text>
+        {/* Delete button - solo para admin */}
+        {user?.role === 'admin' && (
+          <TouchableOpacity
+            onPress={handleDelete}
+            disabled={deleting}
+            style={{ opacity: deleting ? 0.5 : 1 }}
+          >
+            <Text style={styles.menuDots}>{deleting ? '⏳' : '🗑️'}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Chat Content */}

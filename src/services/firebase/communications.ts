@@ -97,3 +97,17 @@ export const getCommunication = async (id: string): Promise<Communication | null
     throw error;
   }
 };
+
+/**
+ * Eliminar una comunicación por ID (solo admin)
+ */
+export const deleteCommunication = async (id: string): Promise<void> => {
+  try {
+    const { deleteDoc, doc } = await import('firebase/firestore');
+    await deleteDoc(doc(db, 'communications', id));
+    console.log('✅ Comunicación eliminada:', id);
+  } catch (error: any) {
+    console.error('❌ Error deleting communication:', error);
+    throw error;
+  }
+};

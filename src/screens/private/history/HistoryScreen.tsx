@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getAllCommunications, Communication } from '@/services/firebase/communications';
 import { styles } from './styles';
 
@@ -22,9 +22,12 @@ export const HistoryScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    loadCommunications();
-  }, []);
+  // Recargar cuando la screen obtiene el foco (después de volver del detalle)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadCommunications();
+    }, [])
+  );
 
   const loadCommunications = async () => {
     try {
