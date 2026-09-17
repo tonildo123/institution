@@ -40,22 +40,22 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     const parent = navigation.getParent();
 
     if (type === 'send' && parent) {
+      console.log('🔍 Ocultando tabs para CommunicationsScreen');
       parent.setOptions({
-        tabBarStyle: { display: 'none' },
-        tabBarVisible: false,
+        tabBarStyle: { height: 0 },
       });
     } else if (parent) {
+      console.log('🔍 Mostrando tabs');
       parent.setOptions({
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#eee',
-          display: 'flex',
+          height: 60,
         },
-        tabBarVisible: true,
       });
     }
-  }, [type]);
+  }, [type, navigation]);
 
   // Determinar pantalla de historial según rol
   const getHistorialRouteName = () => {
