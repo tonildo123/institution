@@ -163,9 +163,11 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
                   ]}
                 />
                 <Text style={styles.levelText}>{level.label}</Text>
-                <Text style={styles.levelCheckmark}>
-                  {selectedLevel === level.id ? '✓' : ''}
-                </Text>
+                {selectedLevel === level.id ? (
+                  <Text style={styles.levelCheckmark}>✓</Text>
+                ) : (
+                  <Text style={styles.levelDropdown}>▼</Text>
+                )}
               </TouchableOpacity>
             ))}
           </View>

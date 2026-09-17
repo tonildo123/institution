@@ -98,12 +98,12 @@ export const styles = StyleSheet.create({
   levelButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#fafafa',
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderRadius: 16,
-    borderLeftWidth: 8,
-    marginBottom: 12,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderLeftWidth: 5,
+    marginBottom: 10,
     marginHorizontal: 0,
   },
 
@@ -112,24 +112,29 @@ export const styles = StyleSheet.create({
   },
 
   levelColorBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
-    marginRight: 16,
+    width: 26,
+    height: 26,
+    borderRadius: 5,
+    marginRight: 14,
   },
 
   levelText: {
     flex: 1,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
     color: '#1a1a1a',
-    letterSpacing: 0.5,
   },
 
   levelCheckmark: {
-    fontSize: 24,
+    fontSize: 20,
     color: '#25D366',
     fontWeight: '900',
+  },
+
+  levelDropdown: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '600',
   },
 
   headerBox: {
@@ -193,37 +198,37 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderRadius: 12,
-    backgroundColor: '#fff',
+    paddingVertical: 14,
+    borderRadius: 10,
+    backgroundColor: '#f9f9f9',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#e8e8e8',
   },
 
   confirmMessageButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f9f9',
   },
 
   confirmDestinationButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f9f9',
   },
 
   confirmButtonIcon: {
-    fontSize: 22,
+    fontSize: 20,
     marginRight: 10,
   },
 
   confirmButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '600',
     color: '#1a1a1a',
   },
 
   sendButton: {
     flexDirection: 'row',
     backgroundColor: '#A8E6C1',
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: 10,
+    paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 12,
@@ -231,13 +236,13 @@ export const styles = StyleSheet.create({
   },
 
   sendButtonIcon: {
-    fontSize: 22,
-    marginRight: 10,
+    fontSize: 20,
+    marginRight: 8,
   },
 
   sendButtonText: {
     color: '#1a1a1a',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
   },
 
