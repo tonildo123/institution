@@ -67,20 +67,20 @@ export const styles = StyleSheet.create({
   sendHeader: {
     backgroundColor: '#A8E6C1',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     alignItems: 'center',
   },
 
   sendHeaderTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#1a1a1a',
   },
 
   sendContent: {
     flex: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
 
   alertBox: {
@@ -91,50 +91,52 @@ export const styles = StyleSheet.create({
   },
 
   selectorContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
     gap: 0,
   },
 
   levelButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fafafa',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderLeftWidth: 5,
-    marginBottom: 10,
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    borderRadius: 16,
+    borderLeftWidth: 7,
+    marginBottom: 14,
     marginHorizontal: 0,
   },
 
   levelButtonActive: {
     backgroundColor: '#fff',
+    borderLeftWidth: 7,
   },
 
   levelColorBox: {
-    width: 26,
-    height: 26,
-    borderRadius: 5,
-    marginRight: 14,
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    marginRight: 16,
   },
 
   levelText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: '#1a1a1a',
+    letterSpacing: 0.3,
   },
 
   levelCheckmark: {
-    fontSize: 20,
+    fontSize: 22,
     color: '#25D366',
     fontWeight: '900',
   },
 
   levelDropdown: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#007AFF',
-    fontWeight: '600',
+    fontWeight: '700',
   },
 
   headerBox: {
@@ -142,7 +144,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 12,
-    marginBottom: 14,
+    marginBottom: 16,
     marginHorizontal: 0,
   },
 
@@ -153,44 +155,44 @@ export const styles = StyleSheet.create({
   },
 
   inputContainer: {
-    marginBottom: 14,
+    marginBottom: 16,
     marginHorizontal: 0,
   },
 
   titleInput: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f9f9',
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: '#1a1a1a',
+    paddingVertical: 12,
+    fontSize: 15,
+    color: '#999999',
   },
 
   descriptionInput: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f9f9',
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
     fontSize: 15,
-    color: '#1a1a1a',
+    color: '#999999',
     textAlignVertical: 'top',
-    minHeight: 100,
+    minHeight: 90,
   },
 
   charCount: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#999',
     marginTop: 6,
     paddingHorizontal: 4,
   },
 
   buttonsContainer: {
-    marginVertical: 18,
-    gap: 12,
+    marginVertical: 20,
+    gap: 14,
   },
 
   confirmButton: {
@@ -198,29 +200,29 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 10,
-    backgroundColor: '#f9f9f9',
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#e8e8e8',
+    borderColor: '#e5e5e5',
   },
 
   confirmMessageButton: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
   },
 
   confirmDestinationButton: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
   },
 
   confirmButtonIcon: {
     fontSize: 20,
-    marginRight: 10,
+    marginRight: 12,
   },
 
   confirmButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
     color: '#1a1a1a',
   },
 
