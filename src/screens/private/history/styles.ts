@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 40,
     backgroundColor: '#f0f0f0',
   },
 
@@ -126,5 +125,67 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: '#007AFF',
     fontWeight: '600',
+  },
+
+  // Styles for level-based message display (matching CommunicationsScreen)
+  levelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+
+  levelAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  levelAvatarText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+
+  levelInfo: {
+    flex: 1,
+  },
+
+  levelTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 4,
+  },
+
+  levelName: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#111',
+  },
+
+  levelTime: {
+    fontSize: 12.5,
+    color: '#8a8a8a',
+    flexShrink: 0,
+  },
+
+  levelBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  levelPreview: {
+    fontSize: 14.5,
+    color: '#6b6b6b',
+    flex: 1,
+  },
+
+  levelListContent: {
+    paddingVertical: 8,
   },
 });

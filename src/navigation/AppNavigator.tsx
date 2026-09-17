@@ -8,6 +8,7 @@ import { ProfileScreen } from '@/screens/private/profile/ProfileScreen';
 import { HistoryScreen } from '@/screens/private/history/HistoryScreen';
 import { CommunicationDetailScreen } from '@/screens/private/communications/CommunicationDetailScreen';
 import { UsersManagementScreen } from '@/screens/private/users/UsersManagementScreen';
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 
 /**
  * App Navigator
@@ -31,7 +32,11 @@ const HistoryStackNavigator = () => {
     >
       <Stack.Screen
         name="HistoryList"
-        component={HistoryScreen}
+        component={() => (
+          <ScreenWrapper>
+            <HistoryScreen />
+          </ScreenWrapper>
+        )}
       />
       <Stack.Screen
         name="CommunicationDetail"
@@ -54,7 +59,11 @@ const CommunicationsStackNavigator = () => {
     >
       <Stack.Screen
         name="CommunicationsList"
-        component={() => <CommunicationsScreen type="receive" />}
+        component={() => (
+          <ScreenWrapper>
+            <CommunicationsScreen type="receive" />
+          </ScreenWrapper>
+        )}
       />
       <Stack.Screen
         name="CommunicationDetail"
@@ -94,7 +103,11 @@ const FamiliaTabNavigator = () => {
       />
       <Tab.Screen
         name="PerfilFamilia"
-        component={ProfileScreen}
+        component={() => (
+          <ScreenWrapper>
+            <ProfileScreen />
+          </ScreenWrapper>
+        )}
         options={{
           title: 'Perfil',
           tabBarLabel: '👤 Perfil',
@@ -129,7 +142,11 @@ const AdminTabNavigator = () => {
     >
       <Tab.Screen
         name="ComunicacionesAdmin"
-        component={() => <CommunicationsScreen type="send" />}
+        component={() => (
+          <ScreenWrapper>
+            <CommunicationsScreen type="send" />
+          </ScreenWrapper>
+        )}
         options={{
           title: 'Comunicaciones',
           tabBarLabel: '📤 Enviar',
@@ -147,7 +164,11 @@ const AdminTabNavigator = () => {
       />
       <Tab.Screen
         name="UsersManagement"
-        component={UsersManagementScreen}
+        component={() => (
+          <ScreenWrapper>
+            <UsersManagementScreen />
+          </ScreenWrapper>
+        )}
         options={{
           title: 'Usuarios',
           tabBarLabel: '👥 Usuarios',
@@ -156,7 +177,11 @@ const AdminTabNavigator = () => {
       />
       <Tab.Screen
         name="PerfilAdmin"
-        component={ProfileScreen}
+        component={() => (
+          <ScreenWrapper>
+            <ProfileScreen />
+          </ScreenWrapper>
+        )}
         options={{
           title: 'Perfil',
           tabBarLabel: '👤 Perfil',
@@ -190,7 +215,11 @@ const PreceptorTabNavigator = () => {
     >
       <Tab.Screen
         name="ComunicacionesPreceptor"
-        component={() => <CommunicationsScreen type="send" />}
+        component={() => (
+          <ScreenWrapper>
+            <CommunicationsScreen type="send" />
+          </ScreenWrapper>
+        )}
         options={{
           title: 'Comunicaciones',
           tabBarLabel: '📤 Enviar',
@@ -208,7 +237,11 @@ const PreceptorTabNavigator = () => {
       />
       <Tab.Screen
         name="PerfilPreceptor"
-        component={ProfileScreen}
+        component={() => (
+          <ScreenWrapper>
+            <ProfileScreen />
+          </ScreenWrapper>
+        )}
         options={{
           title: 'Perfil',
           tabBarLabel: '👤 Perfil',
@@ -247,7 +280,6 @@ export const AppNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        animationEnabled: true,
         headerShown: false,
       }}
     >

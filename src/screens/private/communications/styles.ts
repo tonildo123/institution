@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
-    marginTop: 40,
+    
     flex: 1,
     backgroundColor: '#f0f0f0',
   },
@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
   },
 
   chatContainerWithHeader: {
-    marginTop: 40,
+    
     flex: 1,
     backgroundColor: '#efeae2',
     display: 'flex',
