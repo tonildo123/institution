@@ -63,16 +63,174 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
+  // Send Screen Styles
+  sendHeader: {
+    backgroundColor: '#A8E6C1',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+
+  sendHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+
+  sendContent: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+
+  alertBox: {
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    marginBottom: 12,
+  },
+
+  selectorContainer: {
+    marginBottom: 16,
+    gap: 8,
+  },
+
+  levelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderLeftWidth: 6,
+    marginBottom: 8,
+  },
+
+  levelButtonActive: {
+    backgroundColor: '#f0f0f0',
+  },
+
+  levelColorBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    marginRight: 12,
+  },
+
+  levelText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+
+  levelCheckmark: {
+    fontSize: 18,
+    color: '#25D366',
+    fontWeight: '700',
+  },
+
+  headerBox: {
+    backgroundColor: '#A8E6C1',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+
+  headerBoxTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+
+  inputContainer: {
+    marginBottom: 12,
+  },
+
+  titleInput: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1a1a1a',
+  },
+
+  descriptionInput: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: '#1a1a1a',
+    textAlignVertical: 'top',
+  },
+
+  charCount: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 4,
+    paddingHorizontal: 4,
+  },
+
+  buttonsContainer: {
+    marginVertical: 16,
+    gap: 10,
+  },
+
+  confirmButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+
+  confirmMessageButton: {
+    backgroundColor: '#fff',
+  },
+
+  confirmDestinationButton: {
+    backgroundColor: '#fff',
+  },
+
+  confirmButtonIcon: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+
+  confirmButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+
   sendButton: {
-    backgroundColor: '#25D366',
+    flexDirection: 'row',
+    backgroundColor: '#A8E6C1',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 20,
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+
+  sendButtonIcon: {
+    fontSize: 18,
+    marginRight: 8,
   },
 
   sendButtonText: {
-    color: '#fff',
+    color: '#1a1a1a',
     fontSize: 16,
     fontWeight: '700',
   },

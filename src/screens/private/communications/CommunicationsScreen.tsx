@@ -42,6 +42,9 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState<string>('todos');
+  const [showDestinationConfirm, setShowDestinationConfirm] = useState(false);
+  const [showMessageConfirm, setShowMessageConfirm] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -60,6 +63,13 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       attachment: '📄',
     },
   ]);
+
+  const levels = [
+    { id: 'inicial', label: 'NIVEL INICIAL', color: '#FF9500' },
+    { id: 'primario', label: 'NIVEL PRIMARIO', color: '#25D366' },
+    { id: 'secundario', label: 'NIVEL SECUNDARIO', color: '#007AFF' },
+    { id: 'todos', label: 'TODOS', color: '#FF3B30' },
+  ];
 
   const handleSend = async () => {
     if (!title.trim() || !description.trim()) {
@@ -115,67 +125,121 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
   if (type === 'send') {
     return (
-      <ScrollView style={styles.container}>
-        <View style={styles.formContainer}>
-          <Text style={styles.formTitle}>Nueva Comunicación</Text>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.sendHeader}>
+          <Text style={styles.sendHeaderTitle}>Elegir destinatario</Text>
+        </View>
 
+        <ScrollView style={styles.sendContent} showsVerticalScrollIndicator={false}>
           {error && (
-            <View style={[styles.inputGroup, { backgroundColor: '#ffebee', borderLeftColor: '#ff3b30', borderLeftWidth: 4, padding: 10, borderRadius: 4 }]}>
+            <View style={[styles.alertBox, { backgroundColor: '#ffebee', borderLeftColor: '#ff3b30' }]}>
               <Text style={{ color: '#c62828' }}>❌ {error}</Text>
             </View>
           )}
 
           {success && (
-            <View style={[styles.inputGroup, { backgroundColor: '#f0f8f0', borderLeftColor: '#25d366', borderLeftWidth: 4, padding: 10, borderRadius: 4 }]}>
+            <View style={[styles.alertBox, { backgroundColor: '#f0f8f0', borderLeftColor: '#25d366' }]}>
               <Text style={{ color: '#25d366' }}>{success}</Text>
             </View>
           )}
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Título</Text>
+          {/* Nivel Selector */}
+          <View style={styles.selectorContainer}>
+            {levels.map((level) => (
+              <TouchableOpacity
+                key={level.id}
+                style={[
+                  styles.levelButton,
+                  selectedLevel === level.id && styles.levelButtonActive,
+                  { borderLeftColor: level.color },
+                ]}
+                onPress={() => setSelectedLevel(level.id)}
+              >
+                <View
+                  style={[
+                    styles.levelColorBox,
+                    { backgroundColor: level.color },
+                  ]}
+                />
+                <Text style={styles.levelText}>{level.label}</Text>
+                <Text style={styles.levelCheckmark}>
+                  {selectedLevel === level.id ? '✓' : ''}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Titulo */}
+          <View style={styles.headerBox}>
+            <Text style={styles.headerBoxTitle}>Titulo del mensaje</Text>
+          </View>
+
+          <View style={styles.inputContainer}>
             <TextInput
-              style={styles.input}
-              placeholder="Ej: Aviso importante"
+              style={styles.titleInput}
+              placeholder="Escribe el título..."
               value={title}
               onChangeText={setTitle}
               placeholderTextColor="#999"
               maxLength={100}
               editable={!loading}
             />
-            <Text style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
-              {title.length}/100
-            </Text>
+            <Text style={styles.charCount}>{title.length}/100</Text>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Descripción</Text>
+          {/* Descripción */}
+          <View style={styles.inputContainer}>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={styles.descriptionInput}
               placeholder="Escribe el mensaje..."
               value={description}
               onChangeText={setDescription}
               multiline
-              numberOfLines={5}
+              numberOfLines={6}
               placeholderTextColor="#999"
               maxLength={1000}
               editable={!loading}
             />
-            <Text style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
-              {description.length}/1000
-            </Text>
+            <Text style={styles.charCount}>{description.length}/1000</Text>
           </View>
 
+          {/* Confirm Buttons */}
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity
+              style={[styles.confirmButton, styles.confirmMessageButton]}
+              onPress={() => setShowMessageConfirm(!showMessageConfirm)}
+            >
+              <Text style={styles.confirmButtonIcon}>✉️</Text>
+              <Text style={styles.confirmButtonText}>Confirmar Mensaje</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.confirmButton, styles.confirmDestinationButton]}
+              onPress={() => setShowDestinationConfirm(!showDestinationConfirm)}
+            >
+              <Text style={styles.confirmButtonIcon}>👥</Text>
+              <Text style={styles.confirmButtonText}>Confirmar Destinatario</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Send Button */}
           <TouchableOpacity
-            style={[styles.sendButton, loading && { opacity: 0.6 }]}
+            style={[
+              styles.sendButton,
+              loading && { opacity: 0.6 },
+              { marginBottom: 20 },
+            ]}
             onPress={handleSend}
             disabled={loading}
           >
+            <Text style={styles.sendButtonIcon}>✈️</Text>
             <Text style={styles.sendButtonText}>
-              {loading ? '⏳ Enviando...' : '📤 Enviar a Todos'}
+              {loading ? 'Enviando...' : 'Enviar'}
             </Text>
           </TouchableOpacity>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     );
   }
 
