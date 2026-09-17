@@ -79,7 +79,7 @@ export const styles = StyleSheet.create({
 
   sendContent: {
     flex: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 12,
   },
 
@@ -91,8 +91,8 @@ export const styles = StyleSheet.create({
   },
 
   selectorContainer: {
-    marginBottom: 16,
-    gap: 8,
+    marginBottom: 20,
+    gap: 0,
   },
 
   levelButton: {
@@ -100,61 +100,65 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderLeftWidth: 6,
-    marginBottom: 8,
+    paddingVertical: 16,
+    borderRadius: 16,
+    borderLeftWidth: 8,
+    marginBottom: 12,
+    marginHorizontal: 0,
   },
 
   levelButtonActive: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
   },
 
   levelColorBox: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
-    marginRight: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    marginRight: 16,
   },
 
   levelText: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
     color: '#1a1a1a',
+    letterSpacing: 0.5,
   },
 
   levelCheckmark: {
-    fontSize: 18,
+    fontSize: 24,
     color: '#25D366',
-    fontWeight: '700',
+    fontWeight: '900',
   },
 
   headerBox: {
     backgroundColor: '#A8E6C1',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 12,
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginBottom: 14,
+    marginHorizontal: 0,
   },
 
   headerBoxTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
     color: '#1a1a1a',
   },
 
   inputContainer: {
-    marginBottom: 12,
+    marginBottom: 14,
+    marginHorizontal: 0,
   },
 
   titleInput: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 16,
     color: '#1a1a1a',
   },
@@ -162,25 +166,26 @@ export const styles = StyleSheet.create({
   descriptionInput: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 14,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
     color: '#1a1a1a',
     textAlignVertical: 'top',
+    minHeight: 100,
   },
 
   charCount: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#999',
-    marginTop: 4,
+    marginTop: 6,
     paddingHorizontal: 4,
   },
 
   buttonsContainer: {
-    marginVertical: 16,
-    gap: 10,
+    marginVertical: 18,
+    gap: 12,
   },
 
   confirmButton: {
@@ -188,11 +193,11 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 16,
+    borderRadius: 12,
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#e0e0e0',
   },
 
   confirmMessageButton: {
@@ -204,34 +209,35 @@ export const styles = StyleSheet.create({
   },
 
   confirmButtonIcon: {
-    fontSize: 18,
-    marginRight: 8,
+    fontSize: 22,
+    marginRight: 10,
   },
 
   confirmButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
     color: '#1a1a1a',
   },
 
   sendButton: {
     flexDirection: 'row',
     backgroundColor: '#A8E6C1',
-    borderRadius: 8,
-    paddingVertical: 14,
+    borderRadius: 12,
+    paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 12,
+    marginBottom: 20,
   },
 
   sendButtonIcon: {
-    fontSize: 18,
-    marginRight: 8,
+    fontSize: 22,
+    marginRight: 10,
   },
 
   sendButtonText: {
     color: '#1a1a1a',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
   },
 
