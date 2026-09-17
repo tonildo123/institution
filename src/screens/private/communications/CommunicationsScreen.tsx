@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 import { RootState } from '@/redux/store';
 import { store } from '@/redux/store';
 import { sendCommunicationToAll } from '@/services/communicationsService';
@@ -28,10 +29,25 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   type,
 }) => {
   const user = useSelector((state: RootState) => state.auth.user);
+  const navigation = useNavigation();
   const [selectedLevel, setSelectedLevel] = useState<string>('todos');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Ocultar tabs cuando es type='send'
+  useEffect(() => {
+    if (type === 'send') {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+    }
+    return () => {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: undefined,
+      });
+    };
+  }, [type, navigation]);
 
   const levels = [
     { id: 'inicial', label: 'NIVEL INICIAL', color: '#FF9500' },
@@ -91,7 +107,35 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
   if (type === 'send') {
     return (
-      <View style={styles.chatContainer}>
+      <View style={styles.chatContainerWithHeader}>
+        {/* Header */}
+        <View style={styles.chatHeader}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={styles.headerBackArrow}>←</Text>
+          </TouchableOpacity>
+
+          <View style={styles.headerAvatar}>
+            <View style={styles.avatarBadge}>
+              <View style={styles.avatarBars}>
+                <View style={[styles.avatarBar, { backgroundColor: '#e63946' }]} />
+                <View style={[styles.avatarBar, { backgroundColor: '#f4a300' }]} />
+                <View style={[styles.avatarBar, { backgroundColor: '#2a9d5c' }]} />
+                <View style={[styles.avatarBar, { backgroundColor: '#2a4d9d' }]} />
+              </View>
+              <Text style={styles.avatarBadgeText}>IMEP</Text>
+            </View>
+          </View>
+
+          <View style={styles.headerText}>
+            <Text style={styles.headerTitle}>KIT IMEP</Text>
+            <Text style={styles.headerSub}>last seen today at 13:25</Text>
+          </View>
+
+          <TouchableOpacity>
+            <Text style={styles.headerMenuDots}>⋮</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Chat Area */}
         <ScrollView style={styles.chatMessages} showsVerticalScrollIndicator={false}>
           {/* User message: Elegir destinatario */}

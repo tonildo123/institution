@@ -16,6 +16,85 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
   },
 
+  chatContainerWithHeader: {
+    flex: 1,
+    backgroundColor: '#efeae2',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+
+  // Chat Header
+  chatHeader: {
+    backgroundColor: '#0c6b58',
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+
+  headerBackArrow: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: '700',
+  },
+
+  headerAvatar: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+
+  avatarBadge: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+
+  avatarBars: {
+    flexDirection: 'row',
+    gap: 1.5,
+    marginBottom: 1,
+  },
+
+  avatarBar: {
+    width: 3,
+    height: 8,
+  },
+
+  avatarBadgeText: {
+    color: '#fff',
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+
+  headerText: {
+    flex: 1,
+  },
+
+  headerTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+
+  headerSub: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 13,
+    marginTop: 2,
+  },
+
+  headerMenuDots: {
+    color: '#fff',
+    fontSize: 20,
+    letterSpacing: 2,
+  },
+
   chatMessages: {
     flex: 1,
     paddingHorizontal: 18,
