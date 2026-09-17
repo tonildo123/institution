@@ -8,9 +8,50 @@ export const styles = StyleSheet.create({
   },
 
   listContent: {
+    paddingHorizontal: 8,
     paddingVertical: 8,
   },
 
+  communicationItem: {
+    backgroundColor: '#fff',
+    marginHorizontal: 8,
+    marginVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+  },
+
+  communicationTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 6,
+  },
+
+  communicationDate: {
+    fontSize: 12,
+    color: '#999',
+  },
+
+  errorContainer: {
+    backgroundColor: '#fee',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#f33',
+  },
+
+  errorText: {
+    color: '#c00',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+
+  // Legacy styles (kept for compatibility)
   historyItem: {
     backgroundColor: '#fff',
     marginHorizontal: 8,
