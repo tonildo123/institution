@@ -68,52 +68,51 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             </TouchableOpacity>
           ))}
 
-          {/* User message: Titulo del mensaje */}
+          {/* Input: Titulo del mensaje */}
           <View style={styles.messageRow}>
             <View style={[styles.chatBubble, styles.sentBubble]}>
               <Text style={styles.bubbleText}>Titulo del mensaje</Text>
             </View>
           </View>
 
-          {/* Bot message: Confirmar Mensaje */}
+          {/* Input Field: Title */}
+          <View style={styles.messageRow}>
+            <TextInput
+              style={styles.titleInputBubble}
+              placeholder="Escribe el titulo..."
+              placeholderTextColor="#999"
+              value={title}
+              onChangeText={setTitle}
+              maxLength={100}
+            />
+          </View>
+
+          {/* Message input label */}
           <View style={styles.messageRow}>
             <View style={[styles.chatBubble, styles.receivedBubble]}>
-              <Text style={styles.bubbleIcon}>✉️</Text>
-              <Text style={styles.bubbleText}>Confirmar Mensaje</Text>
+              <Text style={styles.bubbleText}>Escribe el mensaje...</Text>
             </View>
           </View>
 
-          {/* User message: Confirmar Destinatario */}
+          {/* Input Field: Description */}
           <View style={styles.messageRow}>
-            <View style={[styles.chatBubble, styles.sentBubble]}>
-              <Text style={styles.bubbleIcon}>👥</Text>
-              <Text style={styles.bubbleText}>Confirmar Destinatario</Text>
-            </View>
-          </View>
-
-          {/* Bot message: Enviar */}
-          <View style={styles.messageRow}>
-            <View style={[styles.chatBubble, styles.receivedBubble]}>
-              <Text style={styles.bubbleIcon}>✈️</Text>
-              <Text style={styles.bubbleText}>Enviar</Text>
-            </View>
+            <TextInput
+              style={styles.descriptionInputBubble}
+              placeholder="Contenido del mensaje..."
+              placeholderTextColor="#999"
+              multiline
+              numberOfLines={4}
+              maxLength={1000}
+            />
           </View>
         </ScrollView>
 
-        {/* Input Bar */}
-        <View style={styles.inputBar}>
-          <View style={styles.inputPill}>
-            <Text style={styles.inputEmoji}>🙂</Text>
-            <TextInput
-              style={styles.inputField}
-              placeholder="Mensaje"
-              placeholderTextColor="#999"
-            />
-            <Text style={styles.inputClip}>📎</Text>
-            <View style={styles.inputCam}>
-              <Text style={styles.inputCamIcon}>📷</Text>
-            </View>
-          </View>
+        {/* Send Button Bar */}
+        <View style={styles.sendButtonBar}>
+          <TouchableOpacity style={styles.sendButtonChat}>
+            <Text style={styles.sendButtonChatIcon}>✈️</Text>
+            <Text style={styles.sendButtonChatText}>Enviar</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );

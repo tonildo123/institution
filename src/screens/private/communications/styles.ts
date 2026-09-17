@@ -128,6 +128,59 @@ export const styles = StyleSheet.create({
     color: '#fff',
   },
 
+  // Input Bubbles
+  titleInputBubble: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: '#111',
+    marginHorizontal: 0,
+  },
+
+  descriptionInputBubble: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: '#111',
+    textAlignVertical: 'top',
+  },
+
+  // Send Button
+  sendButtonBar: {
+    backgroundColor: '#efeae2',
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    paddingBottom: 24,
+  },
+
+  sendButtonChat: {
+    backgroundColor: '#A8E6C1',
+    borderRadius: 8,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+
+  sendButtonChatIcon: {
+    fontSize: 20,
+  },
+
+  sendButtonChatText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111',
+  },
+
   // Legacy styles (kept for backward compatibility)
   formContainer: {
     padding: 16,
