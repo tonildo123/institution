@@ -1,25 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
   ScrollView,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useLoginLogic } from './useLoginLogic';
-import styles from './styles';
+import { styles } from './styles';
 
 /**
- * LoginScreen - SIMPLE
+ * LoginScreen - Diseño IMEP
  *
  * Flujo:
  * 1. Ingresa email o DNI
  * 2. Ingresa contraseña
- * 3. Toca "Iniciar Sesión"
+ * 3. Toca "INICIAR SESIÓN"
  * 4. Firebase detecta el rol automáticamente
  */
 
@@ -39,7 +39,7 @@ const LoginScreen = () => {
   } = useLoginLogic();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeContainer}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -48,10 +48,31 @@ const LoginScreen = () => {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>📚 Instituto</Text>
-            <Text style={styles.subtitle}>Inicia sesión en tu cuenta</Text>
+          {/* Logo IMEP */}
+          <View style={styles.logoWrap}>
+            <View style={styles.logoBars}>
+              <View style={[styles.bar, styles.barI]}>
+                <Text style={styles.barText}>I</Text>
+              </View>
+              <View style={[styles.bar, styles.barM]}>
+                <Text style={styles.barText}>M</Text>
+              </View>
+              <View style={[styles.bar, styles.barE]}>
+                <Text style={styles.barText}>E</Text>
+              </View>
+              <View style={[styles.bar, styles.barP]}>
+                <Text style={styles.barText}>P</Text>
+              </View>
+            </View>
+
+            <Text style={styles.tagline}>CONOCER, AMAR Y SERVIR</Text>
+
+            <View style={styles.underline}>
+              <View style={[styles.underlineBar, styles.barI]} />
+              <View style={[styles.underlineBar, styles.barM]} />
+              <View style={[styles.underlineBar, styles.barE]} />
+              <View style={[styles.underlineBar, styles.barP]} />
+            </View>
           </View>
 
           {/* Error General */}
@@ -61,74 +82,59 @@ const LoginScreen = () => {
             </View>
           )}
 
-          {/* Formulario */}
-          <View style={styles.form}>
-            {/* Email o DNI */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email o DNI</Text>
+          {/* Email o DNI */}
+          <View style={styles.field}>
+            <Text style={styles.fieldLabel}>Email o DNI</Text>
+            <TextInput
+              style={[styles.input, credentialError && styles.inputError]}
+              placeholder="tu@email.com o 12345678"
+              placeholderTextColor="#9a9a9a"
+              value={credential}
+              onChangeText={handleCredentialChange}
+              autoCapitalize="none"
+              editable={!isLoading}
+            />
+            {credentialError && (
+              <Text style={styles.fieldErrorText}>{credentialError}</Text>
+            )}
+          </View>
+
+          {/* Contraseña */}
+          <View style={styles.field}>
+            <Text style={styles.fieldLabel}>Contraseña</Text>
+            <View style={styles.passwordWrap}>
               <TextInput
-                style={[
-                  styles.input,
-                  credentialError && styles.inputError,
-                ]}
-                placeholder="tu@email.com o 12345678"
-                placeholderTextColor="#999"
-                value={credential}
-                onChangeText={handleCredentialChange}
-                autoCapitalize="none"
+                style={[styles.input, styles.passwordInput, passwordError && styles.inputError]}
+                placeholder="••••••••"
+                placeholderTextColor="#9a9a9a"
+                value={password}
+                onChangeText={handlePasswordChange}
+                secureTextEntry={!showPassword}
                 editable={!isLoading}
               />
-              {credentialError && (
-                <Text style={styles.fieldErrorText}>{credentialError}</Text>
-              )}
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                disabled={isLoading}
+                style={styles.eyeButton}
+              >
+                <Text style={styles.eyeIcon}>{showPassword ? '👁' : '👁'}</Text>
+              </TouchableOpacity>
             </View>
-
-            {/* Contraseña */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Contraseña</Text>
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  style={[
-                    styles.passwordInput,
-                    passwordError && styles.inputError,
-                  ]}
-                  placeholder="••••••••"
-                  placeholderTextColor="#999"
-                  value={password}
-                  onChangeText={handlePasswordChange}
-                  secureTextEntry={!showPassword}
-                  editable={!isLoading}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                  style={styles.showPasswordBtn}
-                >
-                  <Text style={styles.showPasswordText}>
-                    {showPassword ? '👁' : '👁‍🗨'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              {passwordError && (
-                <Text style={styles.fieldErrorText}>{passwordError}</Text>
-              )}
-            </View>
+            {passwordError && (
+              <Text style={styles.fieldErrorText}>{passwordError}</Text>
+            )}
           </View>
 
           {/* Botón Login */}
           <TouchableOpacity
-            style={[
-              styles.loginButton,
-              isLoading && styles.loginButtonDisabled,
-            ]}
+            style={[styles.loginBtn, isLoading && styles.loginBtnDisabled]}
             onPress={handleLogin}
             disabled={isLoading}
-            activeOpacity={0.7}
           >
             {isLoading ? (
               <ActivityIndicator size="large" color="#fff" />
             ) : (
-              <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+              <Text style={styles.loginBtnText}>INICIAR SESIÓN</Text>
             )}
           </TouchableOpacity>
         </ScrollView>

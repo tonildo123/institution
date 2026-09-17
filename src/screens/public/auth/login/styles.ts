@@ -1,210 +1,173 @@
 import { StyleSheet } from 'react-native';
 
 /**
- * Estilos para LoginScreen
+ * Estilos para LoginScreen - Diseño IMEP
  */
 
-const styles = StyleSheet.create({
-  container: {
+export const styles = StyleSheet.create({
+  safeContainer: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#efeae2',
   },
 
   scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingHorizontal: 40,
+    paddingTop: 60,
+    paddingBottom: 60,
+  },
+
+  // Logo
+  logoWrap: {
+    alignItems: 'center',
+    marginBottom: 60,
+  },
+
+  logoBars: {
+    flexDirection: 'row',
+    height: 118,
+    marginBottom: 16,
+  },
+
+  bar: {
+    width: 46,
+    alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // Header
-  header: {
-    marginBottom: 30,
-    alignItems: 'center',
+  barI: {
+    backgroundColor: '#d32b26',
   },
 
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 8,
+  barM: {
+    backgroundColor: '#e39a0c',
   },
 
-  subtitle: {
+  barE: {
+    backgroundColor: '#1f9d55',
+  },
+
+  barP: {
+    backgroundColor: '#3266ad',
+  },
+
+  barText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 46,
+    fontFamily: 'Georgia',
+  },
+
+  tagline: {
+    color: '#2b2b2b',
     fontSize: 14,
-    color: '#666',
-  },
-
-  // Mensajes
-  errorContainer: {
-    backgroundColor: '#fee',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#f33',
-  },
-
-  errorText: {
-    color: '#c00',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-
-  successContainer: {
-    backgroundColor: '#efe',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#0a0',
-  },
-
-  successText: {
-    color: '#060',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-
-  // Formulario
-  form: {
-    marginBottom: 24,
-  },
-
-  inputGroup: {
-    marginBottom: 16,
-  },
-
-  label: {
-    fontSize: 14,
+    letterSpacing: 6,
+    marginTop: 10,
     fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 8,
+  },
+
+  underline: {
+    flexDirection: 'row',
+    width: '100%',
+    height: 4,
+    marginTop: 10,
+    gap: 0,
+  },
+
+  underlineBar: {
+    flex: 1,
+  },
+
+  // Fields
+  field: {
+    marginBottom: 30,
+  },
+
+  fieldLabel: {
+    color: '#1f1f1f',
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 14,
   },
 
   input: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#1a1a1a',
-  },
-
-  inputError: {
-    borderColor: '#f33',
-    backgroundColor: '#fff5f5',
-  },
-
-  fieldErrorText: {
-    color: '#f33',
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingRight: 8,
+    width: '100%',
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    fontSize: 16,
+    color: '#333',
+    borderWidth: 0,
   },
 
   passwordInput: {
-    flex: 1,
+    letterSpacing: 4,
+    paddingRight: 50,
+  },
+
+  inputError: {
+    borderWidth: 1,
+    borderColor: '#d32b26',
+  },
+
+  passwordWrap: {
+    position: 'relative',
+  },
+
+  eyeButton: {
+    position: 'absolute',
+    right: 18,
+    top: '50%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  eyeIcon: {
+    fontSize: 22,
+    color: '#8a8a8a',
+  },
+
+  fieldErrorText: {
+    color: '#d32b26',
+    fontSize: 12,
+    marginTop: 8,
+  },
+
+  // Error Container
+  errorContainer: {
+    backgroundColor: '#fff0f0',
+    borderLeftWidth: 4,
+    borderLeftColor: '#d32b26',
     paddingHorizontal: 12,
     paddingVertical: 10,
+    marginBottom: 20,
+    borderRadius: 6,
+  },
+
+  errorText: {
+    color: '#c62828',
     fontSize: 14,
-    color: '#1a1a1a',
-  },
-
-  showPasswordBtn: {
-    padding: 8,
-  },
-
-  showPasswordText: {
-    fontSize: 16,
-  },
-
-  // Role Selector
-  roleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-
-  roleButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderWidth: 2,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  roleButtonActive: {
-    borderColor: '#007AFF',
-    backgroundColor: '#f0f8ff',
-  },
-
-  roleButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#666',
-  },
-
-  roleButtonTextActive: {
-    color: '#007AFF',
-    fontWeight: '700',
+    fontWeight: '500',
   },
 
   // Login Button
-  loginButton: {
-    backgroundColor: '#007AFF',
+  loginBtn: {
+    width: '100%',
+    backgroundColor: '#0b6b57',
     borderRadius: 8,
-    paddingVertical: 14,
+    paddingVertical: 20,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
+    marginTop: 10,
   },
 
-  loginButtonDisabled: {
+  loginBtnDisabled: {
     opacity: 0.6,
   },
 
-  loginButtonText: {
+  loginBtnText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-
-  // Signup Link
-  signupContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  signupText: {
-    fontSize: 13,
-    color: '#666',
-  },
-
-  signupLink: {
-    fontSize: 13,
-    color: '#007AFF',
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '600',
+    letterSpacing: 1,
   },
 });
-
-export default styles;
