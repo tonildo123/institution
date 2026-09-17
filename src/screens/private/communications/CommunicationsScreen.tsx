@@ -37,17 +37,32 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
   // Ocultar tabs cuando es type='send'
   useEffect(() => {
-    if (type === 'send') {
-      navigation.getParent()?.setOptions({
+    const parent = navigation.getParent();
+
+    if (type === 'send' && parent) {
+      parent.setOptions({
         tabBarStyle: { display: 'none' },
+        tabBarVisible: false,
+      });
+    } else if (parent) {
+      parent.setOptions({
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopWidth: 1,
+          borderTopColor: '#eee',
+          display: 'flex',
+        },
+        tabBarVisible: true,
       });
     }
-    return () => {
-      navigation.getParent()?.setOptions({
-        tabBarStyle: undefined,
-      });
-    };
-  }, [type, navigation]);
+  }, [type]);
+
+  // Determinar pantalla de historial según rol
+  const getHistorialRouteName = () => {
+    if (user?.role === 'admin') return 'HistorialAdmin';
+    if (user?.role === 'preceptor') return 'HistorialPreceptor';
+    return 'HistorialFamilia';
+  };
 
   const levels = [
     { id: 'inicial', label: 'NIVEL INICIAL', color: '#FF9500' },
@@ -111,11 +126,22 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         {/* Header */}
         <View style={styles.chatHeader}>
           <TouchableOpacity onPress={() => {
-            // Restaurar tabs al volver
-            navigation.getParent()?.setOptions({
-              tabBarStyle: undefined,
-            });
-            navigation.goBack();
+            const parent = navigation.getParent();
+
+            // Restaurar tabs
+            if (parent) {
+              parent.setOptions({
+                tabBarStyle: {
+                  backgroundColor: '#fff',
+                  borderTopWidth: 1,
+                  borderTopColor: '#eee',
+                  display: 'flex',
+                },
+              });
+            }
+
+            // Navegar a Historial según rol
+            parent?.navigate(getHistorialRouteName() as any);
           }}>
             <Text style={styles.headerBackArrow}>←</Text>
           </TouchableOpacity>
