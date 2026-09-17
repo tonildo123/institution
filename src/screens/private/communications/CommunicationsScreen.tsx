@@ -34,6 +34,24 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      id: '1',
+      title: 'Aviso importante',
+      description: 'Reunión de padres el viernes',
+      sender: 'Directora María',
+      date: '09:30',
+      attachment: '📎',
+    },
+    {
+      id: '2',
+      title: 'Tarea de matemática',
+      description: 'Ejercicios del capítulo 5',
+      sender: 'Prof. Juan',
+      date: 'ayer',
+      attachment: '📄',
+    },
+  ]);
 
   // Ocultar tabs cuando es type='send'
   useEffect(() => {
