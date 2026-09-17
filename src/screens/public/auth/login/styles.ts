@@ -13,7 +13,9 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 40,
     paddingTop: 60,
-    paddingBottom: 60,
+    paddingBottom: 120,
+    flexGrow: 1,
+    justifyContent: 'space-between',
   },
 
   // Logo
@@ -117,7 +119,7 @@ export const styles = StyleSheet.create({
   eyeButton: {
     position: 'absolute',
     right: 18,
-    top: '50%',
+    top: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
