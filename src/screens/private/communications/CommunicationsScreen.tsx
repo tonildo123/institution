@@ -5,9 +5,13 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  FlatList,
+  Alert,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
+import { store } from '@/redux/store';
+import { sendCommunicationToAll } from '@/services/communicationsService';
 import { styles } from './styles';
 
 /**
@@ -26,6 +30,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const user = useSelector((state: RootState) => state.auth.user);
   const [selectedLevel, setSelectedLevel] = useState<string>('todos');
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const levels = [
     { id: 'inicial', label: 'NIVEL INICIAL', color: '#FF9500' },
@@ -34,8 +40,53 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     { id: 'todos', label: 'TODOS', color: '#FF3B30' },
   ];
 
-  const getLevelColor = (levelId: string) => {
-    return levels.find(l => l.id === levelId)?.color || '#999';
+  const handleSend = async () => {
+    if (!title.trim()) {
+      Alert.alert('Error', 'Por favor ingresa un título');
+      return;
+    }
+
+    if (!description.trim()) {
+      Alert.alert('Error', 'Por favor ingresa un mensaje');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      console.log('📤 Enviando comunicación a nivel:', selectedLevel);
+
+      const result = await sendCommunicationToAll(
+        {
+          title: title.trim(),
+          body: description.trim(),
+          description: description.trim(),
+          data: {
+            type: 'communication',
+            level: selectedLevel,
+            timestamp: new Date().toISOString(),
+          },
+        },
+        store
+      );
+
+      console.log('✅ Comunicación enviada:', result);
+
+      Alert.alert(
+        '✅ Enviado',
+        `Mensaje enviado a ${result.delivered}/${result.totalUsers} usuarios`
+      );
+
+      // Limpiar campos
+      setTitle('');
+      setDescription('');
+      setSelectedLevel('todos');
+    } catch (error: any) {
+      console.error('❌ Error:', error);
+      Alert.alert('Error', error.message || 'Error al enviar la comunicación');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (type === 'send') {
@@ -100,18 +151,27 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
               style={styles.descriptionInputBubble}
               placeholder="Contenido del mensaje..."
               placeholderTextColor="#999"
+              value={description}
+              onChangeText={setDescription}
               multiline
               numberOfLines={4}
               maxLength={1000}
+              editable={!loading}
             />
           </View>
         </ScrollView>
 
         {/* Send Button Bar */}
         <View style={styles.sendButtonBar}>
-          <TouchableOpacity style={styles.sendButtonChat}>
+          <TouchableOpacity
+            style={[styles.sendButtonChat, loading && { opacity: 0.6 }]}
+            onPress={handleSend}
+            disabled={loading}
+          >
             <Text style={styles.sendButtonChatIcon}>✈️</Text>
-            <Text style={styles.sendButtonChatText}>Enviar</Text>
+            <Text style={styles.sendButtonChatText}>
+              {loading ? 'Enviando...' : 'Enviar'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
