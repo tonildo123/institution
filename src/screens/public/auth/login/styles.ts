@@ -81,7 +81,7 @@ export const styles = StyleSheet.create({
 
   // Fields
   field: {
-    marginBottom: 30,
+    marginBottom: 16,
   },
 
   fieldLabel: {
