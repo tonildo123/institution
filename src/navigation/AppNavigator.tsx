@@ -42,6 +42,29 @@ const HistoryStackNavigator = () => {
 };
 
 /**
+ * Communications Stack Navigator
+ * Para Familia: contiene CommunicationsScreen (receive) y CommunicationDetailScreen
+ */
+const CommunicationsStackNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen
+        name="CommunicationsList"
+        component={() => <CommunicationsScreen type="receive" />}
+      />
+      <Stack.Screen
+        name="CommunicationDetail"
+        component={CommunicationDetailScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
+/**
  * FAMILIA TABS (2 tabs)
  * - Comunicaciones (recibe)
  * - Perfil
@@ -62,7 +85,7 @@ const FamiliaTabNavigator = () => {
     >
       <Tab.Screen
         name="ComunicacionesRecibidas"
-        component={() => <CommunicationsScreen type="receive" />}
+        component={CommunicationsStackNavigator}
         options={{
           title: 'Comunicaciones',
           tabBarLabel: '💬 Comunicaciones',

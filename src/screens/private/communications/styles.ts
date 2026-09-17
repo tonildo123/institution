@@ -354,4 +354,106 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 4,
   },
+
+  // Receive Header (Lista de niveles)
+  receiveHeader: {
+    backgroundColor: '#0c6b58',
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+  },
+
+  receiveHeaderTitle: {
+    color: '#fff',
+    fontSize: 26,
+    fontWeight: '700',
+  },
+
+  // Level Row
+  levelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.06)',
+    backgroundColor: '#fff',
+  },
+
+  levelAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+
+  levelAvatarText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+
+  levelInfo: {
+    flex: 1,
+  },
+
+  levelTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 4,
+  },
+
+  levelName: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#111',
+  },
+
+  levelTime: {
+    fontSize: 12.5,
+    color: '#8a8a8a',
+    flexShrink: 0,
+  },
+
+  levelTimeUnread: {
+    color: '#0c6b58',
+    fontWeight: '700',
+  },
+
+  levelBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  levelPreview: {
+    fontSize: 14.5,
+    color: '#6b6b6b',
+    flex: 1,
+  },
+
+  levelBadge: {
+    backgroundColor: '#0c6b58',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    minWidth: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+    marginLeft: 8,
+  },
+
+  levelBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  levelListContent: {
+    backgroundColor: '#fff',
+  },
 });

@@ -7,12 +7,14 @@ import {
   TextInput,
   FlatList,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { RootState } from '@/redux/store';
 import { store } from '@/redux/store';
 import { sendCommunicationToAll } from '@/services/communicationsService';
+import { Communication } from '@/services/firebase/communications';
 import { styles } from './styles';
 
 /**
@@ -272,26 +274,102 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     );
   }
 
-  // Receive - Estilo WhatsApp
+  // Receive - Cargar desde Firestore
+  const [communications, setCommunications] = React.useState<Communication[]>([]);
+  const [loadingCommunications, setLoadingCommunications] = React.useState(true);
+
+  React.useEffect(() => {
+    const loadCommunicationsData = async () => {
+      try {
+        const { getAllCommunications } = await import('@/services/firebase/communications');
+        const data = await getAllCommunications();
+        setCommunications(data);
+        console.log('✅ Comunicaciones cargadas:', data.length);
+      } catch (error) {
+        console.error('❌ Error loading communications:', error);
+      } finally {
+        setLoadingCommunications(false);
+      }
+    };
+    loadCommunicationsData();
+  }, []);
+
+  const getLevelColor = (level: string) => {
+    const colors: { [key: string]: string } = {
+      inicial: '#FF9500',
+      primario: '#25D366',
+      secundario: '#007AFF',
+      todos: '#FF3B30',
+    };
+    return colors[level] || '#0c6b58';
+  };
+
+  const getLevelIcon = (level: string) => {
+    const icons: { [key: string]: string } = {
+      inicial: 'I',
+      primario: 'P',
+      secundario: 'S',
+      todos: 'T',
+    };
+    return icons[level] || '•';
+  };
+
+  if (loadingCommunications) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#25D366" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
+      <View style={styles.receiveHeader}>
+        <Text style={styles.receiveHeaderTitle}>IMEP</Text>
+      </View>
+
       <FlatList
-        data={messages}
+        data={communications}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.messageCard}>
-            <View style={styles.messageHeader}>
-              <Text style={styles.messageSender}>{item.sender}</Text>
-              <Text style={styles.messageTime}>{item.date}</Text>
+          <TouchableOpacity
+            style={styles.levelRow}
+            onPress={() => {
+              navigation.navigate('CommunicationDetail' as any, {
+                communicationId: item.id,
+              });
+            }}
+          >
+            <View
+              style={[
+                styles.levelAvatar,
+                { backgroundColor: getLevelColor(item.level) },
+              ]}
+            >
+              <Text style={styles.levelAvatarText}>{getLevelIcon(item.level)}</Text>
             </View>
-            <Text style={styles.messageTitle}>{item.title}</Text>
-            <Text style={styles.messageDescription}>{item.description}</Text>
-            {item.attachment && (
-              <Text style={styles.attachment}>{item.attachment}</Text>
-            )}
+
+            <View style={styles.levelInfo}>
+              <View style={styles.levelTop}>
+                <Text style={styles.levelName}>{item.title}</Text>
+                <Text style={styles.levelTime}>
+                  {new Date(item.createdAt).toLocaleDateString('es-AR')}
+                </Text>
+              </View>
+              <View style={styles.levelBottom}>
+                <Text style={styles.levelPreview} numberOfLines={1}>
+                  {item.description}
+                </Text>
+              </View>
+            </View>
           </TouchableOpacity>
         )}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={styles.levelListContent}
+        ListEmptyComponent={
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <Text style={{ color: '#999' }}>No hay comunicaciones</Text>
+          </View>
+        }
       />
     </View>
   );
