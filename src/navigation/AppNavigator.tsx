@@ -6,6 +6,7 @@ import { RootState } from '@/redux/store';
 import { CommunicationsScreen } from '@/screens/private/communications/CommunicationsScreen';
 import { ProfileScreen } from '@/screens/private/profile/ProfileScreen';
 import { HistoryScreen } from '@/screens/private/history/HistoryScreen';
+import { CommunicationDetailScreen } from '@/screens/private/communications/CommunicationDetailScreen';
 import { UsersManagementScreen } from '@/screens/private/users/UsersManagementScreen';
 
 /**
@@ -16,6 +17,29 @@ import { UsersManagementScreen } from '@/screens/private/users/UsersManagementSc
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+/**
+ * History Stack Navigator
+ * Contiene HistoryScreen y CommunicationDetailScreen
+ */
+const HistoryStackNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen
+        name="HistoryList"
+        component={HistoryScreen}
+      />
+      <Stack.Screen
+        name="CommunicationDetail"
+        component={CommunicationDetailScreen}
+      />
+    </Stack.Navigator>
+  );
+};
 
 /**
  * FAMILIA TABS (2 tabs)
@@ -91,7 +115,7 @@ const AdminTabNavigator = () => {
       />
       <Tab.Screen
         name="HistorialAdmin"
-        component={HistoryScreen}
+        component={HistoryStackNavigator}
         options={{
           title: 'Historial',
           tabBarLabel: '📜 Historial',
@@ -152,7 +176,7 @@ const PreceptorTabNavigator = () => {
       />
       <Tab.Screen
         name="HistorialPreceptor"
-        component={HistoryScreen}
+        component={HistoryStackNavigator}
         options={{
           title: 'Historial',
           tabBarLabel: '📜 Historial',
