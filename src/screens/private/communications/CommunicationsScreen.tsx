@@ -160,8 +160,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
               });
             }
 
-            // Navegar a Historial según rol
-            parent?.navigate(getHistorialRouteName() as any);
+            // Volver atrás
+            navigation.goBack();
           }}>
             <Text style={styles.headerBackArrow}>←</Text>
           </TouchableOpacity>

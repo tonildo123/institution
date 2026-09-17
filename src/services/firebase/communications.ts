@@ -111,3 +111,27 @@ export const deleteCommunication = async (id: string): Promise<void> => {
     throw error;
   }
 };
+
+/**
+ * Actualizar una comunicación (solo admin)
+ */
+export const updateCommunication = async (
+  id: string,
+  updates: {
+    title?: string;
+    description?: string;
+    body?: string;
+  }
+): Promise<void> => {
+  try {
+    const { updateDoc, doc } = await import('firebase/firestore');
+    await updateDoc(doc(db, 'communications', id), {
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    });
+    console.log('✅ Comunicación actualizada:', id);
+  } catch (error: any) {
+    console.error('❌ Error updating communication:', error);
+    throw error;
+  }
+};
