@@ -189,8 +189,8 @@ export const useAuth = () => {
             throw new Error('Cuenta deshabilitada');
           }
 
-          // Validar que sea admin o preceptor
-          if (user.role !== 'admin' && user.role !== 'preceptor') {
+          // Validar que sea admin, preceptor, equipo directivo o representante legal
+          if (user.role !== 'admin' && user.role !== 'preceptor' && user.role !== 'equipo directivo' && user.role !== 'representante legal') {
             throw new Error('Este email no tiene permisos para acceder');
           }
 

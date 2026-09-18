@@ -276,6 +276,8 @@ export const AppNavigator = () => {
       TabComponent = FamiliaTabNavigator;
       break;
     case 'admin':
+    case 'equipo directivo':
+    case 'representante legal':
       TabComponent = AdminTabNavigator;
       break;
     case 'preceptor':

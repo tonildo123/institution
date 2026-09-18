@@ -60,6 +60,10 @@ export const UsersManagementScreen = () => {
         return '#007AFF';
       case 'familia':
         return '#25D366';
+      case 'equipo directivo':
+        return '#5856D6';
+      case 'representante legal':
+        return '#FF9500';
       default:
         return '#999';
     }
@@ -73,6 +77,10 @@ export const UsersManagementScreen = () => {
         return 'Docente';
       case 'familia':
         return 'Familia';
+      case 'equipo directivo':
+        return 'Equipo Dir.';
+      case 'representante legal':
+        return 'Rep. Legal';
       default:
         return role;
     }
@@ -235,15 +243,21 @@ export const UsersManagementScreen = () => {
         </View>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>
-            {users.filter((u) => u.role === 'familia').length}
+            {users.filter((u) => u.role === 'admin' || u.role === 'equipo directivo' || u.role === 'representante legal').length}
           </Text>
-          <Text style={styles.statLabel}>Familias</Text>
+          <Text style={styles.statLabel}>Admins</Text>
         </View>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>
             {users.filter((u) => u.role === 'preceptor').length}
           </Text>
           <Text style={styles.statLabel}>Docentes</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={styles.statNumber}>
+            {users.filter((u) => u.role === 'familia').length}
+          </Text>
+          <Text style={styles.statLabel}>Familias</Text>
         </View>
       </View>
 
@@ -354,7 +368,7 @@ export const UsersManagementScreen = () => {
                 <View style={styles.inputGroup}>
                   <Text style={styles.label}>Rol</Text>
                   <View style={styles.roleButtons}>
-                    {['admin', 'preceptor', 'familia'].map((role) => (
+                    {['admin', 'preceptor', 'familia', 'equipo directivo', 'representante legal'].map((role) => (
                       <TouchableOpacity
                         key={role}
                         style={[
@@ -373,11 +387,7 @@ export const UsersManagementScreen = () => {
                               styles.roleButtonActiveText,
                           ]}
                         >
-                          {role === 'admin'
-                            ? 'Admin'
-                            : role === 'preceptor'
-                            ? 'Docente'
-                            : 'Familia'}
+                          {getRoleLabel(role)}
                         </Text>
                       </TouchableOpacity>
                     ))}

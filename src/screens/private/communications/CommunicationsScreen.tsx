@@ -79,7 +79,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
   // Determinar pantalla de historial según rol
   const getHistorialRouteName = () => {
-    if (user?.role === 'admin') return 'HistorialAdmin';
+    if (user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal') return 'HistorialAdmin';
     if (user?.role === 'preceptor') return 'HistorialPreceptor';
     return 'HistorialFamilia';
   };

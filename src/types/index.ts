@@ -1,12 +1,14 @@
 // Global Types
 
-export type UserRole = 'admin' | 'familia' | 'preceptor';
+export type UserRole = 'admin' | 'familia' | 'preceptor' | 'equipo directivo' | 'representante legal';
 
 /**
  * Credenciales requeridas por rol:
  * - admin: email + password
  * - familia: dni + password
  * - preceptor: email + password
+ * - equipo directivo: email + password
+ * - representante legal: email + password
  */
 export interface User {
   id: string;
@@ -58,7 +60,7 @@ export interface SignUpCredentials extends LoginCredentials {
 export interface CreateUserCredentials {
   displayName: string;
   role: UserRole;
-  email?: string;      // Requerido para admin, preceptor
+  email?: string;      // Requerido para admin, preceptor, equipo directivo, representante legal
   dni?: string;        // Requerido para familia
   password: string;
   isEnabled?: boolean;

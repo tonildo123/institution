@@ -49,7 +49,7 @@ export const ProfileScreen = () => {
         </View>
         <Text style={styles.name}>{user?.displayName || 'Usuario'}</Text>
         <Text style={styles.role}>
-          {user?.role === 'admin'
+          {user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal'
             ? 'Administrador'
             : user?.role === 'preceptor'
             ? 'Docente'
@@ -83,7 +83,7 @@ export const ProfileScreen = () => {
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Rol</Text>
           <Text style={styles.infoValue}>
-            {user?.role === 'admin'
+            {user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal'
               ? 'Administrador'
               : user?.role === 'preceptor'
               ? 'Docente'

@@ -55,7 +55,7 @@ export const CommunicationDetailScreen = () => {
   };
 
   const handleEdit = () => {
-    if (user?.role !== 'admin' || !communication) return;
+    if ((user?.role !== 'admin' && user?.role !== 'equipo directivo' && user?.role !== 'representante legal') || !communication) return;
     setEditTitle(communication.title);
     setEditDescription(communication.description);
     setShowEditModal(true);
@@ -89,7 +89,7 @@ export const CommunicationDetailScreen = () => {
   };
 
   const handleDelete = () => {
-    if (user?.role !== 'admin') return;
+    if (user?.role !== 'admin' && user?.role !== 'equipo directivo' && user?.role !== 'representante legal') return;
 
     Alert.alert(
       '🗑️ Eliminar Comunicación',
@@ -162,7 +162,7 @@ export const CommunicationDetailScreen = () => {
         </View>
 
         {/* Edit & Delete buttons - solo para admin */}
-        {user?.role === 'admin' && (
+        {(user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal') && (
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <TouchableOpacity
               onPress={handleEdit}

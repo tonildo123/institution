@@ -218,11 +218,12 @@ export const styles = StyleSheet.create({
 
   roleButtons: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
 
   roleButton: {
-    flex: 1,
+    width: '48%',
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: '#ddd',

@@ -38,6 +38,8 @@ const DashboardScreen = ({ navigation }: any) => {
   const getWelcomeMessage = () => {
     switch (user?.role) {
       case 'admin':
+      case 'equipo directivo':
+      case 'representante legal':
         return '¡Bienvenido Administrador! 👨‍💼';
       case 'familia':
         return '¡Bienvenido Padre/Tutor! 👨‍👩‍👧';
@@ -52,6 +54,8 @@ const DashboardScreen = ({ navigation }: any) => {
   const getDescription = () => {
     switch (user?.role) {
       case 'admin':
+      case 'equipo directivo':
+      case 'representante legal':
         return 'Panel de administración del Instituto. Gestiona usuarios, configuración y reportes.';
       case 'familia':
         return 'Panel de familia. Consulta información académica de tu hijo/a y comunicaciones.';
@@ -69,7 +73,7 @@ const DashboardScreen = ({ navigation }: any) => {
         <Text style={styles.welcomeTitle}>{getWelcomeMessage()}</Text>
         <Text style={styles.userName}>{user?.displayName}</Text>
         <Text style={styles.userRole}>
-          {user?.role === 'admin'
+          {user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal'
             ? 'Administrador'
             : user?.role === 'familia'
             ? 'Familia'
@@ -84,7 +88,7 @@ const DashboardScreen = ({ navigation }: any) => {
 
       {/* Contenido según el rol */}
       <View style={styles.contentContainer}>
-        {user?.role === 'admin' && (
+        {(user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal') && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Panel de Administración</Text>
             <TouchableOpacity style={styles.menuItem}>
