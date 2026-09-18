@@ -84,7 +84,7 @@ const CommunicationsStackNavigator = () => {
 
 /**
  * FAMILIA TABS (2 tabs)
- * - Comunicaciones (recibe)
+ * - Mensajes (recibe)
  * - Perfil
  */
 const FamiliaTabNavigator = () => {
@@ -92,12 +92,25 @@ const FamiliaTabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#25D366',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: '#0c6b58',
+        tabBarInactiveTintColor: '#9a9a9a',
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopWidth: 1,
-          borderTopColor: '#eee',
+          borderTopColor: '#e2e2e2',
+          height: 75,
+          paddingTop: 8,
+          paddingBottom: 10,
+        },
+        tabBarItemStyle: {
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+          marginTop: 4,
+          paddingBottom: 0,
         },
       }}
     >
@@ -105,8 +118,8 @@ const FamiliaTabNavigator = () => {
         name="ComunicacionesRecibidas"
         component={CommunicationsStackNavigator}
         options={{
-          title: 'Comunicaciones',
-          tabBarLabel: '💬 Comunicaciones',
+          title: 'Mensajes',
+          tabBarLabel: '💬 Mensajes',
           tabBarIcon: () => null,
         }}
       />
@@ -130,8 +143,9 @@ const FamiliaTabNavigator = () => {
 /**
  * ADMIN TABS (4 tabs)
  * - Comunicaciones (envía)
+ * - Salas
  * - Historial
- * - CRUD de Usuarios
+ * - Usuarios
  * - Perfil
  */
 const AdminTabNavigator = () => {
@@ -145,6 +159,9 @@ const AdminTabNavigator = () => {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#eee',
+          height: 75,
+          paddingTop: 8,
+          paddingBottom: 10,
         },
       }}
       initialRouteName="HistorialAdmin"
@@ -231,6 +248,9 @@ const PreceptorTabNavigator = () => {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#eee',
+          height: 75,
+          paddingTop: 8,
+          paddingBottom: 10,
         },
       }}
       initialRouteName="HistorialPreceptor"

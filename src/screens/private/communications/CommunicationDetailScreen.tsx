@@ -201,13 +201,6 @@ export const CommunicationDetailScreen = () => {
         )}
       </ScrollView>
 
-      {/* Stats */}
-      <View style={styles.statsBar}>
-        <Text style={styles.statsText}>
-          📊 Entregados: {communication.deliveredCount}/{communication.totalUsers}
-        </Text>
-      </View>
-
       {/* Edit Modal */}
       <Modal
         visible={showEditModal}

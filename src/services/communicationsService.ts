@@ -20,7 +20,7 @@ function getUserIdFromStore(store: any): string {
 }
 
 /**
- * Enviar comunicación a TODOS los usuarios
+ * Enviar comunicación a usuarios (todos o lista específica)
  */
 export async function sendCommunicationToAll(
   params: {
@@ -29,10 +29,12 @@ export async function sendCommunicationToAll(
     description?: string;
     data?: Record<string, string>;
   },
-  store: any
+  store: any,
+  targetUserIds?: string[]
 ): Promise<any> {
   try {
-    console.log('📤 Enviando comunicación a todos...');
+    const isSpecificUsers = targetUserIds && targetUserIds.length > 0;
+    console.log(`📤 Enviando comunicación ${isSpecificUsers ? `a ${targetUserIds.length} usuarios específicos` : 'a todos'}...`);
 
     const response = await fetch(
       `${CLOUD_FUNCTION_URL}/sendCommunicationToAll`,
@@ -44,6 +46,7 @@ export async function sendCommunicationToAll(
         body: JSON.stringify({
           ...params,
           userId: getUserIdFromStore(store),
+          targetUserIds: targetUserIds,
         }),
       }
     );

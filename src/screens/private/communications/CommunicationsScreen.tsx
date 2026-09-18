@@ -15,6 +15,8 @@ import { RootState } from '@/redux/store';
 import { store } from '@/redux/store';
 import { sendCommunicationToAll } from '@/services/communicationsService';
 import { Communication } from '@/services/firebase/communications';
+import { getSalaUsers } from '@/services/firebase/salas';
+import { getUser } from '@/services/firebase/users';
 import { styles } from './styles';
 
 /**
@@ -107,6 +109,15 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     try {
       console.log('📤 Enviando comunicación a nivel:', selectedLevel);
 
+      let targetUserIds: string[] | undefined;
+
+      // Si es nivel específico (no 'todos'), obtener usuarios de esa sala
+      if (selectedLevel !== 'todos') {
+        const salaUserIds = await getSalaUsers(selectedLevel as any);
+        targetUserIds = salaUserIds;
+        console.log(`📍 Usuarios en sala ${selectedLevel}:`, salaUserIds.length);
+      }
+
       const result = await sendCommunicationToAll(
         {
           title: title.trim(),
@@ -118,7 +129,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             timestamp: new Date().toISOString(),
           },
         },
-        store
+        store,
+        targetUserIds
       );
 
       console.log('✅ Comunicación enviada:', result);
@@ -209,7 +221,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
                     style={[styles.levelSwatch, { backgroundColor: level.color }]}
                   />
                   <Text style={styles.bubbleText}>{level.label}</Text>
-                  <Text style={styles.chevron}>▼</Text>
+                  <Text style={styles.chevron}>{selectedLevel === level.id ? '✓' : ''}</Text>
                 </View>
               </View>
             </TouchableOpacity>

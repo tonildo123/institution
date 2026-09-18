@@ -4,6 +4,7 @@
  */
 
 import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
@@ -41,14 +42,15 @@ export const sendCommunicationToAll = functions.https.onRequest(
     }
 
     try {
-      const { title, body, description, data: additionalData, userId } = req.body;
+      const { title, body, description, data: additionalData, userId, targetUserIds } = req.body;
 
       if (!title || !body || !userId) {
         res.status(400).json({ error: 'title, body y userId requeridos' });
         return;
       }
 
-      console.log('📤 Enviando comunicación a todos...');
+      const isTargetedSend = targetUserIds && targetUserIds.length > 0;
+      console.log(`📤 Enviando comunicación ${isTargetedSend ? `a ${targetUserIds.length} usuarios específicos` : 'a todos'}...`);
 
       const communicationRef = db.collection(COLLECTIONS.COMMUNICATIONS).doc();
       const now = new Date().toISOString();
@@ -69,7 +71,17 @@ export const sendCommunicationToAll = functions.https.onRequest(
         updatedAt: now,
       });
 
-      const usersSnapshot = await db.collection(COLLECTIONS.USERS).get();
+      // Obtener usuarios: si hay targetUserIds, filtrar; si no, obtener todos
+      let usersSnapshot;
+      if (isTargetedSend) {
+        // Obtener solo los usuarios específicos
+        usersSnapshot = await db.collection(COLLECTIONS.USERS)
+          .where(admin.firestore.FieldPath.documentId(), 'in', targetUserIds)
+          .get();
+      } else {
+        // Obtener todos los usuarios
+        usersSnapshot = await db.collection(COLLECTIONS.USERS).get();
+      }
       let successCount = 0;
       let failCount = 0;
       const invalidTokens: any[] = [];
