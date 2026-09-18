@@ -361,6 +361,44 @@ VITE_APP_NAME=Instituto
 ✅ Formulario dinámico según rol
 ✅ Estadísticas en tiempo real
 
+### Cloud Functions (Firebase)
+- **Ubicación**: `functions/src/index.ts`
+- **Runtime**: v1 gen 1 con `onRequest`
+- **CORS**: Manual headers en `setCORS()`
+
+#### Funciones disponibles:
+
+1. **`sendCommunicationToAll`** (HTTP)
+   - Envía notificación a TODOS los usuarios
+   - Parámetros: `title`, `body`, `description`, `data`, `userId`
+   - Respuesta: `{success, communicationId, totalUsers, delivered, failed}`
+   - Guardado: Crea documento en `communications` collection
+
+2. **`sendCommunicationToUsers`** (HTTP) — **NUEVA**
+   - Envía notificación a usuarios específicos (por sala/nivel)
+   - Parámetros: `title`, `body`, `description`, `data`, `userId`, `userIds` (array)
+   - Respuesta: Igual a `sendCommunicationToAll`
+   - Query: `.where(documentId(), 'in', userIds)` para filtrar
+
+3. **`healthCheck`** (HTTP)
+   - Verifica estado de Cloud Functions
+   - Respuesta: `{status: 'ok', timestamp, message}`
+
+#### Salas (Niveles)
+- **Colección**: `salas` en Firestore
+- **Documentos**: `inicial`, `primario`, `secundario`
+- **Estructura**: `{level: string, users: string[]}`
+- **Servicio**: `src/services/firebase/salas.ts`
+  - `getSalaUsers(level)` — obtiene array de IDs de usuarios en una sala
+  - `addUserToSala(level, userId)` — agrega usuario a una sala
+  - `removeUserFromSala(level, userId)` — remueve usuario de una sala
+
+#### Flujo de Comunicaciones:
+1. **CommunicationsScreen** obtiene el nivel seleccionado (`inicial`, `primario`, `secundario`, `todos`)
+2. Si no es `todos`: llama `getSalaUsers(selectedLevel)` para obtener los IDs
+3. Llama `sendCommunicationToAll()` si es `todos`, o `sendCommunicationToUsers(userIds)` si es específico
+4. Cloud Function envía notificaciones push vía FCM a los usuarios
+
 ---
 
 ## 🛠️ Tecnologías y Dependencias

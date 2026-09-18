@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { RootState } from '@/redux/store';
 import { store } from '@/redux/store';
-import { sendCommunicationToAll } from '@/services/communicationsService';
+import { sendCommunicationToAll, sendCommunicationToUsers } from '@/services/communicationsService';
 import { Communication } from '@/services/firebase/communications';
 import { getSalaUsers } from '@/services/firebase/salas';
 import { getUser } from '@/services/firebase/users';
@@ -115,23 +115,33 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       if (selectedLevel !== 'todos') {
         const salaUserIds = await getSalaUsers(selectedLevel as any);
         targetUserIds = salaUserIds;
-        console.log(`📍 Usuarios en sala ${selectedLevel}:`, salaUserIds.length);
+        console.log(`📍 Usuarios en sala ${selectedLevel}:`, salaUserIds);
+        console.log(`📊 Total usuarios en sala: ${salaUserIds.length}`);
+      } else {
+        console.log('📡 Enviando a TODOS los usuarios');
       }
 
-      const result = await sendCommunicationToAll(
-        {
-          title: title.trim(),
-          body: description.trim(),
-          description: description.trim(),
-          data: {
-            type: 'communication',
-            level: selectedLevel,
-            timestamp: new Date().toISOString(),
-          },
+      console.log('🔹 targetUserIds que se enviará:', targetUserIds);
+
+      const messagePayload = {
+        title: title.trim(),
+        body: description.trim(),
+        description: description.trim(),
+        data: {
+          type: 'communication',
+          level: selectedLevel,
+          timestamp: new Date().toISOString(),
         },
-        store,
-        targetUserIds
-      );
+      };
+
+      let result;
+      if (selectedLevel === 'todos') {
+        // Enviar a TODOS
+        result = await sendCommunicationToAll(messagePayload, store);
+      } else {
+        // Enviar a usuarios específicos
+        result = await sendCommunicationToUsers(messagePayload, store, targetUserIds!);
+      }
 
       console.log('✅ Comunicación enviada:', result);
 

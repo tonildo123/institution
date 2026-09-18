@@ -20,7 +20,7 @@ function getUserIdFromStore(store: any): string {
 }
 
 /**
- * Enviar comunicación a usuarios (todos o lista específica)
+ * Enviar comunicación a TODOS los usuarios
  */
 export async function sendCommunicationToAll(
   params: {
@@ -29,12 +29,10 @@ export async function sendCommunicationToAll(
     description?: string;
     data?: Record<string, string>;
   },
-  store: any,
-  targetUserIds?: string[]
+  store: any
 ): Promise<any> {
   try {
-    const isSpecificUsers = targetUserIds && targetUserIds.length > 0;
-    console.log(`📤 Enviando comunicación ${isSpecificUsers ? `a ${targetUserIds.length} usuarios específicos` : 'a todos'}...`);
+    console.log('📤 Enviando comunicación a TODOS los usuarios...');
 
     const response = await fetch(
       `${CLOUD_FUNCTION_URL}/sendCommunicationToAll`,
@@ -46,7 +44,51 @@ export async function sendCommunicationToAll(
         body: JSON.stringify({
           ...params,
           userId: getUserIdFromStore(store),
-          targetUserIds: targetUserIds,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    console.log('✅ Resultado:', result);
+    return result;
+  } catch (error: any) {
+    console.error('❌ Error al enviar comunicación:', error);
+    throw error;
+  }
+}
+
+/**
+ * Enviar comunicación a usuarios específicos
+ */
+export async function sendCommunicationToUsers(
+  params: {
+    title: string;
+    body: string;
+    description?: string;
+    data?: Record<string, string>;
+  },
+  store: any,
+  userIds: string[]
+): Promise<any> {
+  try {
+    console.log(`📤 Enviando comunicación a ${userIds.length} usuarios específicos...`);
+
+    const response = await fetch(
+      `${CLOUD_FUNCTION_URL}/sendCommunicationToUsers`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...params,
+          userId: getUserIdFromStore(store),
+          userIds: userIds,
         }),
       }
     );
