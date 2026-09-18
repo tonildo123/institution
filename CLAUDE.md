@@ -399,6 +399,34 @@ VITE_APP_NAME=Instituto
 3. Llama `sendCommunicationToAll()` si es `todos`, o `sendCommunicationToUsers(userIds)` si es específico
 4. Cloud Function envía notificaciones push vía FCM a los usuarios
 
+#### Deployment de Cloud Functions:
+**Ubicación**: `functions/` directory
+
+**Pasos para deploy:**
+1. Editar código en `functions/src/index.ts`
+2. Compilar TypeScript:
+   ```bash
+   cd functions && npx tsc
+   ```
+3. Deploy a Firebase:
+   ```bash
+   npm run deploy
+   ```
+   O forzar si hay problemas de caché:
+   ```bash
+   rm -rf lib && npx tsc && npm run deploy
+   ```
+
+**Ver logs:**
+```bash
+firebase functions:log
+```
+
+**Importante**: Usar siempre la API modular de firebase-admin para consistencia:
+- ✅ `import { getFirestore, FieldPath } from 'firebase-admin/firestore'`
+- ✅ `import { getMessaging } from 'firebase-admin/messaging'`
+- ❌ No mezclar con `import * as admin` (puede causar undefined references)
+
 ---
 
 ## 🛠️ Tecnologías y Dependencias
