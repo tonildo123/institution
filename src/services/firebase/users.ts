@@ -45,12 +45,27 @@ export const createUser = async (
       isEnabled: credentials.isEnabled ?? true,
     };
 
-    await setDoc(doc(db, USERS_COLLECTION, userId), {
-      ...userData,
+    const dataToSave: any = {
+      displayName: userData.displayName,
+      role: userData.role,
       createdAt: Timestamp.fromDate(now),
       updatedAt: Timestamp.fromDate(now),
-      enabledAt: credentials.isEnabled ? Timestamp.fromDate(now) : null,
-    });
+      pushTokens: [],
+      isEnabled: userData.isEnabled,
+    };
+
+    // Solo agregar campos opcionales si existen
+    if (credentials.email) {
+      dataToSave.email = credentials.email;
+    }
+    if (credentials.dni) {
+      dataToSave.dni = credentials.dni;
+    }
+    if (credentials.isEnabled) {
+      dataToSave.enabledAt = Timestamp.fromDate(now);
+    }
+
+    await setDoc(doc(db, USERS_COLLECTION, userId), dataToSave);
 
     return userData;
   } catch (error: any) {

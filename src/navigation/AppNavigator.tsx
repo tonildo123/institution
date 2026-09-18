@@ -8,6 +8,7 @@ import { ProfileScreen } from '@/screens/private/profile/ProfileScreen';
 import { HistoryScreen } from '@/screens/private/history/HistoryScreen';
 import { CommunicationDetailScreen } from '@/screens/private/communications/CommunicationDetailScreen';
 import { UsersManagementScreen } from '@/screens/private/users/UsersManagementScreen';
+import { SalasScreen } from '@/screens/private/salas/SalasScreen';
 import { ScreenWrapper } from '@/components/ScreenWrapper';
 
 /**
@@ -158,6 +159,19 @@ const AdminTabNavigator = () => {
         options={{
           title: 'Comunicaciones',
           tabBarLabel: '📤 Enviar',
+          tabBarIcon: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="Salas"
+        component={() => (
+          <ScreenWrapper>
+            <SalasScreen />
+          </ScreenWrapper>
+        )}
+        options={{
+          title: 'Salas',
+          tabBarLabel: '🏫 Salas',
           tabBarIcon: () => null,
         }}
       />
