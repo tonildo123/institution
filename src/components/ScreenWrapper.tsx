@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, ViewStyle } from 'react-native';
+import { ViewStyle } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 /**
  * Wrapper para todas las screens
- * Agrega marginTop: 40 de forma consistente
+ * Respeta el área segura superior y lateral; el navegador de tabs reserva la inferior.
  */
 
 interface ScreenWrapperProps {
@@ -15,19 +16,18 @@ interface ScreenWrapperProps {
 export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
   children,
   style,
-  scrollable = false,
 }) => {
   return (
-    <View
+    <SafeAreaView
+      edges={['top', 'left', 'right']}
       style={[
         {
           flex: 1,
-          marginTop: 40,
         },
         style,
       ]}
     >
       {children}
-    </View>
+    </SafeAreaView>
   );
 };

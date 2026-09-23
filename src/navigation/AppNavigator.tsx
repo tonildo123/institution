@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
@@ -88,6 +89,8 @@ const CommunicationsStackNavigator = () => {
  * - Perfil
  */
 const FamiliaTabNavigator = () => {
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Math.max(insets.bottom, 10);
   return (
     <Tab.Navigator
       screenOptions={{
@@ -98,9 +101,9 @@ const FamiliaTabNavigator = () => {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#e2e2e2',
-          height: 75,
+          height: 65 + bottomPadding,
           paddingTop: 8,
-          paddingBottom: 10,
+          paddingBottom: bottomPadding,
         },
         tabBarItemStyle: {
           justifyContent: 'center',
@@ -149,6 +152,8 @@ const FamiliaTabNavigator = () => {
  * - Perfil
  */
 const AdminTabNavigator = () => {
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Math.max(insets.bottom, 10);
   return (
     <Tab.Navigator
       screenOptions={{
@@ -159,9 +164,9 @@ const AdminTabNavigator = () => {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#eee',
-          height: 75,
+          height: 65 + bottomPadding,
           paddingTop: 8,
-          paddingBottom: 10,
+          paddingBottom: bottomPadding,
         },
       }}
       initialRouteName="HistorialAdmin"
@@ -238,6 +243,8 @@ const AdminTabNavigator = () => {
  * - Perfil
  */
 const PreceptorTabNavigator = () => {
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Math.max(insets.bottom, 10);
   return (
     <Tab.Navigator
       screenOptions={{
@@ -248,9 +255,9 @@ const PreceptorTabNavigator = () => {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#eee',
-          height: 75,
+          height: 65 + bottomPadding,
           paddingTop: 8,
-          paddingBottom: 10,
+          paddingBottom: bottomPadding,
         },
       }}
       initialRouteName="HistorialPreceptor"

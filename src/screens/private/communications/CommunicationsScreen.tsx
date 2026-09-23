@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -59,28 +59,6 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       attachment: '📄',
     },
   ]);
-
-  // Ocultar tabs cuando es type='send'
-  useEffect(() => {
-    const parent = navigation.getParent();
-
-    if (type === 'send' && parent) {
-      console.log('🔍 Ocultando tabs para CommunicationsScreen');
-      parent.setOptions({
-        tabBarStyle: { height: 0 },
-      });
-    } else if (parent) {
-      console.log('🔍 Mostrando tabs');
-      parent.setOptions({
-        tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 1,
-          borderTopColor: '#eee',
-          height: 60,
-        },
-      });
-    }
-  }, [type, navigation]);
 
   // Determinar pantalla de historial según rol
   const getHistorialRouteName = () => {
@@ -197,21 +175,6 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         {/* Header */}
         <View style={styles.chatHeader}>
           <TouchableOpacity onPress={() => {
-            const parent = navigation.getParent();
-
-            // Restaurar tabs
-            if (parent) {
-              parent.setOptions({
-                tabBarStyle: {
-                  backgroundColor: '#fff',
-                  borderTopWidth: 1,
-                  borderTopColor: '#eee',
-                  display: 'flex',
-                },
-              });
-            }
-
-            // Volver atrás
             navigation.goBack();
           }}>
             <Text style={styles.headerBackArrow}>←</Text>
