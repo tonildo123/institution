@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,11 @@ import {
   FlatList,
   Alert,
   ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { RootState } from '@/redux/store';
@@ -34,6 +38,20 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 }) => {
   const user = useSelector((state: RootState) => state.auth.user);
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const messageScrollRef = useRef<ScrollView>(null);
+  const descriptionFocused = useRef(false);
+  const keepMessageVisible = useCallback(() => {
+    if (descriptionFocused.current) {
+      messageScrollRef.current?.scrollToEnd({ animated: true });
+    }
+  }, []);
+
+  useEffect(() => {
+    const subscription = Keyboard.addListener('keyboardDidShow', keepMessageVisible);
+    return () => subscription.remove();
+  }, [keepMessageVisible]);
+
   const [selectedLevel, setSelectedLevel] = useState<SalaLevel | 'todos'>('todos');
   const [selectedCurso, setSelectedCurso] = useState<string | undefined>();
   const [managingCourse, setManagingCourse] = useState(false);
@@ -171,7 +189,11 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
   if (type === 'send') {
     return (
-      <View style={styles.chatContainerWithHeader}>
+      <KeyboardAvoidingView
+        style={styles.chatContainerWithHeader}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={insets.top}
+      >
         {/* Header */}
         <View style={styles.chatHeader}>
           <TouchableOpacity onPress={() => {
@@ -203,7 +225,14 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         </View>
 
         {/* Chat Area */}
-        <ScrollView style={styles.chatMessages} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          ref={messageScrollRef}
+          style={styles.chatMessages}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          onLayout={keepMessageVisible}
+          onContentSizeChange={keepMessageVisible}
+        >
           {/* User message: Elegir destinatario */}
           <View style={styles.messageRow}>
             <View style={[styles.chatBubble, styles.sentBubble]}>
@@ -284,6 +313,11 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           <View style={styles.messageRow}>
             <TextInput
               style={styles.descriptionInputBubble}
+              onFocus={() => {
+                descriptionFocused.current = true;
+                keepMessageVisible();
+              }}
+              onBlur={() => { descriptionFocused.current = false; }}
               placeholder="Contenido del mensaje..."
               placeholderTextColor="#999"
               value={description}
@@ -315,7 +349,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 
