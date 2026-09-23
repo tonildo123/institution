@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator, BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { CommunicationsScreen } from '@/screens/private/communications/CommunicationsScreen';
@@ -20,6 +20,19 @@ import { ScreenWrapper } from '@/components/ScreenWrapper';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+// Los emojis ya forman parte de la etiqueta: no reservar una fila de icono vacía.
+const centeredTabOptions: BottomTabNavigationOptions = {
+  tabBarLabelPosition: 'beside-icon',
+  tabBarIconStyle: { display: 'none' },
+  tabBarItemStyle: { justifyContent: 'center', alignItems: 'center' },
+  tabBarLabelStyle: {
+    fontSize: 12,
+    fontWeight: '500',
+    lineHeight: 20,
+    margin: 0,
+  },
+};
 
 /**
  * History Stack Navigator
@@ -95,6 +108,7 @@ const FamiliaTabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+        ...centeredTabOptions,
         tabBarActiveTintColor: '#0c6b58',
         tabBarInactiveTintColor: '#9a9a9a',
         tabBarStyle: {
@@ -104,16 +118,6 @@ const FamiliaTabNavigator = () => {
           height: 65 + bottomPadding,
           paddingTop: 8,
           paddingBottom: bottomPadding,
-        },
-        tabBarItemStyle: {
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-          marginTop: 4,
-          paddingBottom: 0,
         },
       }}
     >
@@ -158,6 +162,7 @@ const AdminTabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+        ...centeredTabOptions,
         tabBarActiveTintColor: '#FF3B30',
         tabBarInactiveTintColor: '#999',
         tabBarStyle: {
@@ -249,6 +254,7 @@ const PreceptorTabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+        ...centeredTabOptions,
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#999',
         tabBarStyle: {
