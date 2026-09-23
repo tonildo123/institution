@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Text, TextInput, TextInputProps } from 'react-native';
 
 interface Character { text: string; bold: boolean }
@@ -38,20 +38,36 @@ const runsFor = (chars: Character[]) => {
   return runs;
 };
 
-export const BoldMessageInput = ({ onMessageChange, ...props }: Omit<TextInputProps, 'value' | 'onChangeText' | 'children'> & { onMessageChange: (message: string) => void }) => {
+export interface BoldMessageInputHandle { insertEmoji: (emoji: string) => void }
+
+export const BoldMessageInput = forwardRef<BoldMessageInputHandle, Omit<TextInputProps, 'value' | 'onChangeText' | 'children'> & { onMessageChange: (message: string) => void }>(function BoldMessageInput({ onMessageChange, ...props }: Omit<TextInputProps, 'value' | 'onChangeText' | 'children'> & { onMessageChange: (message: string) => void }, ref) {
   const [chars, setChars] = useState<Character[]>([]);
   const [selection, setSelection] = useState<{ start: number; end: number }>();
+  const cursorRef = useRef({ start: 0, end: 0 });
+  useImperativeHandle(ref, () => ({
+    insertEmoji: emoji => {
+      const { start, end } = cursorRef.current;
+      if (chars.length - (end - start) + emoji.length > (props.maxLength ?? Infinity)) return;
+      const next = [...chars.slice(0, start), ...emoji.split('').map(text => ({ text, bold: false })), ...chars.slice(end)];
+      const cursor = { start: start + emoji.length, end: start + emoji.length };
+      cursorRef.current = cursor;
+      setSelection(cursor);
+      setChars(next);
+      onMessageChange(runsFor(next).map(run => run.bold ? `**${run.text}**` : run.text).join(''));
+    },
+  }));
   return (
     <TextInput {...props}
       selection={selection}
-      onSelectionChange={() => setSelection(undefined)}
+      onSelectionChange={event => { cursorRef.current = event.nativeEvent.selection; setSelection(undefined); }}
       onChangeText={text => {
         const result = updateBoldText(chars, text);
         setChars(result.chars);
+        cursorRef.current = { start: result.cursor, end: result.cursor };
         if (result.transformed) setSelection({ start: result.cursor, end: result.cursor });
         onMessageChange(runsFor(result.chars).map(run => run.bold ? `**${run.text}**` : run.text).join(''));
       }}>
       <Text>{runsFor(chars).map((run, index) => <Text key={index} style={{ fontWeight: run.bold ? '700' : '400' }}>{run.text}</Text>)}</Text>
     </TextInput>
   );
-};
+});

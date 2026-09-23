@@ -1,6 +1,10 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  messageComposer: { flexDirection: 'row', alignItems: 'center', marginBottom: 40 },
+  composerInput: { flex: 1, minWidth: 0 },
+  composerIconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  composerIcon: { fontSize: 28, color: '#0c6b58' },
   formatHint: { fontSize: 12, color: '#59645E', marginHorizontal: 12, marginBottom: 6 },
   formatPreview: { padding: 12, marginBottom: 8, backgroundColor: '#fff', borderRadius: 8 },
   previewText: { fontSize: 15, lineHeight: 21, color: '#111' },

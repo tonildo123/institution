@@ -1,4 +1,5 @@
-import { BoldMessageInput } from '@/components/BoldMessageInput';
+import { EmojiPicker } from '@/components/EmojiPicker';
+import { BoldMessageInput, BoldMessageInputHandle } from '@/components/BoldMessageInput';
 import { MessageText } from '@/components/MessageText';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
@@ -41,6 +42,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const user = useSelector((state: RootState) => state.auth.user);
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const messageInputRef = useRef<BoldMessageInputHandle>(null);
+  const [showEmojis, setShowEmojis] = useState(false);
   const messageScrollRef = useRef<ScrollView>(null);
   const descriptionFocused = useRef(false);
   const keepMessageVisible = useCallback(() => {
@@ -315,10 +318,18 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
           
           {/* Input Field: Description */}
-          <View style={[styles.messageRow, { marginBottom: 40 }]}>
+          <View style={styles.messageComposer}>
+            <TouchableOpacity
+              accessibilityRole="button" accessibilityLabel="Agregar emoji"
+              disabled={loading}
+              style={styles.composerIconButton}
+              onPress={() => { Keyboard.dismiss(); setShowEmojis(true); }}>
+              <Text style={styles.composerIcon}>☺</Text>
+            </TouchableOpacity>
             <BoldMessageInput
+              ref={messageInputRef}
               key={messageInputKey}
-              style={styles.descriptionInputBubble}
+              style={[styles.descriptionInputBubble, styles.composerInput]}
               onFocus={() => {
                 descriptionFocused.current = true;
                 keepMessageVisible();
@@ -332,8 +343,18 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
               maxLength={2000}
               editable={!loading}
             />
+            <TouchableOpacity
+              style={styles.composerIconButton}
+              accessibilityRole="button"
+              accessibilityLabel="Más opciones"
+              accessibilityState={{ disabled: true }}
+              disabled>
+              <Text style={styles.composerIcon}>+</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
+
+        {showEmojis && <EmojiPicker onSelect={emoji => messageInputRef.current?.insertEmoji(emoji)} onClose={() => setShowEmojis(false)} />}
 
         {managingCourse && selectedLevel !== 'todos' && selectedCurso && (
           <FamiliasModal level={selectedLevel} cursoId={selectedCurso}
