@@ -186,7 +186,7 @@ const AdminTabNavigator = () => {
         )}
         options={{
           title: 'Comunicaciones',
-          tabBarLabel: 'Enviar',
+          tabBarLabel: 'Mensaje',
           tabBarIcon: ({ color }) => <TabIcon name="mail" color={color} />,
         }}
       />
@@ -278,7 +278,7 @@ const PreceptorTabNavigator = () => {
         )}
         options={{
           title: 'Comunicaciones',
-          tabBarLabel: 'Enviar',
+          tabBarLabel: 'Mensaje',
           tabBarIcon: ({ color }) => <TabIcon name="mail" color={color} />,
         }}
       />

@@ -1,3 +1,4 @@
+// @refresh reset
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -11,6 +12,7 @@ import {
 } from 'react-native';
 import { getAllUsers, createUser, updateUser, deleteUser } from '@/services/firebase/users';
 import { User, CreateUserCredentials } from '@/types';
+import { useNavigation } from '@react-navigation/native';
 import { styles } from './styles';
 
 /**
@@ -19,6 +21,8 @@ import { styles } from './styles';
  */
 
 export const UsersManagementScreen = () => {
+  const navigation = useNavigation();
+  const [search, setSearch] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -59,7 +63,7 @@ export const UsersManagementScreen = () => {
       case 'preceptor':
         return '#007AFF';
       case 'familia':
-        return '#25D366';
+        return '#188334';
       case 'equipo directivo':
         return '#5856D6';
       case 'representante legal':
@@ -196,6 +200,11 @@ export const UsersManagementScreen = () => {
     }
   };
 
+  const term = search.trim().toLocaleLowerCase();
+  const filteredUsers = users.filter(user =>
+    [user.displayName, user.email, user.dni].some(value => value?.toLocaleLowerCase().includes(term)),
+  );
+
   if (loading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -209,6 +218,9 @@ export const UsersManagementScreen = () => {
     <View style={styles.container}>
       {/* Header con botón agregar */}
       <View style={styles.header}>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Volver" style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Text style={styles.backText}>‹</Text>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Gestión de Usuarios</Text>
         <TouchableOpacity
           style={styles.addButton}
@@ -261,15 +273,24 @@ export const UsersManagementScreen = () => {
         </View>
       </View>
 
+      <View style={styles.searchContainer}>
+        <View style={styles.searchIcon} accessible={false}>
+          <View style={styles.searchCircle} /><View style={styles.searchHandle} />
+        </View>
+        <TextInput style={styles.searchInput} placeholder="Buscar usuario" placeholderTextColor="#949BA5"
+          accessibilityLabel="Buscar usuario" value={search} onChangeText={setSearch} autoCapitalize="none" autoCorrect={false} />
+      </View>
+
       {/* Lista de usuarios */}
       <FlatList
-        data={users}
+        data={filteredUsers}
+        keyboardShouldPersistTaps="handled"
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.userCard}>
             <View style={styles.userInfo}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>👤</Text>
+                <View style={styles.avatarHead} /><View style={styles.avatarShoulders} />
               </View>
               <View style={styles.userDetails}>
                 <Text style={styles.userName}>{item.displayName}</Text>
@@ -301,7 +322,7 @@ export const UsersManagementScreen = () => {
                       style={[
                         styles.statusBadgeText,
                         {
-                          color: item.isEnabled ? '#25D366' : '#FF3B30',
+                          color: item.isEnabled ? '#188334' : '#FF3B30',
                         },
                       ]}
                     >
@@ -315,15 +336,21 @@ export const UsersManagementScreen = () => {
             <View style={styles.actions}>
               <TouchableOpacity
                 style={styles.actionButton}
+                disabled={saving}
+                accessibilityLabel={`Editar ${item.displayName}`}
+                accessibilityRole="button"
                 onPress={() => handleEdit(item)}
               >
-                <Text style={styles.actionButtonText}>✏️</Text>
+                <Text style={styles.actionButtonText}>✎</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.actionButton, styles.deleteButton]}
+                disabled={saving}
+                accessibilityLabel={`Eliminar ${item.displayName}`}
+                accessibilityRole="button"
                 onPress={() => handleDelete(item.id)}
               >
-                <Text style={styles.actionButtonText}>🗑️</Text>
+                <View accessible={false}><View style={styles.trashLid} /><View style={styles.trashBody} /></View>
               </TouchableOpacity>
             </View>
           </View>
@@ -331,7 +358,7 @@ export const UsersManagementScreen = () => {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={{ padding: 20, alignItems: 'center' }}>
-            <Text style={{ color: '#999' }}>No hay usuarios</Text>
+            <Text style={{ color: '#999' }}>{term ? 'No se encontraron usuarios' : 'No hay usuarios'}</Text>
           </View>
         }
       />

@@ -17,7 +17,7 @@ import { styles } from './detailStyles';
 
 /**
  * Pantalla de Detalle de Comunicación
- * Maquetado tipo chat con header rojo
+ * Maquetado tipo chat con header verde
  */
 
 export const CommunicationDetailScreen = () => {

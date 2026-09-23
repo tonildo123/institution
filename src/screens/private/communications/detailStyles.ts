@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
 
   // Header
   header: {
-    backgroundColor: '#d21f1a',
+    backgroundColor: '#0c6b58',
     paddingHorizontal: 16,
     paddingVertical: 18,
     flexDirection: 'row',

@@ -1,6 +1,16 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  header: { backgroundColor: '#0c6b58', paddingLeft: 16, paddingRight: 8, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: '#fff' },
+  searchButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  searchIcon: { width: 20, height: 20 },
+  searchCircle: { width: 13, height: 13, borderRadius: 7, borderWidth: 1.6, borderColor: '#fff' },
+  searchHandle: { position: 'absolute', left: 11, top: 13, width: 7, height: 1.6, backgroundColor: '#fff', transform: [{ rotate: '45deg' }] },
+  closeSearch: { fontSize: 28, color: '#fff' },
+  searchContainer: { paddingHorizontal: 16, paddingBottom: 12, backgroundColor: '#0c6b58' },
+  searchInput: { backgroundColor: '#fff', borderRadius: 22, paddingHorizontal: 16, paddingVertical: 10, minHeight: 44, fontSize: 14, color: '#202B3B' },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   container: {
     flex: 1,
     backgroundColor: '#f0f0f0',

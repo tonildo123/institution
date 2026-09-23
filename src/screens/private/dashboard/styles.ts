@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    backgroundColor: '#0c6b58',
     paddingHorizontal: 20,
     paddingVertical: 30,
     alignItems: 'center',

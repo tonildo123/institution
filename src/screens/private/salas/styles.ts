@@ -1,6 +1,9 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  header: { backgroundColor: '#0c6b58', paddingHorizontal: 16, paddingVertical: 16 },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: '#fff' },
+  headerSubtitle: { fontSize: 13, lineHeight: 19, color: '#E1F1EC', marginTop: 4 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   cursoButton: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff',

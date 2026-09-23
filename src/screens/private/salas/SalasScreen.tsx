@@ -15,7 +15,12 @@ export const SalasScreen = () => {
   const [target, setTarget] = useState<{ level: SalaLevel; cursoId?: string; label: string } | null>(null);
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Salas</Text>
+        <Text style={styles.headerSubtitle}>Seleccioná una sala o curso para agregar alumnos y familias</Text>
+      </View>
+      <ScrollView>
       <View style={styles.content}>
         {salas.map(sala => (
           <View key={sala.id}>
@@ -35,7 +40,8 @@ export const SalasScreen = () => {
           </View>
         ))}
       </View>
+      </ScrollView>
       {target && <FamiliasModal {...target} onClose={() => setTarget(null)} />}
-    </ScrollView>
+    </View>
   );
 };
