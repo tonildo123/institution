@@ -15,8 +15,8 @@ import { RootState } from '@/redux/store';
 import { store } from '@/redux/store';
 import { sendCommunicationToAll, sendCommunicationToUsers } from '@/services/communicationsService';
 import { Communication } from '@/services/firebase/communications';
-import { getSalaUsers } from '@/services/firebase/salas';
-import { getUser } from '@/services/firebase/users';
+import { getSalaUsers, getDestinatarios, SalaLevel } from '@/services/firebase/salas';
+import { FamiliasModal } from '@/components/salas/FamiliasModal';
 import { styles } from './styles';
 
 /**
@@ -34,7 +34,10 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 }) => {
   const user = useSelector((state: RootState) => state.auth.user);
   const navigation = useNavigation();
-  const [selectedLevel, setSelectedLevel] = useState<string>('todos');
+  const [selectedLevel, setSelectedLevel] = useState<SalaLevel | 'todos'>('todos');
+  const [selectedCurso, setSelectedCurso] = useState<string | undefined>();
+  const [managingCourse, setManagingCourse] = useState(false);
+  const cursos = selectedLevel === 'todos' ? [] : getDestinatarios(selectedLevel);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,7 +89,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     return 'HistorialFamilia';
   };
 
-  const levels = [
+  const levels: { id: SalaLevel | 'todos'; label: string; color: string }[] = [
     { id: 'inicial', label: 'NIVEL INICIAL', color: '#FF9500' },
     { id: 'primario', label: 'NIVEL PRIMARIO', color: '#25D366' },
     { id: 'secundario', label: 'NIVEL SECUNDARIO', color: '#007AFF' },
@@ -113,7 +116,11 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
       // Si es nivel específico (no 'todos'), obtener usuarios de esa sala
       if (selectedLevel !== 'todos') {
-        const salaUserIds = await getSalaUsers(selectedLevel as any);
+        const salaUserIds = await getSalaUsers(selectedLevel, selectedCurso);
+        if (salaUserIds.length === 0) {
+          Alert.alert('Sin destinatarios', 'Agregá familias al curso o nivel antes de enviar.');
+          return;
+        }
         targetUserIds = salaUserIds;
         console.log(`📍 Usuarios en sala ${selectedLevel}:`, salaUserIds);
         console.log(`📊 Total usuarios en sala: ${salaUserIds.length}`);
@@ -130,6 +137,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         data: {
           type: 'communication',
           level: selectedLevel,
+          ...(selectedCurso ? { cursoId: selectedCurso, cursoLabel: cursos.find(curso => curso.id === selectedCurso)!.label } : {}),
           timestamp: new Date().toISOString(),
         },
       };
@@ -154,6 +162,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       setTitle('');
       setDescription('');
       setSelectedLevel('todos');
+      setSelectedCurso(undefined);
     } catch (error: any) {
       console.error('❌ Error:', error);
       Alert.alert('Error', error.message || 'Error al enviar la comunicación');
@@ -161,6 +170,26 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       setLoading(false);
     }
   };
+
+  // Receive - Cargar desde Firestore
+  const [communications, setCommunications] = React.useState<Communication[]>([]);
+  const [loadingCommunications, setLoadingCommunications] = React.useState(true);
+
+  React.useEffect(() => {
+    const loadCommunicationsData = async () => {
+      try {
+        const { getAllCommunications } = await import('@/services/firebase/communications');
+        const data = await getAllCommunications();
+        setCommunications(data);
+        console.log('✅ Comunicaciones cargadas:', data.length);
+      } catch (error) {
+        console.error('❌ Error loading communications:', error);
+      } finally {
+        setLoadingCommunications(false);
+      }
+    };
+    if (type === 'receive') loadCommunicationsData();
+  }, [type]);
 
   if (type === 'send') {
     return (
@@ -223,7 +252,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           {levels.map((level) => (
             <TouchableOpacity
               key={level.id}
-              onPress={() => setSelectedLevel(level.id)}
+              disabled={loading}
+              onPress={() => { setSelectedLevel(level.id); setSelectedCurso(undefined); }}
             >
               <View style={styles.messageRow}>
                 <View style={[styles.chatBubble, styles.receivedBubble, { width: '90%' }]}>
@@ -236,6 +266,30 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
               </View>
             </TouchableOpacity>
           ))}
+
+          {cursos.length > 0 && (
+            <View>
+              {[{ id: undefined, label: 'TODO EL NIVEL' }, ...cursos].map(curso => (
+                <TouchableOpacity key={curso.id || 'nivel'} disabled={loading} onPress={() => setSelectedCurso(curso.id)}>
+                  <View style={styles.messageRow}>
+                    <View style={[styles.chatBubble, styles.receivedBubble]}>
+                      <Text style={styles.bubbleText}>{curso.label}</Text>
+                      <Text style={styles.chevron}>{selectedCurso === curso.id ? '✓' : ''}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+              {selectedCurso && !selectedCurso.startsWith('turno-') && (
+                <TouchableOpacity disabled={loading} onPress={() => setManagingCourse(true)}>
+                  <View style={styles.messageRow}>
+                    <View style={[styles.chatBubble, styles.receivedBubble]}>
+                      <Text style={styles.bubbleText}>+ Agregar / ver alumnos y familias</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
 
           {/* Input: Titulo del mensaje */}
           <View style={styles.messageRow}>
@@ -279,6 +333,12 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           </View>
         </ScrollView>
 
+        {managingCourse && selectedLevel !== 'todos' && selectedCurso && (
+          <FamiliasModal level={selectedLevel} cursoId={selectedCurso}
+            label={cursos.find(curso => curso.id === selectedCurso)!.label}
+            onClose={() => setManagingCourse(false)} />
+        )}
+
         {/* Send Button Bar */}
         <View style={styles.sendButtonBar}>
           <TouchableOpacity
@@ -295,26 +355,6 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       </View>
     );
   }
-
-  // Receive - Cargar desde Firestore
-  const [communications, setCommunications] = React.useState<Communication[]>([]);
-  const [loadingCommunications, setLoadingCommunications] = React.useState(true);
-
-  React.useEffect(() => {
-    const loadCommunicationsData = async () => {
-      try {
-        const { getAllCommunications } = await import('@/services/firebase/communications');
-        const data = await getAllCommunications();
-        setCommunications(data);
-        console.log('✅ Comunicaciones cargadas:', data.length);
-      } catch (error) {
-        console.error('❌ Error loading communications:', error);
-      } finally {
-        setLoadingCommunications(false);
-      }
-    };
-    loadCommunicationsData();
-  }, []);
 
   const getLevelColor = (level: string) => {
     const colors: { [key: string]: string } = {

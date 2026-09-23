@@ -1,6 +1,11 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+  cursoButton: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff',
+    marginTop: 8, marginLeft: 16, padding: 14, borderRadius: 8,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -66,6 +71,7 @@ export const styles = StyleSheet.create({
   },
 
   modalTitle: {
+    flex: 1,
     fontSize: 18,
     fontWeight: '700',
     color: '#1a1a1a',
