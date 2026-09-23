@@ -1,3 +1,4 @@
+import { MessageText } from '@/components/MessageText';
 import React, { useState } from 'react';
 import {
   View,
@@ -149,9 +150,9 @@ export const HistoryScreen = () => {
                 </Text>
               </View>
               <View style={styles.levelBottom}>
-                <Text style={styles.levelPreview} numberOfLines={1}>
+                <MessageText style={styles.levelPreview} numberOfLines={1}>
                   {item.description}
-                </Text>
+                </MessageText>
               </View>
             </View>
           </TouchableOpacity>

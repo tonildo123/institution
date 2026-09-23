@@ -1,6 +1,9 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  formatHint: { fontSize: 12, color: '#59645E', marginHorizontal: 12, marginBottom: 6 },
+  formatPreview: { padding: 12, marginBottom: 8, backgroundColor: '#fff', borderRadius: 8 },
+  previewText: { fontSize: 15, lineHeight: 21, color: '#111' },
   container: {
     
     flex: 1,

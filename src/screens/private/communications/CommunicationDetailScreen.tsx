@@ -1,3 +1,4 @@
+import { MessageText } from '@/components/MessageText';
 import React, { useState } from 'react';
 import {
   View,
@@ -186,7 +187,7 @@ export const CommunicationDetailScreen = () => {
       <ScrollView style={styles.chatArea}>
         {/* Notice Card */}
         <View style={styles.noticeCard}>
-          <Text style={styles.noticeContent}>{communication.description}</Text>
+          <MessageText style={styles.noticeContent}>{communication.description}</MessageText>
           <Text style={styles.leerMas}>Leer mas..</Text>
         </View>
 

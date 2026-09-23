@@ -1,3 +1,5 @@
+import { BoldMessageInput } from '@/components/BoldMessageInput';
+import { MessageText } from '@/components/MessageText';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
@@ -58,6 +60,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const cursos = selectedLevel === 'todos' ? [] : getDestinatarios(selectedLevel);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [messageInputKey, setMessageInputKey] = useState(0);
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -157,6 +160,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       // Limpiar campos
       setTitle('');
       setDescription('');
+      setMessageInputKey(key => key + 1);
       setSelectedLevel('todos');
       setSelectedCurso(undefined);
     } catch (error: any) {
@@ -309,9 +313,11 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             </View>
           </View>
 
+          
           {/* Input Field: Description */}
-          <View style={styles.messageRow}>
-            <TextInput
+          <View style={[styles.messageRow, { marginBottom: 40 }]}>
+            <BoldMessageInput
+              key={messageInputKey}
               style={styles.descriptionInputBubble}
               onFocus={() => {
                 descriptionFocused.current = true;
@@ -320,11 +326,10 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
               onBlur={() => { descriptionFocused.current = false; }}
               placeholder="Contenido del mensaje..."
               placeholderTextColor="#999"
-              value={description}
-              onChangeText={setDescription}
+              onMessageChange={setDescription}
               multiline
-              numberOfLines={4}
-              maxLength={1000}
+              numberOfLines={10}
+              maxLength={2000}
               editable={!loading}
             />
           </View>
@@ -416,9 +421,9 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
                 </Text>
               </View>
               <View style={styles.levelBottom}>
-                <Text style={styles.levelPreview} numberOfLines={1}>
+                <MessageText style={styles.levelPreview} numberOfLines={1}>
                   {item.description}
-                </Text>
+                </MessageText>
               </View>
             </View>
           </TouchableOpacity>
