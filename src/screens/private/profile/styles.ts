@@ -1,125 +1,26 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-  },
-
-  headerContainer: {
-    backgroundColor: '#fff',
-    paddingVertical: 24,
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#25D366',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-
-  avatarText: {
-    fontSize: 40,
-  },
-
-  name: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 4,
-  },
-
-  role: {
-    fontSize: 14,
-    color: '#25D366',
-    fontWeight: '600',
-  },
-
-  section: {
-    backgroundColor: '#fff',
-    marginTop: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 12,
-  },
-
-  infoItem: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-
-  infoLabel: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-
-  infoValue: {
-    fontSize: 14,
-    color: '#1a1a1a',
-    fontWeight: '500',
-  },
-
-  statusBadge: {
-    backgroundColor: '#f0f8f0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignSelf: 'flex-start',
-  },
-
-  statusText: {
-    fontSize: 13,
-    color: '#25D366',
-    fontWeight: '600',
-  },
-
-  button: {
-    backgroundColor: '#25D366',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginVertical: 8,
-    alignItems: 'center',
-  },
-
-  buttonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-
-  buttonSecondary: {
-    backgroundColor: '#007AFF',
-  },
-
-  buttonSecondaryText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-
-  buttonDanger: {
-    backgroundColor: '#ff3b30',
-  },
-
-  buttonDangerText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
+  container: { flex: 1, backgroundColor: '#ECE6DE' },
+  content: { paddingBottom: 28 },
+  headerContainer: { alignItems: 'center', paddingTop: 26, paddingBottom: 24, paddingHorizontal: 16 },
+  avatar: { width: 88, height: 88, borderRadius: 44, backgroundColor: '#36AA60', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  avatarHead: { width: 19, height: 19, borderRadius: 10, borderWidth: 3.5, borderColor: '#fff', marginBottom: 3 },
+  avatarShoulders: { width: 34, height: 16, borderTopLeftRadius: 17, borderTopRightRadius: 17, borderWidth: 3.5, borderBottomWidth: 0, borderColor: '#fff' },
+  name: { fontSize: 21, fontWeight: '700', color: '#202B3B', textAlign: 'center', marginBottom: 10 },
+  roleBadge: { borderRadius: 16, backgroundColor: '#FCE4E3', paddingHorizontal: 15, paddingVertical: 4 },
+  role: { fontSize: 12, fontWeight: '700', color: '#DE2026' },
+  section: { marginHorizontal: 16, marginBottom: 16 },
+  sectionTitle: { fontSize: 13, fontWeight: '700', letterSpacing: 0.4, color: '#8D8D95', marginBottom: 6, marginLeft: 4 },
+  card: { backgroundColor: '#fff', borderRadius: 15, overflow: 'hidden' },
+  infoItem: { paddingHorizontal: 16, paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+  infoLabel: { fontSize: 12, color: '#85858F', marginBottom: 2 },
+  infoValue: { fontSize: 15, fontWeight: '600', color: '#202B3B' },
+  statusText: { fontSize: 14, fontWeight: '600', color: '#188334' },
+  lastRow: { borderBottomWidth: 0 },
+  actionRow: { minHeight: 50, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+  actionIcon: { width: 24, marginRight: 9, fontSize: 22, color: '#536073', textAlign: 'center' },
+  actionText: { flex: 1, fontSize: 15, fontWeight: '500', color: '#202B3B' },
+  chevron: { fontSize: 22, color: '#C2C5CC', marginLeft: 8 },
+  dangerText: { color: '#FF2028' },
 });

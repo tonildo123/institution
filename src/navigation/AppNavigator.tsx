@@ -10,6 +10,7 @@ import { HistoryScreen } from '@/screens/private/history/HistoryScreen';
 import { CommunicationDetailScreen } from '@/screens/private/communications/CommunicationDetailScreen';
 import { UsersManagementScreen } from '@/screens/private/users/UsersManagementScreen';
 import { SalasScreen } from '@/screens/private/salas/SalasScreen';
+import { TabIcon } from '@/components/TabIcon';
 import { ScreenWrapper } from '@/components/ScreenWrapper';
 
 /**
@@ -21,15 +22,15 @@ import { ScreenWrapper } from '@/components/ScreenWrapper';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Los emojis ya forman parte de la etiqueta: no reservar una fila de icono vacía.
+// Mantener el ícono encima del texto en todos los tamaños de pantalla.
 const centeredTabOptions: BottomTabNavigationOptions = {
-  tabBarLabelPosition: 'beside-icon',
-  tabBarIconStyle: { display: 'none' },
+  tabBarLabelPosition: 'below-icon',
+  tabBarIconStyle: { width: 24, height: 24 },
   tabBarItemStyle: { justifyContent: 'center', alignItems: 'center' },
   tabBarLabelStyle: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
-    lineHeight: 20,
+    lineHeight: 16,
     margin: 0,
   },
 };
@@ -126,8 +127,8 @@ const FamiliaTabNavigator = () => {
         component={CommunicationsStackNavigator}
         options={{
           title: 'Mensajes',
-          tabBarLabel: '💬 Mensajes',
-          tabBarIcon: () => null,
+          tabBarLabel: 'Mensajes',
+          tabBarIcon: ({ color }) => <TabIcon name="mail" color={color} />,
         }}
       />
       <Tab.Screen
@@ -139,8 +140,8 @@ const FamiliaTabNavigator = () => {
         )}
         options={{
           title: 'Perfil',
-          tabBarLabel: '👤 Perfil',
-          tabBarIcon: () => null,
+          tabBarLabel: 'Perfil',
+          tabBarIcon: ({ color }) => <TabIcon name="profile" color={color} />,
         }}
       />
     </Tab.Navigator>
@@ -185,8 +186,8 @@ const AdminTabNavigator = () => {
         )}
         options={{
           title: 'Comunicaciones',
-          tabBarLabel: '📤 Enviar',
-          tabBarIcon: () => null,
+          tabBarLabel: 'Enviar',
+          tabBarIcon: ({ color }) => <TabIcon name="mail" color={color} />,
         }}
       />
       <Tab.Screen
@@ -198,8 +199,8 @@ const AdminTabNavigator = () => {
         )}
         options={{
           title: 'Salas',
-          tabBarLabel: '🏫 Salas',
-          tabBarIcon: () => null,
+          tabBarLabel: 'Salas',
+          tabBarIcon: ({ color }) => <TabIcon name="home" color={color} />,
         }}
       />
       <Tab.Screen
@@ -207,8 +208,8 @@ const AdminTabNavigator = () => {
         component={HistoryStackNavigator}
         options={{
           title: 'Historial',
-          tabBarLabel: '📜 Historial',
-          tabBarIcon: () => null,
+          tabBarLabel: 'Historial',
+          tabBarIcon: ({ color }) => <TabIcon name="clock" color={color} />,
         }}
       />
       <Tab.Screen
@@ -220,8 +221,8 @@ const AdminTabNavigator = () => {
         )}
         options={{
           title: 'Usuarios',
-          tabBarLabel: '👥 Usuarios',
-          tabBarIcon: () => null,
+          tabBarLabel: 'Usuarios',
+          tabBarIcon: ({ color }) => <TabIcon name="users" color={color} />,
         }}
       />
       <Tab.Screen
@@ -233,8 +234,8 @@ const AdminTabNavigator = () => {
         )}
         options={{
           title: 'Perfil',
-          tabBarLabel: '👤 Perfil',
-          tabBarIcon: () => null,
+          tabBarLabel: 'Perfil',
+          tabBarIcon: ({ color }) => <TabIcon name="profile" color={color} />,
         }}
       />
     </Tab.Navigator>
@@ -277,8 +278,8 @@ const PreceptorTabNavigator = () => {
         )}
         options={{
           title: 'Comunicaciones',
-          tabBarLabel: '📤 Enviar',
-          tabBarIcon: () => null,
+          tabBarLabel: 'Enviar',
+          tabBarIcon: ({ color }) => <TabIcon name="mail" color={color} />,
         }}
       />
       <Tab.Screen
@@ -286,8 +287,8 @@ const PreceptorTabNavigator = () => {
         component={HistoryStackNavigator}
         options={{
           title: 'Historial',
-          tabBarLabel: '📜 Historial',
-          tabBarIcon: () => null,
+          tabBarLabel: 'Historial',
+          tabBarIcon: ({ color }) => <TabIcon name="clock" color={color} />,
         }}
       />
       <Tab.Screen
@@ -299,8 +300,8 @@ const PreceptorTabNavigator = () => {
         )}
         options={{
           title: 'Perfil',
-          tabBarLabel: '👤 Perfil',
-          tabBarIcon: () => null,
+          tabBarLabel: 'Perfil',
+          tabBarIcon: ({ color }) => <TabIcon name="profile" color={color} />,
         }}
       />
     </Tab.Navigator>

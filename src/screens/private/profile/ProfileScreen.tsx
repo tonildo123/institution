@@ -40,85 +40,75 @@ export const ProfileScreen = () => {
     ]);
   };
 
+  const roleLabel = user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal'
+    ? 'Administrador' : user?.role === 'preceptor' ? 'Docente' : 'Familia';
+
   return (
-    <ScrollView style={styles.container}>
-      {/* Header con Avatar */}
-      <View style={styles.headerContainer}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>👤</Text>
-        </View>
-        <Text style={styles.name}>{user?.displayName || 'Usuario'}</Text>
-        <Text style={styles.role}>
-          {user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal'
-            ? 'Administrador'
-            : user?.role === 'preceptor'
-            ? 'Docente'
-            : 'Familia'}
-        </Text>
-      </View>
-
-      {/* Información del Usuario */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Información Personal</Text>
-
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Nombre Completo</Text>
-          <Text style={styles.infoValue}>{user?.displayName}</Text>
-        </View>
-
-        {user?.email && (
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Correo Electrónico</Text>
-            <Text style={styles.infoValue}>{user.email}</Text>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.headerContainer}>
+          <View style={styles.avatar} accessible={false}>
+            <View style={styles.avatarHead} />
+            <View style={styles.avatarShoulders} />
           </View>
-        )}
-
-        {user?.dni && (
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>DNI</Text>
-            <Text style={styles.infoValue}>{user.dni}</Text>
-          </View>
-        )}
-
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Rol</Text>
-          <Text style={styles.infoValue}>
-            {user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal'
-              ? 'Administrador'
-              : user?.role === 'preceptor'
-              ? 'Docente'
-              : 'Familia'}
-          </Text>
-        </View>
-
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Estado</Text>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>
-              {user?.isEnabled ? '✓ Activo' : '✗ Inactivo'}
-            </Text>
+          <Text style={styles.name}>{user?.displayName || 'Usuario'}</Text>
+          <View style={styles.roleBadge}>
+            <Text style={styles.role}>{roleLabel.toUpperCase()}</Text>
           </View>
         </View>
-      </View>
 
-      {/* Acciones */}
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>✏️ Editar Perfil</Text>
-        </TouchableOpacity>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>INFORMACIÓN PERSONAL</Text>
+          <View style={styles.card}>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Nombre completo</Text>
+              <Text style={styles.infoValue}>{user?.displayName}</Text>
+            </View>
+            {user?.email && (
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Correo electrónico</Text>
+                <Text style={styles.infoValue}>{user.email}</Text>
+              </View>
+            )}
+            {user?.dni && (
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>DNI</Text>
+                <Text style={styles.infoValue}>{user.dni}</Text>
+              </View>
+            )}
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Rol</Text>
+              <Text style={styles.infoValue}>{roleLabel}</Text>
+            </View>
+            <View style={[styles.infoItem, styles.lastRow]}>
+              <Text style={styles.infoLabel}>Estado</Text>
+              <Text style={[styles.statusText, !user?.isEnabled && styles.dangerText]}>
+                {user?.isEnabled ? '✓ Activo' : '✗ Inactivo'}
+              </Text>
+            </View>
+          </View>
+        </View>
 
-        <TouchableOpacity style={[styles.button, styles.buttonSecondary]}>
-          <Text style={styles.buttonSecondaryText}>🔐 Cambiar Contraseña</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.buttonDanger]}
-          onPress={handleLogout}
-        >
-          <Text style={styles.buttonDangerText}>🚪 Cerrar Sesión</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>CUENTA</Text>
+          <View style={styles.card}>
+            <TouchableOpacity style={styles.actionRow} accessibilityRole="button">
+              <Text style={styles.actionIcon} accessible={false}>✎</Text>
+              <Text style={styles.actionText}>Editar perfil</Text>
+              <Text style={styles.chevron} accessible={false}>›</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionRow} accessibilityRole="button">
+              <Text style={styles.actionIcon} accessible={false}>⚿</Text>
+              <Text style={styles.actionText}>Cambiar contraseña</Text>
+              <Text style={styles.chevron} accessible={false}>›</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionRow, styles.lastRow]} onPress={handleLogout} accessibilityRole="button">
+              <Text style={[styles.actionIcon, styles.dangerText]} accessible={false}>↪</Text>
+              <Text style={[styles.actionText, styles.dangerText]}>Cerrar sesión</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
-
