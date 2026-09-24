@@ -259,7 +259,9 @@ export const styles = StyleSheet.create({
   },
 
   sendButtonChatIcon: {
-    fontSize: 20,
+    width: 26,
+    height: 26,
+    tintColor: '#000',
   },
 
   sendButtonChatText: {

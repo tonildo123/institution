@@ -1,9 +1,11 @@
+import { AttachmentSheet } from '@/components/AttachmentSheet';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { BoldMessageInput, BoldMessageInputHandle } from '@/components/BoldMessageInput';
 import { MessageText } from '@/components/MessageText';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
+  Image,
   Text,
   ScrollView,
   TouchableOpacity,
@@ -44,6 +46,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const insets = useSafeAreaInsets();
   const messageInputRef = useRef<BoldMessageInputHandle>(null);
   const [showEmojis, setShowEmojis] = useState(false);
+  const [showAttachments, setShowAttachments] = useState(false);
   const messageScrollRef = useRef<ScrollView>(null);
   const descriptionFocused = useRef(false);
   const keepMessageVisible = useCallback(() => {
@@ -346,13 +349,15 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             <TouchableOpacity
               style={styles.composerIconButton}
               accessibilityRole="button"
-              accessibilityLabel="Más opciones"
-              accessibilityState={{ disabled: true }}
-              disabled>
+              accessibilityLabel="Adjuntar archivo"
+              disabled={loading}
+              onPress={() => { Keyboard.dismiss(); setShowAttachments(true); }}>
               <Text style={styles.composerIcon}>+</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
+
+        {showAttachments && <AttachmentSheet onClose={() => setShowAttachments(false)} />}
 
         {showEmojis && <EmojiPicker onSelect={emoji => messageInputRef.current?.insertEmoji(emoji)} onClose={() => setShowEmojis(false)} />}
 
@@ -369,7 +374,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             onPress={handleSend}
             disabled={loading}
           >
-            <Text style={styles.sendButtonChatIcon}>✈️</Text>
+            <Image source={require('../../../assets/icons/send-message.png')} style={styles.sendButtonChatIcon} resizeMode="contain" accessible={false} />
             <Text style={styles.sendButtonChatText}>
               {loading ? 'Enviando...' : 'Enviar'}
             </Text>
