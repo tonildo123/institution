@@ -19,12 +19,19 @@ cd ..
 
 ### Desplegar Functions
 
-```bash
-# Desplegar solo Cloud Functions
-firebase deploy --only functions
+La app usa `institucion-59d9a`. El alias de `.firebaserc` apunta a
+`institution-59d9a`, por lo que hay que indicar el proyecto explícitamente.
+Ejecutar desde la raíz del repositorio:
 
-# O desplegar todo (hosting + functions)
-firebase deploy
+```bash
+# Compilar TypeScript: el despliegue usa functions/lib/index.js
+npm --prefix functions run build
+
+# Desplegar solo Cloud Functions
+firebase deploy --only functions --project institucion-59d9a
+
+# Publicar únicamente cambios de comunicaciones
+firebase deploy --only functions:sendCommunicationToAll,functions:sendCommunicationToUsers --project institucion-59d9a
 ```
 
 ### Probar Functions Localmente

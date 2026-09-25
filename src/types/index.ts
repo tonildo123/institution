@@ -34,6 +34,9 @@ export interface User {
     savedAt: string;         // Fecha en ISO string (cuándo se registró)
   }>;
 
+  assignedLevels?: Array<'inicial' | 'primario' | 'secundario'>;
+  assignedCursos?: string[];
+
   // Metadata
   isEnabled: boolean;    // Cuenta habilitada/deshabilitada
   lastLogin?: Date | string;

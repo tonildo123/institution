@@ -6,7 +6,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
-import { getFirestore, FieldPath } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 
 // Inicializar Firebase Admin
@@ -52,7 +52,13 @@ export const sendCommunicationToAll = functions.https.onRequest(
       const communicationRef = db.collection(COLLECTIONS.COMMUNICATIONS).doc();
       const now = new Date().toISOString();
 
+      const usersSnapshot = await db.collection(COLLECTIONS.USERS).get();
+
       await communicationRef.set({
+        level: 'todos',
+        cursoId: null,
+        cursoLabel: null,
+        targetUserIds: usersSnapshot.docs.map(user => user.id),
         id: communicationRef.id,
         title,
         description: description || body,
@@ -68,7 +74,6 @@ export const sendCommunicationToAll = functions.https.onRequest(
         updatedAt: now,
       });
 
-      const usersSnapshot = await db.collection(COLLECTIONS.USERS).get();
       console.log('✅ Total de usuarios:', usersSnapshot.size);
 
       let successCount = 0;
@@ -173,6 +178,22 @@ export const sendCommunicationToUsers = functions.https.onRequest(
         return;
       }
 
+      const level = req.body.level ?? additionalData?.level;
+      const cursoId = req.body.cursoId !== undefined ? req.body.cursoId : additionalData?.cursoId || null;
+      const cursoLabel = req.body.cursoLabel !== undefined ? req.body.cursoLabel : additionalData?.cursoLabel || null;
+      if (!['inicial', 'primario', 'secundario', 'todos'].includes(level) ||
+          userIds.some((id: unknown) => typeof id !== 'string' || !id || id.includes('/')) ||
+          (cursoId !== null && typeof cursoId !== 'string') ||
+          (cursoLabel !== null && typeof cursoLabel !== 'string')) {
+        res.status(400).json({ error: 'Segmentación o destinatarios inválidos' });
+        return;
+      }
+      const targetUserIds = [...new Set<string>(userIds)];
+      // getAll evita el límite de IDs de una consulta con "in".
+      const users = await db.getAll(...targetUserIds.map(id => db.collection(COLLECTIONS.USERS).doc(id)));
+      const docs = users.filter(user => user.exists);
+      const usersSnapshot = { docs, size: docs.length };
+
       console.log(`📤 Enviando comunicación a ${userIds.length} usuarios específicos...`);
       console.log('👥 IDs:', JSON.stringify(userIds));
 
@@ -182,6 +203,10 @@ export const sendCommunicationToUsers = functions.https.onRequest(
       console.log('📝 Creando documento de comunicación...');
 
       await communicationRef.set({
+        level,
+        cursoId,
+        cursoLabel,
+        targetUserIds: docs.map(user => user.id),
         id: communicationRef.id,
         title,
         description: description || body,
@@ -196,19 +221,6 @@ export const sendCommunicationToUsers = functions.https.onRequest(
         createdAt: now,
         updatedAt: now,
       });
-
-      console.log('📋 Construyendo query de usuarios...');
-
-      // Obtener SOLO los usuarios en la lista
-      let usersSnapshot;
-      try {
-        usersSnapshot = await db.collection(COLLECTIONS.USERS)
-          .where(FieldPath.documentId(), 'in', userIds)
-          .get();
-      } catch (queryError: any) {
-        console.error('❌ Error en query:', queryError.message || queryError);
-        throw queryError;
-      }
 
       console.log(`✅ Usuarios encontrados: ${usersSnapshot.size}/${userIds.length}`);
 

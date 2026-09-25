@@ -3,14 +3,19 @@ jest.mock('firebase/firestore', () => ({
   doc: jest.fn((...args) => args.slice(1).join('/')),
   getDoc: jest.fn(), getDocs: jest.fn(), setDoc: jest.fn(),
   updateDoc: jest.fn(), arrayUnion: jest.fn((id) => ({ union: id })),
-  arrayRemove: jest.fn(),
+  arrayRemove: jest.fn((...ids) => ({ remove: ids })),
+  writeBatch: jest.fn(() => ({ set: require('firebase/firestore').setDoc, update: require('firebase/firestore').updateDoc, commit: jest.fn().mockResolvedValue(undefined) })),
 }));
 jest.mock('../src/services/firebase/firebaseConfig', () => ({ db: {} }));
 
 import { getDoc, getDocs, setDoc } from 'firebase/firestore';
 import { getCursos, getSalaUsers, addUserToSala } from '../src/services/firebase/salas';
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  (getDoc as jest.Mock).mockResolvedValue({ exists: () => false });
+  (getDocs as jest.Mock).mockResolvedValue({ docs: [] });
+});
 
 test('ofrece los grados y turnos en el orden solicitado', () => {
   const cursos = getCursos('primario');
@@ -84,4 +89,37 @@ test.each(['tm', 'tt'])('primaria permite enviar a todo el turno %s', async turn
   expect(getDoc).toHaveBeenCalledTimes(6);
   await expect(addUserToSala('primario', 'familia', `turno-${turno}`)).rejects.toThrow();
   expect(getDestinatarios('secundario')).toEqual(getCursos('secundario'));
+});
+
+
+test('resuelve una familia con hijos en dos niveles y asignación directa', async () => {
+  const { getUserAssignedSalas } = require('../src/services/firebase/salas');
+  (getDoc as jest.Mock).mockImplementation(async path => ({ exists: () => true,
+    data: () => ({ users: path === 'salas/secundario' ? ['familia'] : [] }) }));
+  (getDocs as jest.Mock).mockImplementation(async path => ({ docs: path.includes('inicial')
+    ? [{ id: 'sala-4-tm', data: () => ({ users: ['familia'] }) }] : [] }));
+  expect(await getUserAssignedSalas('familia')).toEqual({ levels: ['inicial', 'secundario'], cursos: ['sala-4-tm'] });
+});
+
+test('alta sincroniza el perfil dentro del mismo lote', async () => {
+  const { updateDoc, writeBatch } = require('firebase/firestore');
+  await addUserToSala('inicial', 'familia', 'sala-4-tm');
+  expect(updateDoc).toHaveBeenCalledWith('users/familia', {
+    assignedLevels: { union: 'inicial' }, assignedCursos: { union: 'sala-4-tm' },
+  });
+  expect(writeBatch.mock.results[0].value.commit).toHaveBeenCalled();
+});
+
+test.each([true, false])('baja conserva el nivel solo si quedan asignaciones: %s', async quedaOtro => {
+  const { removeUserFromSala } = require('../src/services/firebase/salas');
+  const { updateDoc } = require('firebase/firestore');
+  (getDocs as jest.Mock).mockResolvedValue({ docs: [
+    { id: 'sala-4-tm', data: () => ({ users: ['familia'] }) },
+    ...(quedaOtro ? [{ id: 'sala-5-tm', data: () => ({ users: ['familia'] }) }] : []),
+  ] });
+  await removeUserFromSala('inicial', 'familia', 'sala-4-tm');
+  expect(updateDoc).toHaveBeenCalledWith('users/familia', {
+    assignedLevels: quedaOtro ? { union: 'inicial' } : { remove: ['inicial'] },
+    assignedCursos: { remove: ['sala-4-tm'] },
+  });
 });

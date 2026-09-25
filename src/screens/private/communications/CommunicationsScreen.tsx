@@ -1,3 +1,4 @@
+import { isCommunicationForFamily, getDestinationLabel } from '@/utils/communicationAudience';
 import { MessageImage as ImagePreview } from '@/components/MessageImage';
 import { pickMessageImage, captureMessageImage, uploadMessageImage, MessageImage } from '@/services/messageImages';
 import { AttachmentSheet } from '@/components/AttachmentSheet';
@@ -18,10 +19,11 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { RootState } from '@/redux/store';
 import { store } from '@/redux/store';
 import { sendCommunicationToAll, sendCommunicationToUsers } from '@/services/communicationsService';
@@ -43,9 +45,9 @@ interface CommunicationsScreenProps {
 export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   type,
 }) => {
-  
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const currentUser = useSelector((state: RootState) => state.auth.user);
   const messageInputRef = useRef<BoldMessageInputHandle>(null);
   const [showEmojis, setShowEmojis] = useState(false);
   const [attachment, setAttachment] = useState<MessageImage | null>(null);
@@ -141,6 +143,9 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         } finally { setUploadingImage(false); }
       }
       const messagePayload = {
+        level: selectedLevel,
+        cursoId: selectedCurso || null,
+        cursoLabel: cursos.find(curso => curso.id === selectedCurso)?.label || null,
         title: title.trim(),
         body: description.trim(),
         description: description.trim(),
@@ -185,25 +190,58 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     }
   };
 
-  // Receive - Cargar desde Firestore
-  const [communications, setCommunications] = React.useState<Communication[]>([]);
-  const [loadingCommunications, setLoadingCommunications] = React.useState(true);
+  // Receive - Cargar desde Firestore con filtrado segmentado
+  const [communications, setCommunications] = useState<Communication[]>([]);
+  const [loadingCommunications, setLoadingCommunications] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  React.useEffect(() => {
-    const loadCommunicationsData = async () => {
-      try {
-        const { getAllCommunications } = await import('@/services/firebase/communications');
-        const data = await getAllCommunications();
-        setCommunications(data);
-        console.log('✅ Comunicaciones cargadas:', data.length);
-      } catch (error) {
-        console.error('❌ Error loading communications:', error);
-      } finally {
-        setLoadingCommunications(false);
+  const loadCommunicationsData = useCallback(async (isRefreshing = false) => {
+    try {
+      if (isRefreshing) {
+        setRefreshing(true);
+      } else {
+        setLoadingCommunications(true);
       }
-    };
-    if (type === 'receive') loadCommunicationsData();
-  }, [type]);
+
+      if (!currentUser?.id) {
+        setCommunications([]);
+        return;
+      }
+
+      const { getAllCommunications } = await import('@/services/firebase/communications');
+      const { getUserAssignedSalas } = await import('@/services/firebase/salas');
+
+      const [allComms, assignedSalas] = await Promise.all([
+        getAllCommunications(),
+        currentUser?.role === 'familia' && currentUser.id ? getUserAssignedSalas(currentUser.id) : Promise.resolve({ levels: [], cursos: [] }),
+      ]);
+
+      if (currentUser?.role === 'familia') {
+        const filtered = allComms.filter(comm =>
+          isCommunicationForFamily(comm, currentUser.id, assignedSalas));
+
+        setCommunications(filtered);
+        console.log(`✅ Comunicaciones filtradas para familia (${currentUser?.displayName}):`, filtered.length, 'de', allComms.length);
+      } else {
+        // Para directivos, admin y preceptores se muestran todas
+        setCommunications(allComms);
+        console.log('✅ Todas las comunicaciones cargadas:', allComms.length);
+      }
+    } catch (error) {
+      setCommunications([]);
+      Alert.alert('Error', 'No se pudieron cargar las comunicaciones. Intentá nuevamente.');
+      console.error('❌ Error loading communications:', error);
+    } finally {
+      setLoadingCommunications(false);
+      setRefreshing(false);
+    }
+  }, [currentUser?.id, currentUser?.role, currentUser?.displayName]);
+
+  useFocusEffect(useCallback(() => {
+    if (type === 'receive') {
+      loadCommunicationsData();
+    }
+  }, [type, loadCommunicationsData]));
 
   if (type === 'send') {
     return (
@@ -421,6 +459,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     return icons[level] || '•';
   };
 
+
   if (loadingCommunications) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -438,6 +477,13 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       <FlatList
         data={communications}
         keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => loadCommunicationsData(true)}
+            colors={['#0c6b58']}
+          />
+        }
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.levelRow}
@@ -458,11 +504,20 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
             <View style={styles.levelInfo}>
               <View style={styles.levelTop}>
-                <Text style={styles.levelName}>{item.title}</Text>
+                <Text style={styles.levelName} numberOfLines={1}>{item.title}</Text>
                 <Text style={styles.levelTime}>
                   {new Date(item.createdAt).toLocaleDateString('es-AR')}
                 </Text>
               </View>
+
+              <View style={styles.tagRow}>
+                <View style={[styles.destinationTag, { borderColor: getLevelColor(item.level) }]}>
+                  <Text style={[styles.destinationTagText, { color: getLevelColor(item.level) }]}>
+                    {getDestinationLabel(item)}
+                  </Text>
+                </View>
+              </View>
+
               <View style={styles.levelBottom}>
                 <MessageText style={styles.levelPreview} numberOfLines={1}>
                   {item.description}
@@ -473,8 +528,15 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         )}
         contentContainerStyle={styles.levelListContent}
         ListEmptyComponent={
-          <View style={{ padding: 20, alignItems: 'center' }}>
-            <Text style={{ color: '#999' }}>No hay comunicaciones</Text>
+          <View style={{ padding: 30, alignItems: 'center' }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', color: '#666', marginBottom: 6 }}>
+              Sin comunicaciones
+            </Text>
+            <Text style={{ fontSize: 13, color: '#999', textAlign: 'center' }}>
+              {currentUser?.role === 'familia'
+                ? 'No tenés nuevos comunicados para tu sala o nivel.'
+                : 'No hay comunicaciones enviadas todavía.'}
+            </Text>
           </View>
         }
       />

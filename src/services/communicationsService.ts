@@ -24,6 +24,9 @@ function getUserIdFromStore(store: any): string {
  */
 export async function sendCommunicationToAll(
   params: {
+    level?: 'inicial' | 'primario' | 'secundario' | 'todos';
+    cursoId?: string | null;
+    cursoLabel?: string | null;
     title: string;
     body: string;
     description?: string;
@@ -67,6 +70,9 @@ export async function sendCommunicationToAll(
  */
 export async function sendCommunicationToUsers(
   params: {
+    level?: 'inicial' | 'primario' | 'secundario' | 'todos';
+    cursoId?: string | null;
+    cursoLabel?: string | null;
     title: string;
     body: string;
     description?: string;

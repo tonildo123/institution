@@ -3,8 +3,7 @@ import {
   doc,
   getDocs,
   getDoc,
-  setDoc,
-  updateDoc,
+  writeBatch,
   arrayUnion,
   arrayRemove,
 } from 'firebase/firestore';
@@ -90,37 +89,58 @@ export const getSalaUsers = async (level: SalaLevel, cursoId?: string): Promise<
   ])];
 };
 
-/**
- * Agregar usuario a una sala
- */
-export const addUserToSala = async (
-  level: SalaLevel,
-  userId: string,
-  cursoId?: string,
-): Promise<void> => {
-  await setDoc(getSalaRef(level, cursoId), {
-    level,
-    users: arrayUnion(userId),
-  }, { merge: true });
+export interface UserSalasInfo {
+  levels: SalaLevel[];
+  cursos: string[];
+}
+
+export const getUserAssignedSalas = async (userId: string): Promise<UserSalasInfo> => {
+  // Consultar la fuente de verdad evita conservar asignaciones antiguas del perfil.
+  const levels: SalaLevel[] = ['inicial', 'primario', 'secundario'];
+  const assignments = await Promise.all(levels.map(async level => {
+    const [sala, cursos] = await Promise.all([
+      getDoc(doc(db, 'salas', level)),
+      getDocs(collection(db, 'salas', level, 'cursos')),
+    ]);
+    const assignedCursos = cursos.docs.filter(curso =>
+      (curso.data().users || []).includes(userId)).map(curso => curso.id);
+    return { level, cursos: assignedCursos,
+      assigned: (sala.exists() && (sala.data().users || []).includes(userId)) || assignedCursos.length > 0 };
+  }));
+  return {
+    levels: assignments.filter(item => item.assigned).map(item => item.level),
+    cursos: assignments.flatMap(item => item.cursos),
+  };
 };
 
-/**
- * Remover usuario de una sala
- */
-export const removeUserFromSala = async (
-  level: SalaLevel,
-  userId: string
-): Promise<void> => {
-  try {
-    const salaRef = doc(db, 'salas', level);
-    await updateDoc(salaRef, {
-      users: arrayRemove(userId),
-    });
-    console.log(`✅ Usuario ${userId} removido de sala ${level}`);
-  } catch (error: any) {
-    console.error('❌ Error removing user from sala:', error);
-    throw error;
-  }
+/** La asignación y el perfil se guardan juntos o no se guarda ninguno. */
+export const addUserToSala = async (level: SalaLevel, userId: string, cursoId?: string): Promise<void> => {
+  const salaRef = getSalaRef(level, cursoId);
+  const assigned = await getUserAssignedSalas(userId);
+  const batch = writeBatch(db);
+  batch.set(salaRef, { level, users: arrayUnion(userId) }, { merge: true });
+  batch.update(doc(db, 'users', userId), {
+    assignedLevels: arrayUnion(...new Set([...assigned.levels, level])),
+    assignedCursos: arrayUnion(...new Set([...assigned.cursos, ...(cursoId ? [cursoId] : [])])),
+  });
+  await batch.commit();
+};
+
+export const removeUserFromSala = async (level: SalaLevel, userId: string, cursoId?: string): Promise<void> => {
+  const salaRef = getSalaRef(level, cursoId);
+  const [sala, cursos] = await Promise.all([
+    getDoc(doc(db, 'salas', level)),
+    getDocs(collection(db, 'salas', level, 'cursos')),
+  ]);
+  const stillAssigned = (Boolean(cursoId) && sala.exists() && (sala.data().users || []).includes(userId)) ||
+    cursos.docs.some(curso => curso.id !== cursoId && (curso.data().users || []).includes(userId));
+  const batch = writeBatch(db);
+  batch.update(salaRef, { users: arrayRemove(userId) });
+  batch.update(doc(db, 'users', userId), {
+    assignedLevels: stillAssigned ? arrayUnion(level) : arrayRemove(level),
+    ...(cursoId ? { assignedCursos: arrayRemove(cursoId) } : {}),
+  });
+  await batch.commit();
 };
 
 /**

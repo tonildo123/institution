@@ -462,6 +462,10 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
+  tagRow: { flexDirection: 'row', marginBottom: 4 },
+  destinationTag: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6,
+    backgroundColor: '#f6f7f8', borderWidth: 1, flexShrink: 1 },
+  destinationTagText: { fontSize: 11, fontWeight: '600' },
   levelListContent: {
     backgroundColor: '#fff',
   },

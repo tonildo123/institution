@@ -1,3 +1,4 @@
+import { getDestinationLabel } from '@/utils/communicationAudience';
 import { MessageText } from '@/components/MessageText';
 import React, { useState } from 'react';
 import {
@@ -71,6 +72,7 @@ export const HistoryScreen = () => {
     };
     return icons[level] || '•';
   };
+
 
   return (
     <View style={styles.container}>
@@ -149,6 +151,15 @@ export const HistoryScreen = () => {
                   {new Date(item.createdAt).toLocaleDateString('es-AR')}
                 </Text>
               </View>
+
+              <View style={styles.tagRow}>
+                <View style={[styles.destinationTag, { borderColor: getLevelColor(item.level) }]}>
+                  <Text style={[styles.destinationTagText, { color: getLevelColor(item.level) }]}>
+                    {getDestinationLabel(item)}
+                  </Text>
+                </View>
+              </View>
+
               <View style={styles.levelBottom}>
                 <MessageText style={styles.levelPreview} numberOfLines={1}>
                   {item.description}

@@ -3,8 +3,6 @@ import {
   getDocs,
   query,
   orderBy,
-  Query,
-  Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
@@ -18,6 +16,9 @@ export interface Communication {
   createdAt: string;
   status: string;
   level: string;
+  cursoId?: string | null;
+  cursoLabel?: string | null;
+  targetUserIds?: string[];
   deliveredCount: number;
   failedCount: number;
   totalUsers: number;
@@ -53,7 +54,10 @@ export const getAllCommunications = async (): Promise<Communication[]> => {
         sentAt: data.sentAt || '',
         createdAt: data.createdAt || '',
         status: data.status || 'enviado',
-        level: data.level || 'todos',
+        level: data.level || data.data?.level || '',
+        cursoId: data.cursoId !== undefined ? data.cursoId : data.data?.cursoId || null,
+        cursoLabel: data.cursoLabel !== undefined ? data.cursoLabel : data.data?.cursoLabel || null,
+        targetUserIds: Array.isArray(data.targetUserIds) ? data.targetUserIds : [],
         deliveredCount: data.deliveredCount || 0,
         failedCount: data.failedCount || 0,
         totalUsers: data.totalUsers || 0,
@@ -88,7 +92,10 @@ export const getCommunication = async (id: string): Promise<Communication | null
       sentAt: data.sentAt || '',
       createdAt: data.createdAt || '',
       status: data.status || 'enviado',
-      level: data.level || 'todos',
+      level: data.level || data.data?.level || '',
+      cursoId: data.cursoId !== undefined ? data.cursoId : data.data?.cursoId || null,
+      cursoLabel: data.cursoLabel !== undefined ? data.cursoLabel : data.data?.cursoLabel || null,
+      targetUserIds: Array.isArray(data.targetUserIds) ? data.targetUserIds : [],
       deliveredCount: data.deliveredCount || 0,
       failedCount: data.failedCount || 0,
       totalUsers: data.totalUsers || 0,
