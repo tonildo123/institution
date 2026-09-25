@@ -1,3 +1,4 @@
+import { MessageDocument } from '@/components/MessageDocument';
 import { MessageImage } from '@/components/MessageImage';
 import { MessageText } from '@/components/MessageText';
 import React, { useState } from 'react';
@@ -189,6 +190,10 @@ export const CommunicationDetailScreen = () => {
         {/* Notice Card */}
         <View style={styles.noticeCard}>
           <MessageText style={styles.noticeContent}>{communication.description}</MessageText>
+          {communication.data?.documentUrl && (
+            <MessageDocument name={communication.data.documentName || 'Documento adjunto'}
+              size={Number(communication.data.documentSize) || 0} url={communication.data.documentUrl} />
+          )}
           {communication.data?.imageUrl && <MessageImage key={communication.data.imageUrl} uri={communication.data.imageUrl} />}
         </View>
 

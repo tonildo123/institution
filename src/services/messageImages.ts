@@ -44,30 +44,35 @@ function imageFromResult(result: ImagePickerResponse): MessageImage | null {
 }
 
 export async function uploadMessageImage(image: MessageImage): Promise<string> {
+  return uploadMessageFile(image, 'communication-images', 5 * 1024 * 1024);
+}
+
+export async function uploadMessageFile(file: MessageImage, folder: 'communication-images' | 'communication-documents', maxSize: number): Promise<string> {
   await auth.authStateReady();
   if (!auth.currentUser) {
-    throw new Error('Cerrá sesión e ingresá con tu cuenta habilitada en Firebase Auth para enviar imágenes.');
+    throw new Error('Cerrá sesión e ingresá con tu cuenta habilitada en Firebase Auth para enviar archivos.');
   }
-  if (!image.path.startsWith(`communication-images/${auth.currentUser.uid}/`)) {
-    throw new Error('Volvé a seleccionar la imagen con la sesión actual.');
+  if (!file.path.startsWith(`${folder}/${auth.currentUser.uid}/`)) {
+    throw new Error('Volvé a seleccionar el archivo con la sesión actual.');
   }
   const token = await auth.currentUser.getIdToken();
-  const imageRef = ref(storage, image.path);
+  const imageRef = ref(storage, file.path);
   // React Native admite blobs de archivo nativos, pero no construirlos desde ArrayBuffer.
-  const blob = await readImageBlob(image.uri);
+  const blob = await readFileBlob(file.uri);
   try {
+    if (blob.size <= 0 || blob.size > maxSize) throw new Error('El archivo está vacío o supera el tamaño permitido.');
     const response = await fetch(
-      `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(imageRef.bucket)}/o?uploadType=media&name=${encodeURIComponent(image.path)}`,
+      `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(imageRef.bucket)}/o?uploadType=media&name=${encodeURIComponent(file.path)}`,
       {
         method: 'POST',
-        headers: { Authorization: `Firebase ${token}`, 'Content-Type': image.contentType },
+        headers: { Authorization: `Firebase ${token}`, 'Content-Type': file.contentType },
         body: blob,
       },
     );
     if (!response.ok) {
       throw new Error(response.status === 403
-        ? 'No tenés permiso para subir esta imagen.'
-        : `No se pudo subir la imagen (HTTP ${response.status}). Intentá nuevamente.`);
+        ? 'No tenés permiso para subir este archivo.'
+        : `No se pudo subir el archivo (HTTP ${response.status}). Intentá nuevamente.`);
     }
     return await getDownloadURL(imageRef);
   } finally {
@@ -76,7 +81,7 @@ export async function uploadMessageImage(image: MessageImage): Promise<string> {
   }
 }
 
-function readImageBlob(uri: string): Promise<Blob> {
+function readFileBlob(uri: string): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open('GET', uri, true);
@@ -84,10 +89,10 @@ function readImageBlob(uri: string): Promise<Blob> {
     request.timeout = 30000;
     request.onload = () => {
       if ((request.status === 0 || request.status === 200) && request.response) resolve(request.response);
-      else reject(new Error('No se pudo leer la imagen seleccionada. Volvé a elegirla.'));
+      else reject(new Error('No se pudo leer el archivo seleccionado. Volvé a elegirlo.'));
     };
-    request.onerror = () => reject(new Error('No se pudo leer la imagen seleccionada.'));
-    request.ontimeout = () => reject(new Error('La lectura de la imagen tardó demasiado.'));
+    request.onerror = () => reject(new Error('No se pudo leer el archivo seleccionado.'));
+    request.ontimeout = () => reject(new Error('La lectura del archivo tardó demasiado.'));
     request.send();
   });
 }

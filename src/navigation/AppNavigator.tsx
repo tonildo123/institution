@@ -48,7 +48,7 @@ const HistoryStackNavigator = () => {
     >
       <Stack.Screen
         name="HistoryList"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <HistoryScreen />
           </ScreenWrapper>
@@ -56,7 +56,7 @@ const HistoryStackNavigator = () => {
       />
       <Stack.Screen
         name="CommunicationDetail"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <CommunicationDetailScreen />
           </ScreenWrapper>
@@ -79,7 +79,7 @@ const CommunicationsStackNavigator = () => {
     >
       <Stack.Screen
         name="CommunicationsList"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <CommunicationsScreen type="receive" />
           </ScreenWrapper>
@@ -87,7 +87,7 @@ const CommunicationsStackNavigator = () => {
       />
       <Stack.Screen
         name="CommunicationDetail"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <CommunicationDetailScreen />
           </ScreenWrapper>
@@ -133,7 +133,7 @@ const FamiliaTabNavigator = () => {
       />
       <Tab.Screen
         name="PerfilFamilia"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <ProfileScreen />
           </ScreenWrapper>
@@ -179,7 +179,7 @@ const AdminTabNavigator = () => {
     >
       <Tab.Screen
         name="ComunicacionesAdmin"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <CommunicationsScreen type="send" />
           </ScreenWrapper>
@@ -192,7 +192,7 @@ const AdminTabNavigator = () => {
       />
       <Tab.Screen
         name="Salas"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <SalasScreen />
           </ScreenWrapper>
@@ -214,7 +214,7 @@ const AdminTabNavigator = () => {
       />
       <Tab.Screen
         name="UsersManagement"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <UsersManagementScreen />
           </ScreenWrapper>
@@ -227,7 +227,7 @@ const AdminTabNavigator = () => {
       />
       <Tab.Screen
         name="PerfilAdmin"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <ProfileScreen />
           </ScreenWrapper>
@@ -271,7 +271,7 @@ const PreceptorTabNavigator = () => {
     >
       <Tab.Screen
         name="ComunicacionesPreceptor"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <CommunicationsScreen type="send" />
           </ScreenWrapper>
@@ -293,7 +293,7 @@ const PreceptorTabNavigator = () => {
       />
       <Tab.Screen
         name="PerfilPreceptor"
-        component={() => (
+        children={() => (
           <ScreenWrapper>
             <ProfileScreen />
           </ScreenWrapper>

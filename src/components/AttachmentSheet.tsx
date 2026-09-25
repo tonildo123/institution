@@ -11,7 +11,7 @@ const options: { title: string; description: string; icon: AttachmentIconName; c
   { title: 'Enlace', description: 'Instagram, web', icon: 'enlace', color: '#3973D1', background: '#E2EBFC' },
 ];
 
-export const AttachmentSheet = ({ onClose, onGallery, onCamera }: { onClose: () => void; onGallery: () => void; onCamera: () => void }) => {
+export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument }: { onClose: () => void; onGallery: () => void; onCamera: () => void; onDocument: () => void }) => {
   const insets = useSafeAreaInsets();
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
@@ -22,7 +22,7 @@ export const AttachmentSheet = ({ onClose, onGallery, onCamera }: { onClose: () 
           <Text style={styles.title}>Adjuntar archivo</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>
             {options.map(option => (
-              <TouchableOpacity key={option.title} style={styles.option} disabled={!['galeria', 'camara'].includes(option.icon)} onPress={option.icon === 'camara' ? onCamera : onGallery} accessibilityRole="button" accessibilityLabel={option.title}>
+              <TouchableOpacity key={option.title} style={styles.option} disabled={!['galeria', 'camara', 'documento'].includes(option.icon)} onPress={option.icon === 'documento' ? onDocument : option.icon === 'camara' ? onCamera : onGallery} accessibilityRole="button" accessibilityLabel={option.title}>
                 <View style={[styles.iconBox, { backgroundColor: option.background }]}>
                   <AttachmentIcon name={option.icon} />
                 </View>

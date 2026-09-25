@@ -1,3 +1,5 @@
+import { MessageDocument } from '@/components/MessageDocument';
+import { pickMessageDocument, uploadMessageDocument, documentMessageData, MessageDocumentFile } from '@/services/messageDocuments';
 import { isCommunicationForFamily, getDestinationLabel } from '@/utils/communicationAudience';
 import { MessageImage as ImagePreview } from '@/components/MessageImage';
 import { pickMessageImage, captureMessageImage, uploadMessageImage, MessageImage } from '@/services/messageImages';
@@ -50,6 +52,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const messageInputRef = useRef<BoldMessageInputHandle>(null);
   const [showEmojis, setShowEmojis] = useState(false);
+  const [document, setDocument] = useState<MessageDocumentFile | null>(null);
+  const uploadedDocumentRef = useRef<{ path: string; url: string } | null>(null);
   const [attachment, setAttachment] = useState<MessageImage | null>(null);
   const [pickingImage, setPickingImage] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -98,6 +102,18 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     } finally { setPickingImage(false); }
   };
 
+  const handlePickDocument = async () => {
+    if (pickingImage || loading) return;
+    setShowAttachments(false);
+    setPickingImage(true);
+    try {
+      const picked = await pickMessageDocument();
+      if (picked) { setDocument(picked); uploadedDocumentRef.current = null; }
+    } catch (error: any) {
+      Alert.alert('Documento', error.message || 'No se pudo seleccionar el documento.');
+    } finally { setPickingImage(false); }
+  };
+
   const handleSend = async () => {
     if (loading || pickingImage) return;
     if (!title.trim()) {
@@ -142,6 +158,16 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           uploadedImageRef.current = { path: attachment.path, url: imageUrl };
         } finally { setUploadingImage(false); }
       }
+      let documentData: Record<string, string> = {};
+      if (document) {
+        setUploadingImage(true);
+        try {
+          const documentUrl = uploadedDocumentRef.current?.path === document.path
+            ? uploadedDocumentRef.current.url : await uploadMessageDocument(document);
+          documentData = documentMessageData(document, documentUrl);
+          uploadedDocumentRef.current = { path: document.path, url: documentUrl };
+        } finally { setUploadingImage(false); }
+      }
       const messagePayload = {
         level: selectedLevel,
         cursoId: selectedCurso || null,
@@ -151,6 +177,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         description: description.trim(),
         data: {
           type: 'communication',
+          ...documentData,
           ...(imageUrl ? { imageUrl, imagePath: attachment!.path } : {}),
           level: selectedLevel,
           ...(selectedCurso ? { cursoId: selectedCurso, cursoLabel: cursos.find(curso => curso.id === selectedCurso)!.label } : {}),
@@ -178,6 +205,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       setTitle('');
       setDescription('');
       setAttachment(null);
+      setDocument(null);
+      uploadedDocumentRef.current = null;
       uploadedImageRef.current = null;
       setMessageInputKey(key => key + 1);
       setSelectedLevel('todos');
@@ -402,6 +431,14 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             </TouchableOpacity>
           </View>
           {pickingImage && <ActivityIndicator color="#0c6b58" />}
+          {document && (
+            <View>
+              <MessageDocument name={document.name} size={document.size} />
+              <TouchableOpacity disabled={loading} onPress={() => { setDocument(null); uploadedDocumentRef.current = null; }} style={{ padding: 12 }}>
+                <Text style={{ color: '#B42323' }}>Quitar documento</Text>
+              </TouchableOpacity>
+            </View>
+          )}
           {attachment && (
             <View>
               <ImagePreview key={attachment.path} uri={attachment.uri} />
@@ -412,7 +449,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           )}
         </ScrollView>
 
-        {showAttachments && <AttachmentSheet onGallery={() => handlePickImage('gallery')} onCamera={() => handlePickImage('camera')} onClose={() => setShowAttachments(false)} />}
+        {showAttachments && <AttachmentSheet onDocument={handlePickDocument} onGallery={() => handlePickImage('gallery')} onCamera={() => handlePickImage('camera')} onClose={() => setShowAttachments(false)} />}
 
         {showEmojis && <EmojiPicker onSelect={emoji => messageInputRef.current?.insertEmoji(emoji)} onClose={() => setShowEmojis(false)} />}
 
@@ -427,11 +464,11 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           <TouchableOpacity
             style={[styles.sendButtonChat, loading && { opacity: 0.6 }]}
             onPress={handleSend}
-            disabled={loading}
+            disabled={loading || pickingImage}
           >
             <Image source={require('../../../assets/icons/send-message.png')} style={styles.sendButtonChatIcon} resizeMode="contain" accessible={false} />
             <Text style={styles.sendButtonChatText}>
-              {uploadingImage ? 'Subiendo imagen...' : loading ? 'Enviando...' : 'Enviar'}
+              {uploadingImage ? 'Subiendo adjunto...' : loading ? 'Enviando...' : 'Enviar'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -504,9 +541,9 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
             <View style={styles.levelInfo}>
               <View style={styles.levelTop}>
-                <Text style={styles.levelName} numberOfLines={1}>{item.title}</Text>
+                <Text style={styles.levelName}>{item.title}</Text>
                 <Text style={styles.levelTime}>
-                  {new Date(item.createdAt).toLocaleDateString('es-AR')}
+                  {new Date(item.createdAt).toLocaleDateString('es-AR')} · {new Date(item.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}
                 </Text>
               </View>
 
@@ -523,6 +560,10 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
                   {item.description}
                 </MessageText>
               </View>
+              {item.data?.documentUrl && (
+                <MessageDocument name={item.data.documentName || 'Documento adjunto'}
+                  size={Number(item.data.documentSize) || 0} url={item.data.documentUrl} />
+              )}
             </View>
           </TouchableOpacity>
         )}

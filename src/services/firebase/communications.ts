@@ -28,6 +28,11 @@ export interface Communication {
     timestamp: string;
     imageUrl?: string;
     imagePath?: string;
+    documentUrl?: string;
+    documentPath?: string;
+    documentName?: string;
+    documentSize?: string;
+    documentContentType?: string;
   };
 }
 

@@ -38,3 +38,20 @@ test('rechaza un envío segmentado sin nivel antes de escribir', async () => {
   expect(res.status).toHaveBeenCalledWith(400);
   expect(mockSet).not.toHaveBeenCalled();
 });
+
+test.each([
+  ['todos', sendCommunicationToAll],
+  ['inicial', sendCommunicationToUsers],
+])('conserva URL y metadatos del PDF en el envío a %s', async (level, send) => {
+  const data = {
+    type: 'communication', level, documentUrl: 'https://example.com/test.pdf',
+    documentPath: 'communication-documents/admin/id/test.pdf', documentName: 'test.pdf',
+    documentSize: '1024', documentContentType: 'application/pdf',
+  };
+  const res = response();
+  await send({ method: 'POST', body: {
+    title: 'Test pdf', body: 'Pdf test', userId: 'admin', userIds: ['family-0'], level, data,
+  } }, res);
+  expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
+  expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+});

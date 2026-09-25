@@ -210,3 +210,29 @@ Para más información:
 - [Firebase Documentation](https://firebase.google.com/docs)
 - [React Native Firebase](https://rnfirebase.io/)
 - [Cloud Functions](https://firebase.google.com/docs/functions)
+
+
+## Documentos adjuntos en comunicaciones
+
+La app permite adjuntar un PDF, Word (.doc/.docx), Excel (.xls/.xlsx),
+PowerPoint (.ppt/.pptx) o TXT de hasta 20 MB por comunicado, además de la imagen.
+El detalle recibido muestra el nombre, tamaño y un botón para abrir o descargar
+con el navegador o la aplicación disponible en el dispositivo.
+
+Se agregó `@react-native-documents/picker`: recompilar Android (recargar Metro
+no alcanza). Para iOS, ejecutar `bundle exec pod install` desde `ios` y recompilar.
+
+La ruta nueva `communication-documents/{uid}/{documentId}/{fileName}` necesita
+las reglas de `storage.rules`. Revisar las reglas publicadas antes de desplegar:
+
+```bash
+firebase deploy --only storage --config firebase.storage.json --project institucion-59d9a
+```
+
+Las Functions existentes conservan los metadatos del documento en `data`;
+no necesitan un despliegue adicional para este cambio. Al igual que las imágenes,
+los documentos se abren mediante URLs de descarga de Firebase.
+
+Prueba manual: seleccionar y quitar un documento, cancelar el selector, enviar
+un PDF y un DOCX a un curso de prueba, abrirlos desde otra cuenta destinataria y
+comprobar nombre/tamaño. Verificar también el rechazo de archivos mayores a 20 MB.

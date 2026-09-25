@@ -409,10 +409,9 @@ export const styles = StyleSheet.create({
   },
 
   levelTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: 4,
+    alignItems: 'stretch',
+    gap: 4,
+    marginBottom: 6,
   },
 
   levelName: {

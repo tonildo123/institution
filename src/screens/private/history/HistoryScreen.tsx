@@ -148,7 +148,7 @@ export const HistoryScreen = () => {
               <View style={styles.levelTop}>
                 <Text style={styles.levelName}>{item.title}</Text>
                 <Text style={styles.levelTime}>
-                  {new Date(item.createdAt).toLocaleDateString('es-AR')}
+                  {new Date(item.createdAt).toLocaleDateString('es-AR')} · {new Date(item.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}
                 </Text>
               </View>
 
