@@ -1,6 +1,9 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  passwordWrapper: { position: 'relative' },
+  passwordInput: { paddingRight: 52 },
+  passwordToggle: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 48, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   container: { flex: 1, backgroundColor: '#ECE6DE' },
   header: { backgroundColor: '#0c6b58', paddingHorizontal: 16, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', gap: 8 },
   backButton: { minWidth: 24, minHeight: 40, justifyContent: 'center' },

@@ -314,3 +314,5 @@ export const healthCheck = functions.https.onRequest(
     });
   }
 );
+
+export { createManagedUser } from './createManagedUser.js';

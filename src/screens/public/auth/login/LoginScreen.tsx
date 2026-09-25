@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { AuthStackParamList } from '@/navigation/AuthNavigator';
 import {
   View,
   Text,
@@ -23,7 +25,7 @@ import { styles } from './styles';
  * 4. Firebase detecta el rol automáticamente
  */
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }: NativeStackScreenProps<AuthStackParamList, 'Login'>) => {
   const {
     credential,
     password,
@@ -121,6 +123,15 @@ const LoginScreen = () => {
             )}
           </View>
 
+
+          <TouchableOpacity
+            style={styles.forgotPasswordButton}
+            accessibilityRole="button"
+            onPress={() => navigation.navigate('ForgotPassword')}
+            disabled={isLoading}
+          >
+            <Text style={styles.forgotPasswordText}>Olvidé mi contraseña</Text>
+          </TouchableOpacity>
 
           {/* Botón Login */}
           <TouchableOpacity

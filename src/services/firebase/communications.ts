@@ -25,6 +25,8 @@ export interface Communication {
     type: string;
     level: string;
     timestamp: string;
+    imageUrl?: string;
+    imagePath?: string;
   };
 }
 

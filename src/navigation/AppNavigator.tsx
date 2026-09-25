@@ -348,6 +348,9 @@ export const AppNavigator = () => {
           headerShown: false,
         }}
       />
+      <Stack.Screen name="NotificationDetail">
+        {() => <ScreenWrapper><CommunicationDetailScreen /></ScreenWrapper>}
+      </Stack.Screen>
     </Stack.Navigator>
   );
 };

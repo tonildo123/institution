@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { serializeUser } from '@/utils/serializeUser';
+import React, { useEffect, useRef, useCallback } from 'react';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setUser, setLoading } from '@/redux/slices/authSlice';
 import { RootState } from '@/redux/store';
 import { AuthNavigator } from './AuthNavigator';
 import { AppNavigator } from './AppNavigator';
-import { linking } from './linking';
-import { View, ActivityIndicator, Text } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+import { communicationIdFromURL, notificationURL } from './notificationLinks';
+import { View, ActivityIndicator, Text, Linking } from 'react-native';
 
 /**
  * Root Navigator
@@ -21,6 +23,8 @@ import { View, ActivityIndicator, Text } from 'react-native';
  * - Deep Linking
  */
 
+const navigationRef = createNavigationContainerRef<{ MainApp: undefined; NotificationDetail: { communicationId: string } }>();
+
 const SplashScreen = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
     <ActivityIndicator size="large" color="#007AFF" />
@@ -32,6 +36,37 @@ export const RootNavigator = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, isLoading, user } = useSelector((state: RootState) => state.auth);
   const [isReady, setIsReady] = React.useState(false);
+
+  const pendingMessage = useRef<string | null>(null);
+  const canNavigate = useRef(false);
+  canNavigate.current = isReady && isAuthenticated && !isLoading;
+  const openPendingMessage = useCallback(() => {
+    if (!canNavigate.current || !navigationRef.isReady() || !pendingMessage.current) return;
+    // Esperar a que el stack autenticado esté montado.
+    if (!navigationRef.getRootState()?.routeNames.includes('NotificationDetail')) return;
+    const communicationId = pendingMessage.current;
+    pendingMessage.current = null;
+    navigationRef.navigate('NotificationDetail', { communicationId });
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const openURL = (url: string | null) => {
+      if (!active || !url) return;
+      const id = communicationIdFromURL(url);
+      if (!id) return;
+      pendingMessage.current = id;
+      openPendingMessage();
+    };
+    const unsubscribe = messaging().onNotificationOpenedApp(message => openURL(notificationURL(message.data)));
+    const linkSubscription = Linking.addEventListener('url', event => openURL(event.url));
+    Promise.all([Linking.getInitialURL(), messaging().getInitialNotification()])
+      .then(([url, message]) => openURL(notificationURL(message?.data) || url))
+      .catch(() => console.warn('No se pudo recuperar la notificación inicial'));
+    return () => { active = false; unsubscribe(); linkSubscription.remove(); };
+  }, [openPendingMessage]);
+
+  useEffect(() => { openPendingMessage(); }, [isReady, isAuthenticated, isLoading, openPendingMessage]);
 
   // Log cambios de autenticación
   useEffect(() => {
@@ -59,7 +94,7 @@ export const RootNavigator = () => {
       const userData = await AsyncStorage.getItem('user');
 
       if (userData) {
-        dispatch(setUser(JSON.parse(userData)));
+        dispatch(setUser(serializeUser(JSON.parse(userData))));
       } else {
         dispatch(setUser(null));
       }
@@ -79,9 +114,10 @@ export const RootNavigator = () => {
 
   return (
     <NavigationContainer
-      linking={linking}
+      ref={navigationRef}
+      onStateChange={openPendingMessage}
       fallback={<SplashScreen />}
-      onReady={() => console.log('Navigation ready')}
+      onReady={openPendingMessage}
     >
       {isAuthenticated ? (
         // 🔐 Usuario autenticado → Pantallas protegidas

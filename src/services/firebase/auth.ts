@@ -110,7 +110,7 @@ export const getUserData = async (userId: string): Promise<User | null> => {
   try {
     const userDoc = await getDoc(doc(db, 'users', userId));
     if (userDoc.exists()) {
-      return userDoc.data() as User;
+      return { ...userDoc.data(), id: userDoc.id } as User;
     }
     return null;
   } catch (error: any) {

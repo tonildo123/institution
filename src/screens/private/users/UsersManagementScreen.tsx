@@ -1,3 +1,4 @@
+import Svg, { Path, Circle, Line } from 'react-native-svg';
 // @refresh reset
 import React, { useState, useEffect } from 'react';
 import {
@@ -11,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { getAllUsers, createUser, updateUser, deleteUser } from '@/services/firebase/users';
-import { User, CreateUserCredentials } from '@/types';
+import { User, UserRole, CreateUserCredentials } from '@/types';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from './styles';
 
@@ -27,6 +28,7 @@ export const UsersManagementScreen = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
@@ -34,7 +36,7 @@ export const UsersManagementScreen = () => {
     email: '',
     dni: '',
     password: '',
-    role: 'familia' as const,
+    role: 'familia' as UserRole,
     isEnabled: true,
   });
 
@@ -141,6 +143,11 @@ export const UsersManagementScreen = () => {
       return;
     }
 
+    if (!selectedUser && formData.role !== 'familia' && formData.password.length < 6) {
+      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -173,6 +180,7 @@ export const UsersManagementScreen = () => {
         const userId = `user_${Date.now()}`;
         const credentials: CreateUserCredentials = {
           displayName: formData.displayName,
+          password: formData.password,
           role: formData.role,
           email: formData.email || undefined,
           dni: formData.dni || undefined,
@@ -226,6 +234,7 @@ export const UsersManagementScreen = () => {
           style={styles.addButton}
           onPress={() => {
             setSelectedUser(null);
+            setShowPassword(false);
             setFormData({
               displayName: '',
               email: '',
@@ -459,17 +468,32 @@ export const UsersManagementScreen = () => {
               {!selectedUser && (
                 <View style={styles.inputGroup}>
                   <Text style={styles.label}>Contraseña</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="••••••••"
-                    placeholderTextColor="#999"
-                    value={formData.password}
-                    onChangeText={(text) =>
-                      setFormData({ ...formData, password: text })
-                    }
-                    editable={!saving}
-                    secureTextEntry
-                  />
+                  <View style={styles.passwordWrapper}>
+                    <TextInput
+                      style={[styles.input, styles.passwordInput]}
+                      placeholder="••••••••"
+                      placeholderTextColor="#999"
+                      value={formData.password}
+                      onChangeText={text => setFormData({ ...formData, password: text })}
+                      editable={!saving}
+                      secureTextEntry={!showPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                    <TouchableOpacity
+                      style={styles.passwordToggle}
+                      onPress={() => setShowPassword(visible => !visible)}
+                      disabled={saving}
+                      accessibilityRole="button"
+                      accessibilityLabel={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    >
+                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#536073" strokeWidth={1.8}>
+                        <Path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                        <Circle cx={12} cy={12} r={3} />
+                        {showPassword && <Line x1={3} y1={3} x2={21} y2={21} />}
+                      </Svg>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
 

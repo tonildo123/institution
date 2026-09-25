@@ -5,6 +5,8 @@ import { StyleSheet } from 'react-native';
  */
 
 export const styles = StyleSheet.create({
+  forgotPasswordButton: { alignSelf: 'flex-end', paddingVertical: 12, paddingHorizontal: 4, marginBottom: 12 },
+  forgotPasswordText: { color: '#0c6b58', fontSize: 14, fontWeight: '600' },
   safeContainer: {
     flex: 1,
     backgroundColor: '#efeae2',

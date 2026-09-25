@@ -1,3 +1,4 @@
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import {
   collection,
   doc,
@@ -10,7 +11,7 @@ import {
   where,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { auth, db } from './firebaseConfig';
 import type { User, CreateUserCredentials, UpdateUserData } from '@/types/index';
 
 /**
@@ -28,6 +29,16 @@ export const createUser = async (
   credentials: CreateUserCredentials
 ): Promise<User> => {
   try {
+    if (credentials.role !== 'familia') {
+      await auth.authStateReady();
+      if (!auth.currentUser) {
+        throw new Error('Esta sesión es del acceso anterior. Para crear cuentas por email, ingresá con el administrador habilitado en Firebase Auth. Tu cuenta existente no se elimina al cerrar sesión.');
+      }
+      // La función crea Auth + Firestore sin cambiar la sesión del administrador.
+      const createAccount = httpsCallable<CreateUserCredentials, User>(getFunctions(undefined, 'us-central1'), 'createManagedUser');
+      const result = await createAccount(credentials);
+      return result.data;
+    }
     const now = new Date();
 
     const userData: User = {

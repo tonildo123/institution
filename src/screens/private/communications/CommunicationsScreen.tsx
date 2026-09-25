@@ -1,3 +1,5 @@
+import { MessageImage as ImagePreview } from '@/components/MessageImage';
+import { pickMessageImage, uploadMessageImage, MessageImage } from '@/services/messageImages';
 import { AttachmentSheet } from '@/components/AttachmentSheet';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { BoldMessageInput, BoldMessageInputHandle } from '@/components/BoldMessageInput';
@@ -46,8 +48,12 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const insets = useSafeAreaInsets();
   const messageInputRef = useRef<BoldMessageInputHandle>(null);
   const [showEmojis, setShowEmojis] = useState(false);
+  const [attachment, setAttachment] = useState<MessageImage | null>(null);
+  const [pickingImage, setPickingImage] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const uploadedImageRef = useRef<{ path: string; url: string } | null>(null);
   const [showAttachments, setShowAttachments] = useState(false);
-  const messageScrollRef = useRef<ScrollView>(null);
+  const messageScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const descriptionFocused = useRef(false);
   const keepMessageVisible = useCallback(() => {
     if (descriptionFocused.current) {
@@ -101,7 +107,19 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     { id: 'todos', label: 'TODOS', color: '#FF3B30' },
   ];
 
+  const handlePickImage = async () => {
+    setShowAttachments(false);
+    setPickingImage(true);
+    try {
+      const picked = await pickMessageImage();
+      if (picked) { setAttachment(picked); uploadedImageRef.current = null; }
+    } catch (error: any) {
+      Alert.alert('Imagen', error.message || 'No se pudo seleccionar la imagen');
+    } finally { setPickingImage(false); }
+  };
+
   const handleSend = async () => {
+    if (loading || pickingImage) return;
     if (!title.trim()) {
       Alert.alert('Error', 'Por favor ingresa un título');
       return;
@@ -135,12 +153,22 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
       console.log('🔹 targetUserIds que se enviará:', targetUserIds);
 
+      let imageUrl: string | undefined;
+      if (attachment) {
+        setUploadingImage(true);
+        try {
+          imageUrl = uploadedImageRef.current?.path === attachment.path
+            ? uploadedImageRef.current.url : await uploadMessageImage(attachment);
+          uploadedImageRef.current = { path: attachment.path, url: imageUrl };
+        } finally { setUploadingImage(false); }
+      }
       const messagePayload = {
         title: title.trim(),
         body: description.trim(),
         description: description.trim(),
         data: {
           type: 'communication',
+          ...(imageUrl ? { imageUrl, imagePath: attachment!.path } : {}),
           level: selectedLevel,
           ...(selectedCurso ? { cursoId: selectedCurso, cursoLabel: cursos.find(curso => curso.id === selectedCurso)!.label } : {}),
           timestamp: new Date().toISOString(),
@@ -166,6 +194,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       // Limpiar campos
       setTitle('');
       setDescription('');
+      setAttachment(null);
+      uploadedImageRef.current = null;
       setMessageInputKey(key => key + 1);
       setSelectedLevel('todos');
       setSelectedCurso(undefined);
@@ -350,14 +380,23 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
               style={styles.composerIconButton}
               accessibilityRole="button"
               accessibilityLabel="Adjuntar archivo"
-              disabled={loading}
+              disabled={loading || pickingImage}
               onPress={() => { Keyboard.dismiss(); setShowAttachments(true); }}>
               <Text style={styles.composerIcon}>+</Text>
             </TouchableOpacity>
           </View>
+          {pickingImage && <ActivityIndicator color="#0c6b58" />}
+          {attachment && (
+            <View>
+              <ImagePreview key={attachment.path} uri={attachment.uri} />
+              <TouchableOpacity disabled={loading} onPress={() => { setAttachment(null); uploadedImageRef.current = null; }} style={{ padding: 12 }}>
+                <Text style={{ color: '#B42323' }}>Quitar imagen</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </ScrollView>
 
-        {showAttachments && <AttachmentSheet onClose={() => setShowAttachments(false)} />}
+        {showAttachments && <AttachmentSheet onGallery={handlePickImage} onClose={() => setShowAttachments(false)} />}
 
         {showEmojis && <EmojiPicker onSelect={emoji => messageInputRef.current?.insertEmoji(emoji)} onClose={() => setShowEmojis(false)} />}
 
@@ -376,7 +415,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           >
             <Image source={require('../../../assets/icons/send-message.png')} style={styles.sendButtonChatIcon} resizeMode="contain" accessible={false} />
             <Text style={styles.sendButtonChatText}>
-              {loading ? 'Enviando...' : 'Enviar'}
+              {uploadingImage ? 'Subiendo imagen...' : loading ? 'Enviando...' : 'Enviar'}
             </Text>
           </TouchableOpacity>
         </View>

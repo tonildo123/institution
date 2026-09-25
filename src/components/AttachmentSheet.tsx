@@ -11,7 +11,7 @@ const options: { title: string; description: string; icon: AttachmentIconName; c
   { title: 'Enlace', description: 'Instagram, web', icon: 'enlace', color: '#3973D1', background: '#E2EBFC' },
 ];
 
-export const AttachmentSheet = ({ onClose }: { onClose: () => void }) => {
+export const AttachmentSheet = ({ onClose, onGallery }: { onClose: () => void; onGallery: () => void }) => {
   const insets = useSafeAreaInsets();
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
@@ -22,13 +22,13 @@ export const AttachmentSheet = ({ onClose }: { onClose: () => void }) => {
           <Text style={styles.title}>Adjuntar archivo</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>
             {options.map(option => (
-              <View key={option.title} style={styles.option} accessibilityLabel={`${option.title}: próximamente`}>
+              <TouchableOpacity key={option.title} style={styles.option} disabled={option.icon !== 'galeria'} onPress={onGallery} accessibilityRole="button" accessibilityLabel={option.title}>
                 <View style={[styles.iconBox, { backgroundColor: option.background }]}>
                   <AttachmentIcon name={option.icon} />
                 </View>
                 <Text style={styles.optionTitle}>{option.title}</Text>
                 <Text style={styles.description}>{option.description}</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
           <TouchableOpacity style={styles.cancel} onPress={onClose} accessibilityRole="button">

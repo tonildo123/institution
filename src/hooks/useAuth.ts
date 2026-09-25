@@ -1,3 +1,4 @@
+import { serializeUser } from '@/utils/serializeUser';
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -48,10 +49,10 @@ export const useAuth = () => {
           console.log('🔐 Firebase Auth: Usuario autenticado');
           // Usuario autenticado en Firebase Auth
           const userData = await getUserData(firebaseUser.uid);
-          if (userData) {
-            dispatch(setUser(userData));
+          if (userData && auth.currentUser?.uid === firebaseUser.uid) {
+            dispatch(setUser(serializeUser(userData)));
             // Guardar en AsyncStorage para persistencia
-            await AsyncStorage.setItem('user', JSON.stringify(userData));
+            await AsyncStorage.setItem('user', JSON.stringify(serializeUser(userData)));
           }
         } else {
           console.log('🔐 Firebase Auth: Sin usuario');
@@ -73,17 +74,12 @@ export const useAuth = () => {
     });
 
     return () => unsubscribe();
-  }, [dispatch, currentUser]);
+  }, [dispatch, currentUser?.id]);
 
   /**
    * Serializar fechas de Date a ISO string
    */
-  const serializeUser = (user: any) => ({
-    ...user,
-    createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
-    updatedAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt,
-    enabledAt: user.enabledAt instanceof Date ? user.enabledAt.toISOString() : user.enabledAt,
-  });
+
 
   /**
    * Inicia sesión con email (admin/preceptor)
@@ -195,8 +191,11 @@ export const useAuth = () => {
           }
 
           console.log('✅ Usuario email encontrado y validado:', user.displayName);
-          // Para email, usamos el usuario de Firestore (sin verificar contraseña en Firebase Auth)
-          // porque los usuarios se crean desde el panel admin, no desde Firebase Auth
+          const authenticated = await loginWithEmail({ email: user.email!, password: params.password });
+          if (authenticated.uid !== user.id) {
+            await logout();
+            throw new Error('La cuenta de Firebase Auth no está vinculada al usuario. Contactá al administrador para completar la vinculación.');
+          }
         } else if (params.type === 'dni') {
           console.log('🆔 Buscando por DNI...');
           // Buscar por DNI

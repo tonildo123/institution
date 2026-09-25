@@ -1,5 +1,10 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeAuth, Persistence } from 'firebase/auth';
+// Metro resuelve la exportación React Native; los tipos por defecto usan la de web.
+const { getReactNativePersistence } = require('firebase/auth') as {
+  getReactNativePersistence: (storage: typeof AsyncStorage) => Persistence;
+};
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { ENV } from '@/config/env';
@@ -27,7 +32,9 @@ console.log('🔥 Firebase Config loaded:', {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase services
-export const auth = getAuth(app);
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 

@@ -1,3 +1,4 @@
+import { MessageImage } from '@/components/MessageImage';
 import { MessageText } from '@/components/MessageText';
 import React, { useState } from 'react';
 import {
@@ -188,7 +189,7 @@ export const CommunicationDetailScreen = () => {
         {/* Notice Card */}
         <View style={styles.noticeCard}>
           <MessageText style={styles.noticeContent}>{communication.description}</MessageText>
-          <Text style={styles.leerMas}>Leer mas..</Text>
+          {communication.data?.imageUrl && <MessageImage key={communication.data.imageUrl} uri={communication.data.imageUrl} />}
         </View>
 
         {/* Read Confirmation */}

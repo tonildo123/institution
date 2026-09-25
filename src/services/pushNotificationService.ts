@@ -136,7 +136,7 @@ export async function registerDeviceToken(userId: string): Promise<string> {
     });
 
     console.log('✅ Token guardado en Firestore');
-    console.log('📋 Timestamp:', timestamp);
+    console.log('📋 Timestamp:', newToken.savedAt);
     return token;
   } catch (error) {
     console.error('❌ Error al registrar token:', error);
@@ -159,18 +159,10 @@ export function initializePushNotifications() {
       console.log('🔔 Notificación en background:', remoteMessage.notification);
     });
 
-    // Listener cuando el usuario toca la notificación
-    const unsubscribeOnNotificationOpenedApp = messaging().onNotificationOpenedApp(
-      (remoteMessage) => {
-        console.log('👆 Notificación abierta por el usuario:', remoteMessage.notification);
-      }
-    );
-
     console.log('✅ Push Notifications inicializado correctamente');
 
     return () => {
       unsubscribeOnMessage();
-      unsubscribeOnNotificationOpenedApp();
     };
   } catch (error) {
     console.error('⚠️ Error inicializando push notifications:', error);

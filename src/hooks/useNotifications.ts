@@ -13,6 +13,7 @@ export const useNotifications = () => {
 
   useEffect(() => {
     if (user?.id) {
+      const cleanup = initializePushNotifications();
       const initializeNotifications = async () => {
         try {
           console.log('🔔 Inicializando notificaciones para usuario:', user.id);
@@ -23,8 +24,7 @@ export const useNotifications = () => {
             console.log('✅ Token FCM registrado correctamente');
           }
 
-          // 2. Inicializar listeners
-          initializePushNotifications();
+
         } catch (error) {
           console.error('❌ Error inicializando notificaciones:', error);
           // Continuar sin problema, notificaciones no son críticas
@@ -32,6 +32,7 @@ export const useNotifications = () => {
       };
 
       initializeNotifications();
+      return cleanup;
     }
   }, [user?.id]);
 };
