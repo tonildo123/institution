@@ -1,11 +1,11 @@
 import { auth } from '../src/services/firebase/firebaseConfig';
-jest.mock('react-native-image-picker', () => ({ launchImageLibrary: jest.fn() }));
+jest.mock('react-native-image-picker', () => ({ launchImageLibrary: jest.fn(), launchCamera: jest.fn() }));
 jest.mock('../src/services/firebase/firebaseConfig', () => ({ auth: { currentUser: { uid: 'sender', getIdToken: jest.fn().mockResolvedValue('token') }, authStateReady: jest.fn().mockResolvedValue(undefined) }, db: {}, storage: {} }));
 jest.mock('firebase/firestore', () => ({ collection: jest.fn(), doc: jest.fn(() => ({ id: 'image-id' })) }));
 jest.mock('firebase/storage', () => ({ ref: jest.fn((_, path) => ({ bucket: 'bucket', fullPath: path })), getDownloadURL: jest.fn().mockResolvedValue('https://example.com/image') }));
-import { launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { getDownloadURL } from 'firebase/storage';
-import { pickMessageImage, uploadMessageImage } from '../src/services/messageImages';
+import { pickMessageImage, captureMessageImage, uploadMessageImage } from '../src/services/messageImages';
 const originalFetch = global.fetch;
 const originalXHR = global.XMLHttpRequest;
 const blob = { close: jest.fn() };
@@ -42,4 +42,21 @@ test('bloquea la subida sin sesión', async () => {
     await expect(uploadMessageImage(selected)).rejects.toThrow('Cerrá sesión');
     expect(fetch).not.toHaveBeenCalled();
   } finally { Object.defineProperty(auth, 'currentUser', { value: user, writable: true }); }
+});
+
+test('cámara devuelve una foto compatible con el flujo de envío', async () => {
+  (launchCamera as jest.Mock).mockResolvedValue({ assets: [{ uri: 'file://camera.jpg', type: 'image/jpeg', fileSize: 1024 }] });
+  expect(await captureMessageImage()).toEqual({ ...selected, uri: 'file://camera.jpg' });
+  expect(launchCamera).toHaveBeenCalledWith(expect.objectContaining({ mediaType: 'photo', saveToPhotos: false }));
+});
+test('cancelación de cámara conserva el borrador sin subir archivos', async () => {
+  (launchCamera as jest.Mock).mockResolvedValue({ didCancel: true });
+  expect(await captureMessageImage()).toBeNull();
+  expect(fetch).not.toHaveBeenCalled();
+});
+test('explica permiso denegado o cámara no disponible', async () => {
+  (launchCamera as jest.Mock).mockResolvedValue({ errorCode: 'permission' });
+  await expect(captureMessageImage()).rejects.toThrow('Ajustes');
+  (launchCamera as jest.Mock).mockResolvedValue({ errorCode: 'camera_unavailable' });
+  await expect(captureMessageImage()).rejects.toThrow('No hay una cámara');
 });

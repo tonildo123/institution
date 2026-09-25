@@ -53,6 +53,8 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Sacar fotos para adjuntar a los mensajes de la institución.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Seleccionar imágenes para adjuntar a comunicaciones.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>

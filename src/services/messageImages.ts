@@ -1,4 +1,4 @@
-import { launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary, launchCamera, ImagePickerResponse } from 'react-native-image-picker';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { doc, collection } from 'firebase/firestore';
 import { auth, db, storage } from './firebase/firebaseConfig';
@@ -15,8 +15,22 @@ export async function pickMessageImage(): Promise<MessageImage | null> {
     maxWidth: 1600, maxHeight: 1600, quality: 0.8,
     assetRepresentationMode: 'compatible',
   });
+  return imageFromResult(result);
+}
+
+export async function captureMessageImage(): Promise<MessageImage | null> {
+  const result = await launchCamera({
+    mediaType: 'photo', cameraType: 'back', saveToPhotos: false,
+    maxWidth: 1600, maxHeight: 1600, quality: 0.8,
+  });
+  return imageFromResult(result);
+}
+
+function imageFromResult(result: ImagePickerResponse): MessageImage | null {
   if (result.didCancel) return null;
-  if (result.errorCode) throw new Error(result.errorMessage || 'No se pudo abrir la galería');
+  if (result.errorCode === 'permission') throw new Error('Permití el acceso a la cámara en Ajustes para sacar una foto.');
+  if (result.errorCode === 'camera_unavailable') throw new Error('No hay una cámara disponible en este dispositivo.');
+  if (result.errorCode) throw new Error('No se pudo obtener la foto. Intentá nuevamente.');
   const asset = result.assets?.[0];
   if (!asset?.uri) throw new Error('No se pudo leer la imagen');
   if (!['image/jpeg', 'image/png', 'image/webp'].includes(asset.type || '')) {

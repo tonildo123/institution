@@ -1,5 +1,5 @@
 import { MessageImage as ImagePreview } from '@/components/MessageImage';
-import { pickMessageImage, uploadMessageImage, MessageImage } from '@/services/messageImages';
+import { pickMessageImage, captureMessageImage, uploadMessageImage, MessageImage } from '@/services/messageImages';
 import { AttachmentSheet } from '@/components/AttachmentSheet';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { BoldMessageInput, BoldMessageInputHandle } from '@/components/BoldMessageInput';
@@ -107,11 +107,12 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     { id: 'todos', label: 'TODOS', color: '#FF3B30' },
   ];
 
-  const handlePickImage = async () => {
+  const handlePickImage = async (source: 'gallery' | 'camera' = 'gallery') => {
+    if (pickingImage || loading) return;
     setShowAttachments(false);
     setPickingImage(true);
     try {
-      const picked = await pickMessageImage();
+      const picked = await (source === 'camera' ? captureMessageImage() : pickMessageImage());
       if (picked) { setAttachment(picked); uploadedImageRef.current = null; }
     } catch (error: any) {
       Alert.alert('Imagen', error.message || 'No se pudo seleccionar la imagen');
@@ -396,7 +397,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           )}
         </ScrollView>
 
-        {showAttachments && <AttachmentSheet onGallery={handlePickImage} onClose={() => setShowAttachments(false)} />}
+        {showAttachments && <AttachmentSheet onGallery={() => handlePickImage('gallery')} onCamera={() => handlePickImage('camera')} onClose={() => setShowAttachments(false)} />}
 
         {showEmojis && <EmojiPicker onSelect={emoji => messageInputRef.current?.insertEmoji(emoji)} onClose={() => setShowEmojis(false)} />}
 
