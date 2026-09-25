@@ -43,7 +43,7 @@ interface CommunicationsScreenProps {
 export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   type,
 }) => {
-  const user = useSelector((state: RootState) => state.auth.user);
+  
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const messageInputRef = useRef<BoldMessageInputHandle>(null);
@@ -74,32 +74,9 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const [description, setDescription] = useState('');
   const [messageInputKey, setMessageInputKey] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: '1',
-      title: 'Aviso importante',
-      description: 'Reunión de padres el viernes',
-      sender: 'Directora María',
-      date: '09:30',
-      attachment: '📎',
-    },
-    {
-      id: '2',
-      title: 'Tarea de matemática',
-      description: 'Ejercicios del capítulo 5',
-      sender: 'Prof. Juan',
-      date: 'ayer',
-      attachment: '📄',
-    },
-  ]);
+ 
 
-  // Determinar pantalla de historial según rol
-  const getHistorialRouteName = () => {
-    if (user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal') return 'HistorialAdmin';
-    if (user?.role === 'preceptor') return 'HistorialPreceptor';
-    return 'HistorialFamilia';
-  };
-
+ 
   const levels: { id: SalaLevel | 'todos'; label: string; color: string }[] = [
     { id: 'inicial', label: 'NIVEL INICIAL', color: '#FF9500' },
     { id: 'primario', label: 'NIVEL PRIMARIO', color: '#25D366' },

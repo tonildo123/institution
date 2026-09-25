@@ -112,3 +112,9 @@ To learn more about React Native, take a look at the following resources:
 - para perfil de padre / recibir mescladoz mensajes de todos sus hijos
 - recibir notificaciones con colores segun nivel inicial
 - cambiar todos por institucional
+
+#### pendiente hoy
+ - ver mensjaes en grupos
+ - ver enviar videos / audios / documentos
+
+
