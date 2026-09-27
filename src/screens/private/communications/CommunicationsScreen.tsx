@@ -1,7 +1,7 @@
 import { MessageDocument } from '@/components/MessageDocument';
 import { pickMessageDocument, uploadMessageDocument, documentMessageData, MessageDocumentFile } from '@/services/messageDocuments';
 import { isCommunicationForFamily, getDestinationLabel } from '@/utils/communicationAudience';
-import { MessageImage as ImagePreview } from '@/components/MessageImage';
+import { DraftAttachments } from '@/components/DraftAttachments';
 import { pickMessageImage, captureMessageImage, uploadMessageImage, MessageImage } from '@/services/messageImages';
 import { AttachmentSheet } from '@/components/AttachmentSheet';
 import { EmojiPicker } from '@/components/EmojiPicker';
@@ -387,6 +387,24 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             />
           </View>
 
+          <DraftAttachments disabled={loading || pickingImage} items={[
+            ...(document ? [{
+              id: document.path,
+              name: document.name,
+              detail: document.size >= 1024 * 1024
+                ? `${(document.size / (1024 * 1024)).toFixed(1)} MB`
+                : `${Math.ceil(document.size / 1024)} KB`,
+              onRemove: () => { setDocument(null); uploadedDocumentRef.current = null; },
+            }] : []),
+            ...(attachment ? [{
+              id: attachment.path,
+              name: 'Imagen adjunta',
+              detail: attachment.contentType.replace('image/', '').toUpperCase(),
+              imageUri: attachment.uri,
+              onRemove: () => { setAttachment(null); uploadedImageRef.current = null; },
+            }] : []),
+          ]} />
+
           {/* Message input label */}
           <View style={styles.messageRow}>
             <View style={[styles.chatBubble, styles.sentBubble]}>
@@ -431,22 +449,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             </TouchableOpacity>
           </View>
           {pickingImage && <ActivityIndicator color="#0c6b58" />}
-          {document && (
-            <View>
-              <MessageDocument name={document.name} size={document.size} />
-              <TouchableOpacity disabled={loading} onPress={() => { setDocument(null); uploadedDocumentRef.current = null; }} style={{ padding: 12 }}>
-                <Text style={{ color: '#B42323' }}>Quitar documento</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          {attachment && (
-            <View>
-              <ImagePreview key={attachment.path} uri={attachment.uri} />
-              <TouchableOpacity disabled={loading} onPress={() => { setAttachment(null); uploadedImageRef.current = null; }} style={{ padding: 12 }}>
-                <Text style={{ color: '#B42323' }}>Quitar imagen</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+
         </ScrollView>
 
         {showAttachments && <AttachmentSheet onDocument={handlePickDocument} onGallery={() => handlePickImage('gallery')} onCamera={() => handlePickImage('camera')} onClose={() => setShowAttachments(false)} />}

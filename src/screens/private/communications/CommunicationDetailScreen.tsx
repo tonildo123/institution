@@ -32,7 +32,6 @@ export const CommunicationDetailScreen = () => {
   const [communication, setCommunication] = useState<Communication | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
-  const [hasRead, setHasRead] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
@@ -49,7 +48,6 @@ export const CommunicationDetailScreen = () => {
       setLoading(true);
       const data = await getCommunication(communicationId);
       setCommunication(data);
-      setHasRead(true);
     } catch (error) {
       console.error('❌ Error:', error);
     } finally {
@@ -186,10 +184,11 @@ export const CommunicationDetailScreen = () => {
       </View>
 
       {/* Chat Content */}
-      <ScrollView style={styles.chatArea}>
+      <ScrollView style={styles.chatArea} contentContainerStyle={styles.chatContent}>
         {/* Notice Card */}
         <View style={styles.noticeCard}>
-          <MessageText style={styles.noticeContent}>{communication.description}</MessageText>
+          <MessageText style={styles.noticeTitle}>{communication.title}</MessageText>
+          <MessageText style={styles.noticeContent}>{communication.description || communication.body}</MessageText>
           {communication.data?.documentUrl && (
             <MessageDocument name={communication.data.documentName || 'Documento adjunto'}
               size={Number(communication.data.documentSize) || 0} url={communication.data.documentUrl} />
@@ -197,15 +196,6 @@ export const CommunicationDetailScreen = () => {
           {communication.data?.imageUrl && <MessageImage key={communication.data.imageUrl} uri={communication.data.imageUrl} />}
         </View>
 
-        {/* Read Confirmation */}
-        {hasRead && (
-          <View style={styles.confirmationRow}>
-            <View style={styles.confirmationBubble}>
-              <Text style={styles.checkmark}>✓</Text>
-              <Text style={styles.confirmationText}>Confirmación de lectura</Text>
-            </View>
-          </View>
-        )}
       </ScrollView>
 
       {/* Edit Modal */}

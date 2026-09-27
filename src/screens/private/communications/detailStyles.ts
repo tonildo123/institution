@@ -79,6 +79,9 @@ export const styles = StyleSheet.create({
   // Chat Area
   chatArea: {
     flex: 1,
+  },
+
+  chatContent: {
     paddingHorizontal: 18,
     paddingVertical: 24,
   },
@@ -91,47 +94,20 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
+  noticeTitle: {
+    fontSize: 20,
+    lineHeight: 28,
+    fontWeight: '700',
+    color: '#111',
+    marginBottom: 12,
+  },
+
   noticeContent: {
     fontSize: 16,
     lineHeight: 24,
     color: '#111',
     marginBottom: 12,
     fontWeight: '500',
-  },
-
-  leerMas: {
-    color: '#d21f1a',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-
-  // Confirmation
-  confirmationRow: {
-    justifyContent: 'flex-end',
-    marginBottom: 16,
-  },
-
-  confirmationBubble: {
-    backgroundColor: '#b6f2c1',
-    borderRadius: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    maxWidth: '82%',
-  },
-
-  checkmark: {
-    fontSize: 18,
-    color: '#111',
-    fontWeight: '700',
-  },
-
-  confirmationText: {
-    fontSize: 16,
-    color: '#111',
-    fontWeight: '600',
   },
 
   // Stats Bar
