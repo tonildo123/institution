@@ -146,7 +146,7 @@ export const HistoryScreen = () => {
             {/* Información del mensaje */}
             <View style={styles.levelInfo}>
               <View style={styles.levelTop}>
-                <Text style={styles.levelName}>{item.title}</Text>
+                <MessageText style={styles.levelName}>{item.title}</MessageText>
                 <Text style={styles.levelTime}>
                   {new Date(item.createdAt).toLocaleDateString('es-AR')} · {new Date(item.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}
                 </Text>

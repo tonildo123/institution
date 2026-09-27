@@ -97,7 +97,7 @@ export const styles = StyleSheet.create({
   noticeTitle: {
     fontSize: 20,
     lineHeight: 28,
-    fontWeight: '700',
+    fontWeight: '500',
     color: '#111',
     marginBottom: 12,
   },

@@ -14,7 +14,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   FlatList,
   Alert,
   ActivityIndicator,
@@ -377,12 +376,13 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
           {/* Input Field: Title */}
           <View style={styles.messageRow}>
-            <TextInput
+            <BoldMessageInput
+              key={`title-${messageInputKey}`}
               style={styles.titleInputBubble}
               placeholder="Escribe el titulo..."
               placeholderTextColor="#999"
-              value={title}
-              onChangeText={setTitle}
+              onMessageChange={setTitle}
+              editable={!loading}
               maxLength={100}
             />
           </View>
@@ -544,7 +544,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
             <View style={styles.levelInfo}>
               <View style={styles.levelTop}>
-                <Text style={styles.levelName}>{item.title}</Text>
+                <MessageText style={styles.levelName}>{item.title}</MessageText>
                 <Text style={styles.levelTime}>
                   {new Date(item.createdAt).toLocaleDateString('es-AR')} · {new Date(item.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}
                 </Text>
