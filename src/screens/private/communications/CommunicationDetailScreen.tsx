@@ -1,3 +1,4 @@
+import { MessageLink } from '@/components/MessageLink';
 import { MessageDocument } from '@/components/MessageDocument';
 import { MessageImage } from '@/components/MessageImage';
 import { MessageText } from '@/components/MessageText';
@@ -189,6 +190,7 @@ export const CommunicationDetailScreen = () => {
         <View style={styles.noticeCard}>
           <MessageText style={styles.noticeTitle}>{communication.title}</MessageText>
           <MessageText style={styles.noticeContent}>{communication.description || communication.body}</MessageText>
+          {communication.data?.linkUrl && <MessageLink url={communication.data.linkUrl} />}
           {communication.data?.documentUrl && (
             <MessageDocument name={communication.data.documentName || 'Documento adjunto'}
               size={Number(communication.data.documentSize) || 0} url={communication.data.documentUrl} />

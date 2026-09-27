@@ -7,6 +7,7 @@ export interface DraftAttachment {
   name: string;
   detail: string;
   imageUri?: string;
+  kind?: 'enlace';
   onRemove: () => void;
 }
 
@@ -22,7 +23,7 @@ export const DraftAttachments = ({ items, disabled }: { items: DraftAttachment[]
             {item.imageUri ? (
               <Image source={{ uri: item.imageUri }} style={styles.thumbnail} resizeMode="cover" accessibilityLabel={item.name} />
             ) : (
-              <View style={styles.documentIcon}><AttachmentIcon name="documento" /></View>
+              <View style={[styles.documentIcon, item.kind === 'enlace' && styles.linkIcon]}><AttachmentIcon name={item.kind || "documento"} /></View>
             )}
             <View style={styles.info}>
               <Text numberOfLines={1} ellipsizeMode="middle" style={styles.name}>{item.name}</Text>
@@ -44,6 +45,7 @@ const styles = StyleSheet.create({
   heading: { color: '#8f9098', fontSize: 12, fontWeight: '700', letterSpacing: 0.5, marginHorizontal: 16, marginBottom: 8 },
   list: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, gap: 12 },
   card: { width: 200, minHeight: 80, borderRadius: 16, backgroundColor: '#fff', flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
+  linkIcon: { backgroundColor: '#e2ebfc' },
   documentIcon: { width: 42, height: 42, borderRadius: 10, backgroundColor: '#fce4e3', alignItems: 'center', justifyContent: 'center' },
   thumbnail: { width: 42, height: 42, borderRadius: 10, backgroundColor: '#ded6ca' },
   info: { flex: 1 },

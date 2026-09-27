@@ -55,3 +55,14 @@ test.each([
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
   expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
 });
+
+test.each([
+  ['todos', sendCommunicationToAll], ['primario', sendCommunicationToUsers],
+])('guarda el enlace adjunto al enviar a %s', async (level, send) => {
+  const data = { type: 'communication', level, linkUrl: 'https://escuela.com/noticias' };
+  const res = response();
+  await send({ method: 'POST', body: { title: 'Enlace', body: 'Información', userId: 'admin',
+    userIds: ['family-0'], level, data } }, res);
+  expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
+  expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+});

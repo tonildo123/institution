@@ -1,3 +1,5 @@
+import { MessageLink } from '@/components/MessageLink';
+import { normalizeMessageLink } from '@/utils/messageLinks';
 import { MessageDocument } from '@/components/MessageDocument';
 import { pickMessageDocument, uploadMessageDocument, documentMessageData, MessageDocumentFile } from '@/services/messageDocuments';
 import { isCommunicationForFamily, getDestinationLabel } from '@/utils/communicationAudience';
@@ -51,6 +53,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const messageInputRef = useRef<BoldMessageInputHandle>(null);
   const [showEmojis, setShowEmojis] = useState(false);
+  const [linkUrl, setLinkUrl] = useState<string | null>(null);
   const [document, setDocument] = useState<MessageDocumentFile | null>(null);
   const uploadedDocumentRef = useRef<{ path: string; url: string } | null>(null);
   const [attachment, setAttachment] = useState<MessageImage | null>(null);
@@ -177,6 +180,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         data: {
           type: 'communication',
           ...documentData,
+          ...(linkUrl ? { linkUrl: normalizeMessageLink(linkUrl) } : {}),
           ...(imageUrl ? { imageUrl, imagePath: attachment!.path } : {}),
           level: selectedLevel,
           ...(selectedCurso ? { cursoId: selectedCurso, cursoLabel: cursos.find(curso => curso.id === selectedCurso)!.label } : {}),
@@ -195,16 +199,14 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
       console.log('✅ Comunicación enviada:', result);
 
-      Alert.alert(
-        '✅ Enviado',
-        `Mensaje enviado a ${result.delivered}/${result.totalUsers} usuarios`
-      );
+      Alert.alert('Mensaje enviado');
 
       // Limpiar campos
       setTitle('');
       setDescription('');
       setAttachment(null);
       setDocument(null);
+      setLinkUrl(null);
       uploadedDocumentRef.current = null;
       uploadedImageRef.current = null;
       setMessageInputKey(key => key + 1);
@@ -388,6 +390,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           </View>
 
           <DraftAttachments disabled={loading || pickingImage} items={[
+            ...(linkUrl ? [{ id: 'link', name: 'Enlace', detail: linkUrl, kind: 'enlace' as const,
+              onRemove: () => setLinkUrl(null) }] : []),
             ...(document ? [{
               id: document.path,
               name: document.name,
@@ -452,7 +456,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
         </ScrollView>
 
-        {showAttachments && <AttachmentSheet onDocument={handlePickDocument} onGallery={() => handlePickImage('gallery')} onCamera={() => handlePickImage('camera')} onClose={() => setShowAttachments(false)} />}
+        {showAttachments && <AttachmentSheet onLink={url => { setLinkUrl(url); setShowAttachments(false); }} onDocument={handlePickDocument} onGallery={() => handlePickImage('gallery')} onCamera={() => handlePickImage('camera')} onClose={() => setShowAttachments(false)} />}
 
         {showEmojis && <EmojiPicker onSelect={emoji => messageInputRef.current?.insertEmoji(emoji)} onClose={() => setShowEmojis(false)} />}
 
@@ -563,6 +567,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
                   {item.description}
                 </MessageText>
               </View>
+              {item.data?.linkUrl && <MessageLink url={item.data.linkUrl} />}
               {item.data?.documentUrl && (
                 <MessageDocument name={item.data.documentName || 'Documento adjunto'}
                   size={Number(item.data.documentSize) || 0} url={item.data.documentUrl} />
@@ -587,4 +592,3 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     </View>
   );
 };
-
