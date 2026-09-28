@@ -344,12 +344,6 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       >
         {/* Header */}
         <View style={styles.chatHeader}>
-          <TouchableOpacity onPress={() => {
-            navigation.goBack();
-          }}>
-            <Text style={styles.headerBackArrow}>←</Text>
-          </TouchableOpacity>
-
           <View style={styles.headerAvatar}>
             <View style={styles.avatarBadge}>
               <View style={styles.avatarBars}>

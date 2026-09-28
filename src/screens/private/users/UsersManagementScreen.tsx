@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { getAllUsers, createUser, updateUser, deleteUser } from '@/services/firebase/users';
 import { User, UserRole, CreateUserCredentials } from '@/types';
-import { useNavigation } from '@react-navigation/native';
 import { styles } from './styles';
 
 /**
@@ -22,7 +21,6 @@ import { styles } from './styles';
  */
 
 export const UsersManagementScreen = () => {
-  const navigation = useNavigation();
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -226,9 +224,6 @@ export const UsersManagementScreen = () => {
     <View style={styles.container}>
       {/* Header con botón agregar */}
       <View style={styles.header}>
-        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Volver" style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>‹</Text>
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>Gestión de Usuarios</Text>
         <TouchableOpacity
           style={styles.addButton}
