@@ -23,3 +23,9 @@ test('si no se puede renovar el token conserva el error y no consulta Firestore'
   await expect(getAllCommunications()).rejects.toEqual({ code: 'auth/network-request-failed' });
   expect(getDocsFromServer).not.toHaveBeenCalled();
 });
+
+test('Ver más amplía la consulta hasta 100, sin cargar toda la colección', async () => {
+  (getDocsFromServer as jest.Mock).mockResolvedValue({ docs: [] });
+  await getAllCommunications(100);
+  expect(limit).toHaveBeenCalledWith(100);
+});

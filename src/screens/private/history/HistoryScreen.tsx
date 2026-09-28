@@ -15,7 +15,7 @@ import { styles } from './styles';
 
 /**
  * Pantalla de Historial de Comunicaciones - Admin
- * Muestra los últimos 30 mensajes sin agrupar
+ * Muestra los últimos 30 mensajes; Ver más amplía el listado hasta 100
  * Carga mensajes reales desde Firestore
  */
 
@@ -24,6 +24,7 @@ export const HistoryScreen = () => {
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [messageLimit, setMessageLimit] = useState<30 | 100>(30);
   const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const term = search.trim().toLocaleLowerCase();
@@ -35,14 +36,14 @@ export const HistoryScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       loadCommunications();
-    }, [])
+    }, [messageLimit])
   );
 
   const loadCommunications = async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await getAllCommunications();
+      const data = await getAllCommunications(messageLimit);
       setCommunications(data);
       console.log('✅ Comunicaciones cargadas:', data.length);
     } catch (err: any) {
@@ -125,6 +126,10 @@ export const HistoryScreen = () => {
         refreshing={loading}
         onRefresh={loadCommunications}
         keyboardShouldPersistTaps="handled"
+        ListFooterComponent={messageLimit === 30 && !error ? <TouchableOpacity
+          accessibilityRole="button" style={{ padding: 20, alignItems: 'center' }} onPress={() => setMessageLimit(100)}>
+          <Text style={{ color: '#0c6b58', fontWeight: '700' }}>Ver más</Text>
+        </TouchableOpacity> : undefined}
         data={filteredCommunications}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (

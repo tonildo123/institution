@@ -283,6 +283,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   // Receive - Cargar desde Firestore con filtrado segmentado
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [loadingCommunications, setLoadingCommunications] = useState(true);
+  const [messageLimit, setMessageLimit] = useState<30 | 100>(30);
   const [loadError, setLoadError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -304,7 +305,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       const { getUserAssignedSalas } = await import('@/services/firebase/salas');
 
       const [allComms, assignedSalas] = await Promise.all([
-        getAllCommunications(),
+        getAllCommunications(messageLimit),
         currentUser?.role === 'familia' && currentUser.id ? getUserAssignedSalas(currentUser.id) : Promise.resolve({ levels: [], cursos: [] }),
       ]);
 
@@ -326,7 +327,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       setLoadingCommunications(false);
       setRefreshing(false);
     }
-  }, [currentUser?.id, currentUser?.role, currentUser?.displayName]);
+  }, [currentUser?.id, currentUser?.role, currentUser?.displayName, messageLimit]);
 
   useFocusEffect(useCallback(() => {
     if (type === 'receive') {
@@ -590,6 +591,10 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         <TouchableOpacity accessibilityRole="button" onPress={() => loadCommunicationsData(true)}><Text>Reintentar</Text></TouchableOpacity>
       </View>}
       <FlatList
+        ListFooterComponent={messageLimit === 30 && !loadError ? <TouchableOpacity
+          accessibilityRole="button" style={{ padding: 20, alignItems: 'center' }} onPress={() => setMessageLimit(100)}>
+          <Text style={{ color: '#0c6b58', fontWeight: '700' }}>Ver más</Text>
+        </TouchableOpacity> : undefined}
         data={communications}
         keyExtractor={(item) => item.id}
         refreshControl={

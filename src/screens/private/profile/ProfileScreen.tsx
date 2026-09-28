@@ -102,6 +102,16 @@ export const ProfileScreen = () => {
               <Text style={styles.actionText}>Cambiar contraseña</Text>
               <Text style={styles.chevron} accessible={false}>›</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.actionRow} accessibilityRole="button">
+              <Text style={styles.actionIcon} accessible={false}>!</Text>
+              <Text style={styles.actionText}>Reportar problema</Text>
+              <Text style={styles.chevron} accessible={false}>›</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionRow} accessibilityRole="button">
+              <Text style={[styles.actionIcon, styles.dangerText]} accessible={false}>×</Text>
+              <Text style={[styles.actionText, styles.dangerText]}>Dar de baja mi cuenta</Text>
+              <Text style={styles.chevron} accessible={false}>›</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={[styles.actionRow, styles.lastRow]} onPress={handleLogout} accessibilityRole="button">
               <Text style={[styles.actionIcon, styles.dangerText]} accessible={false}>↪</Text>
               <Text style={[styles.actionText, styles.dangerText]}>Cerrar sesión</Text>

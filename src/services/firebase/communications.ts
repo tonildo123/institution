@@ -64,9 +64,10 @@ export interface Communication {
 }
 
 /**
- * Obtener los últimos 30 comunicados; una caché vacía no confirma que no haya mensajes.
+ * Obtener los últimos 30 comunicados, o hasta 100 al ampliar el listado.
+ * Una caché vacía no confirma que no haya mensajes.
  */
-export const getAllCommunications = async (): Promise<Communication[]> => {
+export const getAllCommunications = async (maxMessages: 30 | 100 = COMMUNICATIONS_LIMIT): Promise<Communication[]> => {
   try {
     await auth.authStateReady();
     // El token puede necesitar renovarse tras restaurar la sesión.
@@ -74,7 +75,7 @@ export const getAllCommunications = async (): Promise<Communication[]> => {
     const q = query(
       collection(db, 'communications'),
       orderBy('createdAt', 'desc'),
-      limit(COMMUNICATIONS_LIMIT)
+      limit(maxMessages === 100 ? 100 : COMMUNICATIONS_LIMIT)
     );
 
     const snapshot = await getDocsFromServer(q);
