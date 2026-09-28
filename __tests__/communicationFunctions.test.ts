@@ -66,3 +66,17 @@ test.each([
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
   expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
 });
+
+
+test.each([
+  ['todos', sendCommunicationToAll], ['primario', sendCommunicationToUsers],
+])('conserva URL y duración del audio al enviar a %s', async (level, send) => {
+  const data = { type: 'communication', level, audioUrl: 'https://example.com/audio.m4a',
+    audioPath: 'communication-audios/admin/id/nota.m4a', audioName: 'Nota de voz',
+    audioSize: '2048', audioContentType: 'audio/mp4', audioDurationMs: '18200' };
+  const res = response();
+  await send({ method: 'POST', body: { title: 'Nota', body: 'Información', userId: 'admin',
+    userIds: ['family-0'], level, data } }, res);
+  expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
+  expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+});

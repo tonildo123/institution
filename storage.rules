@@ -18,6 +18,13 @@ service firebase.storage {
         ];
       allow delete: if request.auth != null && request.auth.uid == uid && sender();
     }
+    match /communication-audios/{uid}/{audioId}/{fileName} {
+      allow read: if request.auth != null && request.auth.uid == uid && sender();
+      allow create, update: if request.auth != null && request.auth.uid == uid && sender()
+        && request.resource.size > 0 && request.resource.size <= 20 * 1024 * 1024
+        && request.resource.contentType in ['audio/mpeg', 'audio/mp4', 'audio/aac', 'audio/wav'];
+      allow delete: if request.auth != null && request.auth.uid == uid && sender();
+    }
     match /communication-images/{uid}/{imageId} {
       allow read: if request.auth != null && request.auth.uid == uid && sender();
       allow create, update: if request.auth != null && request.auth.uid == uid && sender()

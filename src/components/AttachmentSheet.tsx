@@ -1,3 +1,5 @@
+import { AudioAttachmentComposer } from './AudioAttachmentComposer';
+import type { MessageAudioFile } from '../services/messageAudio';
 import { AttachmentIcon, AttachmentIconName } from './AttachmentIcon';
 import React, { useState } from 'react';
 import { normalizeMessageLink } from '../utils/messageLinks';
@@ -12,7 +14,8 @@ const options: { title: string; description: string; icon: AttachmentIconName; c
   { title: 'Enlace', description: 'Instagram, web', icon: 'enlace', color: '#3973D1', background: '#E2EBFC' },
 ];
 
-export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument, onLink }: { onClose: () => void; onGallery: () => void; onCamera: () => void; onDocument: () => void; onLink: (url: string) => void }) => {
+export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument, onLink, onAudio, onPickAudio }: { onClose: () => void; onGallery: () => void; onCamera: () => void; onDocument: () => void; onLink: (url: string) => void; onAudio: (file: MessageAudioFile) => void; onPickAudio: () => void }) => {
+  const [editingAudio, setEditingAudio] = useState(false);
   const [editingLink, setEditingLink] = useState(false);
   const [link, setLink] = useState('');
   const [error, setError] = useState('');
@@ -27,8 +30,10 @@ export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument, onLi
         <TouchableOpacity style={styles.backdrop} onPress={onClose} accessibilityLabel="Cerrar adjuntos" />
         <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16), paddingLeft: Math.max(insets.left, 16), paddingRight: Math.max(insets.right, 16) }]} accessibilityViewIsModal>
           <View style={styles.handle} />
-          <Text style={styles.title}>{editingLink ? 'Adjuntar enlace' : 'Adjuntar archivo'}</Text>
-          {editingLink ? (
+          <Text style={styles.title}>{editingAudio ? 'Adjuntar audio' : editingLink ? 'Adjuntar enlace' : 'Adjuntar archivo'}</Text>
+          {editingAudio ? (
+            <AudioAttachmentComposer onAttach={onAudio} onPick={onPickAudio} />
+          ) : editingLink ? (
             <View>
               <TextInput autoFocus value={link} onChangeText={value => { setLink(value); setError(''); }}
                 placeholder="https://www.ejemplo.com" placeholderTextColor="#888" keyboardType="url"
@@ -42,7 +47,7 @@ export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument, onLi
           ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>
             {options.map(option => (
-              <TouchableOpacity key={option.title} style={styles.option} disabled={!['galeria', 'camara', 'documento', 'enlace'].includes(option.icon)} onPress={option.icon === 'enlace' ? () => setEditingLink(true) : option.icon === 'documento' ? onDocument : option.icon === 'camara' ? onCamera : onGallery} accessibilityRole="button" accessibilityLabel={option.title}>
+              <TouchableOpacity key={option.title} style={styles.option} disabled={!['galeria', 'camara', 'documento', 'enlace', 'audio'].includes(option.icon)} onPress={option.icon === 'audio' ? () => setEditingAudio(true) : option.icon === 'enlace' ? () => setEditingLink(true) : option.icon === 'documento' ? onDocument : option.icon === 'camara' ? onCamera : onGallery} accessibilityRole="button" accessibilityLabel={option.title}>
                 <View style={[styles.iconBox, { backgroundColor: option.background }]}>
                   <AttachmentIcon name={option.icon} />
                 </View>

@@ -1,3 +1,4 @@
+import { MessageAudio } from './MessageAudio';
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AttachmentIcon } from './AttachmentIcon';
@@ -8,6 +9,8 @@ export interface DraftAttachment {
   detail: string;
   imageUri?: string;
   kind?: 'enlace';
+  audioUri?: string;
+  durationMs?: number;
   onRemove: () => void;
 }
 
@@ -20,6 +23,9 @@ export const DraftAttachments = ({ items, disabled }: { items: DraftAttachment[]
         contentContainerStyle={styles.list}>
         {items.map(item => (
           <View key={item.id} style={styles.card}>
+            {item.audioUri ? (
+              <View style={styles.audioInfo}><MessageAudio compact uri={item.audioUri} name={item.name} durationMs={item.durationMs} /></View>
+            ) : <>
             {item.imageUri ? (
               <Image source={{ uri: item.imageUri }} style={styles.thumbnail} resizeMode="cover" accessibilityLabel={item.name} />
             ) : (
@@ -29,6 +35,7 @@ export const DraftAttachments = ({ items, disabled }: { items: DraftAttachment[]
               <Text numberOfLines={1} ellipsizeMode="middle" style={styles.name}>{item.name}</Text>
               <Text numberOfLines={1} style={styles.detail}>{item.detail}</Text>
             </View>
+            </>}
             <TouchableOpacity onPress={item.onRemove} disabled={disabled} hitSlop={10}
               accessibilityRole="button" accessibilityLabel={`Quitar ${item.name}`}
               accessibilityState={{ disabled }} style={[styles.remove, disabled && styles.disabled]}>
@@ -41,6 +48,7 @@ export const DraftAttachments = ({ items, disabled }: { items: DraftAttachment[]
   );
 };
 const styles = StyleSheet.create({
+  audioInfo: { flex: 1 },
   section: { marginTop: 12, marginBottom: 12 },
   heading: { color: '#8f9098', fontSize: 12, fontWeight: '700', letterSpacing: 0.5, marginHorizontal: 16, marginBottom: 8 },
   list: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, gap: 12 },

@@ -28,6 +28,12 @@ export interface Communication {
     timestamp: string;
     imageUrl?: string;
     imagePath?: string;
+    audioUrl?: string;
+    audioPath?: string;
+    audioName?: string;
+    audioSize?: string;
+    audioContentType?: string;
+    audioDurationMs?: string;
     linkUrl?: string;
     documentUrl?: string;
     documentPath?: string;

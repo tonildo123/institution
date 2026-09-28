@@ -236,3 +236,35 @@ los documentos se abren mediante URLs de descarga de Firebase.
 Prueba manual: seleccionar y quitar un documento, cancelar el selector, enviar
 un PDF y un DOCX a un curso de prueba, abrirlos desde otra cuenta destinataria y
 comprobar nombre/tamaño. Verificar también el rechazo de archivos mayores a 20 MB.
+
+
+## Audios adjuntos en comunicaciones
+
+Desde Adjuntar → Audio se puede grabar una nota de voz (hasta 5 minutos) o
+seleccionar MP3, M4A, AAC o WAV (hasta 20 MB). Se adjunta un audio por comunicado;
+puede convivir con imagen, documento y enlace. La nota se puede escuchar antes de
+adjuntarla. El reproductor permite pausar/reanudar y muestra progreso y duración.
+Al salir de la pantalla o mandar la app al fondo se detiene la reproducción;
+la grabación se detiene al ir al fondo y se descarta al cerrar el panel sin adjuntarla.
+
+Dependencias nativas: `react-native-nitro-sound` y `react-native-nitro-modules`.
+Se agregó RECORD_AUDIO en Android y NSMicrophoneUsageDescription en iOS.
+Recompilar y reinstalar Android; en iOS instalar Pods y recompilar. Recargar Metro
+no es suficiente la primera vez. Referencia de la librería:
+https://github.com/hyochan/react-native-nitro-sound
+
+Las reglas nuevas permiten al emisor habilitado subir audio a
+`communication-audios/{uid}/{audioId}/{fileName}`. Publicarlas antes de probar:
+
+```bash
+firebase deploy --only storage --config firebase.storage.json --project institucion-59d9a
+```
+
+No se necesita cambiar las Functions: conservan en `data` los campos `audioUrl`,
+`audioPath`, `audioName`, `audioSize`, `audioContentType` y `audioDurationMs`
+(opcional para archivos importados). Se usan URLs de descarga, igual que en imágenes.
+
+Prueba con un curso de prueba y dos cuentas: permiso denegado, grabar/detener,
+escuchar antes de enviar, cancelar, importar MP3, enviar y reproducir/pausar desde
+familia. Verificar en teléfono físico Android e iOS el micrófono, volumen y el
+comportamiento al bloquear la pantalla o recibir una llamada.
