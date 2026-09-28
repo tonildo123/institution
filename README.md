@@ -113,8 +113,3 @@ To learn more about React Native, take a look at the following resources:
 - recibir notificaciones con colores segun nivel inicial
 - cambiar todos por institucional
 
-#### pendiente hoy
- - ver mensjaes en grupos
- - ver enviar videos 
-
-
