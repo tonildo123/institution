@@ -1,3 +1,4 @@
+import { LinkPreview, linkPreviewData } from '@/services/linkPreview';
 import { pickMessageAudio, uploadMessageAudio, audioMessageData, MessageAudioFile } from '@/services/messageAudio';
 import { stopAudioPlayback } from '@/services/audioPlayback';
 import { normalizeMessageLink } from '@/utils/messageLinks';
@@ -55,6 +56,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const [showEmojis, setShowEmojis] = useState(false);
   const [audio, setAudio] = useState<MessageAudioFile | null>(null);
   const uploadedAudioRef = useRef<{ path: string; url: string } | null>(null);
+  const [linkPreview, setLinkPreview] = useState<LinkPreview | null>(null);
   const [linkUrl, setLinkUrl] = useState<string | null>(null);
   const [document, setDocument] = useState<MessageDocumentFile | null>(null);
   const uploadedDocumentRef = useRef<{ path: string; url: string } | null>(null);
@@ -206,7 +208,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           type: 'communication',
           ...documentData,
           ...audioData,
-          ...(linkUrl ? { linkUrl: normalizeMessageLink(linkUrl) } : {}),
+          ...(linkUrl ? { linkUrl: normalizeMessageLink(linkUrl), ...linkPreviewData(linkPreview?.url === linkUrl ? linkPreview : null) } : {}),
           ...(imageUrl ? { imageUrl, imagePath: attachment!.path } : {}),
           level: selectedLevel,
           ...(selectedCurso ? { cursoId: selectedCurso, cursoLabel: cursos.find(curso => curso.id === selectedCurso)!.label } : {}),
@@ -235,6 +237,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       setAudio(null);
       uploadedAudioRef.current = null;
       setLinkUrl(null);
+      setLinkPreview(null);
       uploadedDocumentRef.current = null;
       uploadedImageRef.current = null;
       setMessageInputKey(key => key + 1);
@@ -421,8 +424,9 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             ...(audio ? [{ id: audio.path, name: audio.durationMs ? 'Nota de voz' : audio.name,
               detail: `${Math.ceil(audio.size / 1024)} KB`, audioUri: audio.uri, durationMs: audio.durationMs,
               onRemove: () => { setAudio(null); uploadedAudioRef.current = null; } }] : []),
-            ...(linkUrl ? [{ id: 'link', name: 'Enlace', detail: linkUrl, kind: 'enlace' as const,
-              onRemove: () => setLinkUrl(null) }] : []),
+            ...(linkUrl ? [{ id: 'link', name: linkPreview?.title || 'Enlace', detail: linkUrl, kind: 'enlace' as const,
+              imageUri: linkPreview?.imageUrl || undefined,
+              onRemove: () => { setLinkUrl(null); setLinkPreview(null); } }] : []),
             ...(document ? [{
               id: document.path,
               name: document.name,
@@ -487,7 +491,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
         </ScrollView>
 
-        {showAttachments && <AttachmentSheet onAudio={file => { setAudio(file); uploadedAudioRef.current = null; setShowAttachments(false); }} onPickAudio={handlePickAudio} onLink={url => { setLinkUrl(url); setShowAttachments(false); }} onDocument={handlePickDocument} onGallery={() => handlePickImage('gallery')} onCamera={() => handlePickImage('camera')} onClose={() => setShowAttachments(false)} />}
+        {showAttachments && <AttachmentSheet onAudio={file => { setAudio(file); uploadedAudioRef.current = null; setShowAttachments(false); }} onPickAudio={handlePickAudio} onLink={(url, preview) => { setLinkUrl(url); setLinkPreview(preview); setShowAttachments(false); }} onDocument={handlePickDocument} onGallery={() => handlePickImage('gallery')} onCamera={() => handlePickImage('camera')} onClose={() => setShowAttachments(false)} />}
 
         {showEmojis && <EmojiPicker onSelect={emoji => messageInputRef.current?.insertEmoji(emoji)} onClose={() => setShowEmojis(false)} />}
 

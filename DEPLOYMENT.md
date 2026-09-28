@@ -268,3 +268,29 @@ Prueba con un curso de prueba y dos cuentas: permiso denegado, grabar/detener,
 escuchar antes de enviar, cancelar, importar MP3, enviar y reproducir/pausar desde
 familia. Verificar en teléfono físico Android e iOS el micrófono, volumen y el
 comportamiento al bloquear la pantalla o recibir una llamada.
+
+## Vista previa de enlaces
+
+Al adjuntar un enlace, la app consulta sus metadatos Open Graph y muestra imagen,
+título, descripción y dominio. La vista previa se guarda con el comunicado y se
+muestra en su detalle; los listados siguen sin mostrar adjuntos. Si el sitio no
+ofrece metadatos o bloquea la consulta, el enlace puede enviarse y abrirse igual.
+Los mensajes anteriores conservan su enlace simple: para guardar una vista previa
+hay que adjuntarlo en un nuevo comunicado.
+
+Publicar la nueva función y la actualización de las funciones de envío:
+
+```bash
+npm --prefix functions run build
+firebase deploy --only functions:getLinkPreview,functions:sendCommunicationToAll,functions:sendCommunicationToUsers --project institucion-59d9a
+```
+
+`getLinkPreview` requiere un emisor autenticado y habilitado, limita las consultas
+a 20 por minuto y usuario, y rechaza destinos privados, incluso en redirecciones.
+Las notificaciones transportan el identificador del comunicado; sus adjuntos y
+metadatos completos permanecen en Firestore.
+
+Este cambio no agrega dependencias nativas ni modifica Storage. En desarrollo
+basta recargar la app después del despliegue; para distribuirlo, incluir el código
+actualizado en la siguiente versión. Probar un enlace con imagen, otro sin
+metadatos, cambiarlo antes de adjuntar y abrir el comunicado desde una familia.

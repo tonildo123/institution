@@ -35,6 +35,10 @@ export interface Communication {
     audioContentType?: string;
     audioDurationMs?: string;
     linkUrl?: string;
+    linkDomain?: string;
+    linkTitle?: string;
+    linkDescription?: string;
+    linkImageUrl?: string;
     documentUrl?: string;
     documentPath?: string;
     documentName?: string;

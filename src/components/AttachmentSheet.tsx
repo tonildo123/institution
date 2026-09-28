@@ -1,9 +1,11 @@
+import { MessageLink } from './MessageLink';
+import { getLinkPreview, LinkPreview } from '../services/linkPreview';
 import { AudioAttachmentComposer } from './AudioAttachmentComposer';
 import type { MessageAudioFile } from '../services/messageAudio';
 import { AttachmentIcon, AttachmentIconName } from './AttachmentIcon';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { normalizeMessageLink } from '../utils/messageLinks';
-import { Modal, View, Text, TouchableOpacity, ScrollView, StyleSheet, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, ScrollView, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const options: { title: string; description: string; icon: AttachmentIconName; color: string; background: string }[] = [
@@ -14,13 +16,33 @@ const options: { title: string; description: string; icon: AttachmentIconName; c
   { title: 'Enlace', description: 'Instagram, web', icon: 'enlace', color: '#3973D1', background: '#E2EBFC' },
 ];
 
-export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument, onLink, onAudio, onPickAudio }: { onClose: () => void; onGallery: () => void; onCamera: () => void; onDocument: () => void; onLink: (url: string) => void; onAudio: (file: MessageAudioFile) => void; onPickAudio: () => void }) => {
+export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument, onLink, onAudio, onPickAudio }: { onClose: () => void; onGallery: () => void; onCamera: () => void; onDocument: () => void; onLink: (url: string, preview: LinkPreview | null) => void; onAudio: (file: MessageAudioFile) => void; onPickAudio: () => void }) => {
   const [editingAudio, setEditingAudio] = useState(false);
   const [editingLink, setEditingLink] = useState(false);
   const [link, setLink] = useState('');
   const [error, setError] = useState('');
+  const [preview, setPreview] = useState<LinkPreview | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  useEffect(() => {
+    let active = true;
+    setPreview(null);
+    setPreviewLoading(false);
+    let url: string;
+    try { url = normalizeMessageLink(link); } catch { return; }
+    if (!editingLink) return;
+    setPreviewLoading(true);
+    const timer = setTimeout(() => {
+      void getLinkPreview(url).then(result => {
+        if (active) { setPreview(result); setPreviewLoading(false); }
+      });
+    }, 650);
+    return () => { active = false; clearTimeout(timer); };
+  }, [link, editingLink]);
   const saveLink = () => {
-    try { onLink(normalizeMessageLink(link)); }
+    try {
+      const url = normalizeMessageLink(link);
+      onLink(url, preview?.url === url ? preview : null);
+    }
     catch (err) { setError(err instanceof Error ? err.message : 'Enlace inválido'); }
   };
   const insets = useSafeAreaInsets();
@@ -34,16 +56,18 @@ export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument, onLi
           {editingAudio ? (
             <AudioAttachmentComposer onAttach={onAudio} onPick={onPickAudio} />
           ) : editingLink ? (
-            <View>
+            <ScrollView keyboardShouldPersistTaps="handled">
               <TextInput autoFocus value={link} onChangeText={value => { setLink(value); setError(''); }}
                 placeholder="https://www.ejemplo.com" placeholderTextColor="#888" keyboardType="url"
                 autoCapitalize="none" autoCorrect={false} maxLength={1500} returnKeyType="done"
-                onSubmitEditing={saveLink} accessibilityLabel="Dirección del enlace" style={styles.linkInput} />
+                onSubmitEditing={() => { if (!previewLoading) saveLink(); }} accessibilityLabel="Dirección del enlace" style={styles.linkInput} />
+              {previewLoading && <ActivityIndicator color="#0c6b58" style={{ marginTop: 12 }} accessibilityLabel="Cargando vista previa" />}
+              {preview && <MessageLink url={preview.url} preview={preview} />}
               {Boolean(error) && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
-              <TouchableOpacity onPress={saveLink} style={styles.saveLink} accessibilityRole="button">
+              <TouchableOpacity onPress={saveLink} disabled={previewLoading} style={[styles.saveLink, previewLoading && { opacity: 0.5 }]} accessibilityRole="button">
                 <Text style={styles.saveLinkText}>Agregar enlace</Text>
               </TouchableOpacity>
-            </View>
+            </ScrollView>
           ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>
             {options.map(option => (

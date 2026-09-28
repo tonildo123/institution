@@ -192,7 +192,7 @@ export const CommunicationDetailScreen = () => {
           <MessageText style={styles.noticeTitle}>{communication.title}</MessageText>
           <MessageText style={styles.noticeContent}>{communication.description || communication.body}</MessageText>
           {communication.data?.audioUrl && <MessageAudio uri={communication.data.audioUrl} name={communication.data.audioName || 'Audio adjunto'} durationMs={Number(communication.data.audioDurationMs) || 0} />}
-          {communication.data?.linkUrl && <MessageLink url={communication.data.linkUrl} />}
+          {communication.data?.linkUrl && <MessageLink url={communication.data.linkUrl} preview={{ title: communication.data.linkTitle, description: communication.data.linkDescription, imageUrl: communication.data.linkImageUrl }} />}
           {communication.data?.documentUrl && (
             <MessageDocument name={communication.data.documentName || 'Documento adjunto'}
               size={Number(communication.data.documentSize) || 0} url={communication.data.documentUrl} />

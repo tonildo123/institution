@@ -1,3 +1,4 @@
+const mockSend = jest.fn().mockResolvedValue('message-id');
 const mockSet = jest.fn().mockResolvedValue(undefined);
 const mockUpdate = jest.fn().mockResolvedValue(undefined);
 const mockUsers = Array.from({ length: 35 }, (_, i) => ({ id: `family-${i}`, exists: true, data: () => ({ pushTokens: [] }) }));
@@ -9,7 +10,8 @@ jest.mock('firebase-functions', () => ({ https: { onRequest: (handler: unknown) 
 jest.mock('firebase-admin', () => ({}), { virtual: true });
 jest.mock('firebase-admin/app', () => ({ initializeApp: jest.fn() }), { virtual: true });
 jest.mock('firebase-admin/firestore', () => ({ getFirestore: () => mockDb }), { virtual: true });
-jest.mock('firebase-admin/messaging', () => ({ getMessaging: () => ({ send: jest.fn() }) }), { virtual: true });
+jest.mock('firebase-admin/messaging', () => ({ getMessaging: () => ({ send: mockSend }) }), { virtual: true });
+jest.mock('../functions/src/getLinkPreview.js', () => ({}), { virtual: true });
 jest.mock('../functions/src/createManagedUser.js', () => ({}), { virtual: true });
 const { sendCommunicationToAll, sendCommunicationToUsers } = require('../functions/src/index');
 const response = () => { const res: any = { set: jest.fn(), json: jest.fn(), send: jest.fn() }; res.status = jest.fn(() => res); return res; };
@@ -79,4 +81,16 @@ test.each([
     userIds: ['family-0'], level, data } }, res);
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
   expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+});
+
+
+test('guarda la vista previa completa y mantiene pequeña la notificación push', async () => {
+  const data = { type: 'communication', linkUrl: 'https://example.com', linkTitle: 'Noticia',
+    linkDescription: 'Descripción', linkImageUrl: 'https://example.com/foto.jpg' };
+  const spy = jest.spyOn(mockUsers[0], 'data').mockReturnValue({ pushTokens: ['token'] } as any);
+  try {
+    await sendCommunicationToAll({ method: 'POST', body: { title: 'Aviso', body: 'Texto', userId: 'admin', data } }, response());
+    expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
+    expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({ data: { type: 'communication', communicationId: 'communication' } }));
+  } finally { spy.mockRestore(); }
 });

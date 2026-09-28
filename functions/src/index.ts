@@ -101,7 +101,7 @@ export const sendCommunicationToAll = functions.https.onRequest(
                 body,
               },
               data: {
-                ...additionalData,
+                type: 'communication',
                 communicationId: communicationRef.id,
               },
               android: {
@@ -249,7 +249,7 @@ export const sendCommunicationToUsers = functions.https.onRequest(
                 body,
               },
               data: {
-                ...additionalData,
+                type: 'communication',
                 communicationId: communicationRef.id,
               },
               android: {
@@ -328,3 +328,5 @@ export const healthCheck = functions.https.onRequest(
 );
 
 export { createManagedUser } from './createManagedUser.js';
+
+export { getLinkPreview } from "./getLinkPreview.js";

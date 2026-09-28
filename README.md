@@ -115,6 +115,6 @@ To learn more about React Native, take a look at the following resources:
 
 #### pendiente hoy
  - ver mensjaes en grupos
- - ver enviar videos / audios / documentos
+ - ver enviar videos 
 
 
