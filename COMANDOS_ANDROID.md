@@ -58,3 +58,16 @@ npm start -- --reset-cache
 ```
 
 Si se agregó una librería nativa, recompilar con `npm run android -- --list-devices`; recargar Metro no alcanza.
+
+### Emulador sin conexión a Firebase (fallo DNS)
+
+Si `auth/network-request-failed` aparece solo en el emulador y no puede resolver
+`securetoken.googleapis.com`, cerrar el AVD y arrancarlo en frío con DNS explícito:
+
+```bash
+$ANDROID_HOME/emulator/emulator -avd Pixel_10 -dns-server 8.8.8.8,8.8.4.4 -no-snapshot-load
+adb -s emulator-5554 reverse tcp:8081 tcp:8081
+```
+
+Este arranque conserva aplicaciones y datos. Ajustar el nombre del AVD si cambia.
+No borrar la base de datos ni cerrar sesión para resolver un problema de DNS.

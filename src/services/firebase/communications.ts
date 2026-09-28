@@ -1,10 +1,20 @@
 import {
   collection,
-  getDocs,
+  getDocsFromServer,
+  limit,
   query,
   orderBy,
 } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { auth, db } from './firebaseConfig';
+
+export const COMMUNICATIONS_LIMIT = 30;
+export function communicationLoadError(error: unknown): string {
+  const code = (error as { code?: string })?.code;
+  if (['unavailable', 'auth/network-request-failed', 'deadline-exceeded'].includes(code || '')) {
+    return 'No se pudo conectar con Firebase. Revisá la conexión y tocá Reintentar.';
+  }
+  return 'No se pudieron cargar las comunicaciones. Intentá nuevamente.';
+}
 
 export interface Communication {
   id: string;
@@ -54,16 +64,20 @@ export interface Communication {
 }
 
 /**
- * Obtener todas las comunicaciones ordenadas por fecha
+ * Obtener los últimos 30 comunicados; una caché vacía no confirma que no haya mensajes.
  */
 export const getAllCommunications = async (): Promise<Communication[]> => {
   try {
+    await auth.authStateReady();
+    // El token puede necesitar renovarse tras restaurar la sesión.
+    await auth.currentUser?.getIdToken();
     const q = query(
       collection(db, 'communications'),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(COMMUNICATIONS_LIMIT)
     );
 
-    const snapshot = await getDocs(q);
+    const snapshot = await getDocsFromServer(q);
 
     return snapshot.docs.map((doc) => {
       const data = doc.data();

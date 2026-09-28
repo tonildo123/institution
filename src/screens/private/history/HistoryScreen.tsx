@@ -10,12 +10,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { getAllCommunications, Communication } from '@/services/firebase/communications';
+import { getAllCommunications, communicationLoadError, Communication } from '@/services/firebase/communications';
 import { styles } from './styles';
 
 /**
  * Pantalla de Historial de Comunicaciones - Admin
- * Muestra TODOS los mensajes sin filtrar ni agrupar (como familia)
+ * Muestra los últimos 30 mensajes sin agrupar
  * Carga mensajes reales desde Firestore
  */
 
@@ -47,7 +47,7 @@ export const HistoryScreen = () => {
       console.log('✅ Comunicaciones cargadas:', data.length);
     } catch (err: any) {
       console.error('❌ Error:', err);
-      setError('Error al cargar comunicaciones');
+      setError(communicationLoadError(err));
     } finally {
       setLoading(false);
     }
@@ -113,6 +113,7 @@ export const HistoryScreen = () => {
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity onPress={loadCommunications} accessibilityRole="button"><Text>Reintentar</Text></TouchableOpacity>
         </View>
       )}
 
@@ -121,6 +122,8 @@ export const HistoryScreen = () => {
           <ActivityIndicator size="large" color="#0c6b58" />
         </View>
       ) : <FlatList
+        refreshing={loading}
+        onRefresh={loadCommunications}
         keyboardShouldPersistTaps="handled"
         data={filteredCommunications}
         keyExtractor={(item) => item.id}
@@ -169,7 +172,7 @@ export const HistoryScreen = () => {
           </TouchableOpacity>
         )}
         contentContainerStyle={styles.levelListContent}
-        ListEmptyComponent={
+        ListEmptyComponent={error ? undefined :
           <View style={{ padding: 20, alignItems: 'center' }}>
             <Text style={{ color: '#999' }}>{term ? 'No se encontraron comunicaciones' : 'No hay comunicaciones'}</Text>
           </View>

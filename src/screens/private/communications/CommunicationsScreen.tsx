@@ -1,3 +1,4 @@
+import { communicationLoadError } from '@/services/firebase/communications';
 import { pickMessageVideo, uploadMessageVideo, videoMessageData, MessageVideoFile } from '@/services/messageVideo';
 import { LinkPreview, linkPreviewData } from '@/services/linkPreview';
 import { pickMessageAudio, uploadMessageAudio, audioMessageData, MessageAudioFile } from '@/services/messageAudio';
@@ -282,9 +283,11 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   // Receive - Cargar desde Firestore con filtrado segmentado
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [loadingCommunications, setLoadingCommunications] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
   const loadCommunicationsData = useCallback(async (isRefreshing = false) => {
+    setLoadError('');
     try {
       if (isRefreshing) {
         setRefreshing(true);
@@ -317,8 +320,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         console.log('✅ Todas las comunicaciones cargadas:', allComms.length);
       }
     } catch (error) {
-      setCommunications([]);
-      Alert.alert('Error', 'No se pudieron cargar las comunicaciones. Intentá nuevamente.');
+      setLoadError(communicationLoadError(error));
       console.error('❌ Error loading communications:', error);
     } finally {
       setLoadingCommunications(false);
@@ -583,6 +585,10 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         <Text style={styles.receiveHeaderTitle}>IMEP</Text>
       </View>
 
+      {Boolean(loadError) && <View style={{ padding: 16 }}>
+        <Text accessibilityRole="alert">{loadError}</Text>
+        <TouchableOpacity accessibilityRole="button" onPress={() => loadCommunicationsData(true)}><Text>Reintentar</Text></TouchableOpacity>
+      </View>}
       <FlatList
         data={communications}
         keyExtractor={(item) => item.id}
@@ -636,7 +642,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           </TouchableOpacity>
         )}
         contentContainerStyle={styles.levelListContent}
-        ListEmptyComponent={
+        ListEmptyComponent={loadError ? undefined :
           <View style={{ padding: 30, alignItems: 'center' }}>
             <Text style={{ fontSize: 16, fontWeight: '600', color: '#666', marginBottom: 6 }}>
               Sin comunicaciones
