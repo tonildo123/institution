@@ -3,6 +3,7 @@ import { SvgXml } from 'react-native-svg';
 
 // Geometría y colores de los SVG originales en assets/icons/attachments.
 const icons = {
+  video: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#3973D1" stroke-width="2"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="M16 10l6-4v12l-6-4z"/></svg>',
   "audio": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" stroke=\"#5B21B6\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" xmlns:c2pa=\"http://c2pa.org/manifest\">\n  <rect x=\"9\" y=\"2\" width=\"6\" height=\"12\" rx=\"3\"/>\n  <path d=\"M5 10a7 7 0 0014 0\"/>\n  <path d=\"M12 17v4\"/>\n  <path d=\"M8 21h8\"/>\n</svg>\n",
   "camara": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" stroke=\"#3CAA5C\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" xmlns:c2pa=\"http://c2pa.org/manifest\">\n  <path d=\"M4 8h3l1.5-2h7L17 8h3a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z\"/>\n  <circle cx=\"12\" cy=\"13\" r=\"3.3\"/>\n</svg>\n",
   "documento": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" stroke=\"#C62828\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" xmlns:c2pa=\"http://c2pa.org/manifest\">\n  <path d=\"M14 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V8z\"/>\n  <path d=\"M14 2v6h6\"/>\n</svg>\n",

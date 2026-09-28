@@ -94,3 +94,16 @@ test('guarda la vista previa completa y mantiene pequeña la notificación push'
     expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({ data: { type: 'communication', communicationId: 'communication' } }));
   } finally { spy.mockRestore(); }
 });
+
+test.each([
+  ['todos', sendCommunicationToAll], ['primario', sendCommunicationToUsers],
+])('conserva URL y metadatos del video al enviar a %s', async (level, send) => {
+  const data = { type: 'communication', level, videoUrl: 'https://example.com/video.mp4',
+    videoPath: 'communication-videos/admin/id/video.mp4', videoName: 'video.mp4',
+    videoSize: '2048', videoContentType: 'video/mp4', videoDurationMs: '12000' };
+  const res = response();
+  await send({ method: 'POST', body: { title: 'Video', body: 'Información', userId: 'admin',
+    userIds: ['family-0'], level, data } }, res);
+  expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
+  expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+});

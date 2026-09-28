@@ -1,3 +1,4 @@
+import { pickMessageVideo, uploadMessageVideo, videoMessageData, MessageVideoFile } from '@/services/messageVideo';
 import { LinkPreview, linkPreviewData } from '@/services/linkPreview';
 import { pickMessageAudio, uploadMessageAudio, audioMessageData, MessageAudioFile } from '@/services/messageAudio';
 import { stopAudioPlayback } from '@/services/audioPlayback';
@@ -54,6 +55,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const messageInputRef = useRef<BoldMessageInputHandle>(null);
   const [showEmojis, setShowEmojis] = useState(false);
+  const [video, setVideo] = useState<MessageVideoFile | null>(null);
+  const uploadedVideoRef = useRef<{ path: string; url: string } | null>(null);
   const [audio, setAudio] = useState<MessageAudioFile | null>(null);
   const uploadedAudioRef = useRef<{ path: string; url: string } | null>(null);
   const [linkPreview, setLinkPreview] = useState<LinkPreview | null>(null);
@@ -132,6 +135,18 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     } finally { setPickingImage(false); }
   };
 
+  const handlePickVideo = async () => {
+    if (pickingImage || loading) return;
+    setShowAttachments(false);
+    setPickingImage(true);
+    try {
+      const picked = await pickMessageVideo();
+      if (picked) { setVideo(picked); uploadedVideoRef.current = null; }
+    } catch (error: any) {
+      Alert.alert('Video', error.message || 'No se pudo seleccionar el video.');
+    } finally { setPickingImage(false); }
+  };
+
   const handleSend = async () => {
     if (loading || pickingImage) return;
     if (!title.trim()) {
@@ -197,6 +212,16 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           uploadedAudioRef.current = { path: audio.path, url: audioUrl };
         } finally { setUploadingImage(false); }
       }
+      let videoData: Record<string, string> = {};
+      if (video) {
+        setUploadingImage(true);
+        try {
+          const videoUrl = uploadedVideoRef.current?.path === video.path
+            ? uploadedVideoRef.current.url : await uploadMessageVideo(video);
+          videoData = videoMessageData(video, videoUrl);
+          uploadedVideoRef.current = { path: video.path, url: videoUrl };
+        } finally { setUploadingImage(false); }
+      }
       const messagePayload = {
         level: selectedLevel,
         cursoId: selectedCurso || null,
@@ -208,6 +233,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           type: 'communication',
           ...documentData,
           ...audioData,
+          ...videoData,
           ...(linkUrl ? { linkUrl: normalizeMessageLink(linkUrl), ...linkPreviewData(linkPreview?.url === linkUrl ? linkPreview : null) } : {}),
           ...(imageUrl ? { imageUrl, imagePath: attachment!.path } : {}),
           level: selectedLevel,
@@ -234,6 +260,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       setDescription('');
       setAttachment(null);
       setDocument(null);
+      setVideo(null);
+      uploadedVideoRef.current = null;
       setAudio(null);
       uploadedAudioRef.current = null;
       setLinkUrl(null);
@@ -421,6 +449,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           </View>
 
           <DraftAttachments disabled={loading || pickingImage} items={[
+            ...(video ? [{ id: video.path, name: video.name, detail: 'Video', videoUri: video.uri, size: video.size,
+              onRemove: () => { setVideo(null); uploadedVideoRef.current = null; } }] : []),
             ...(audio ? [{ id: audio.path, name: audio.durationMs ? 'Nota de voz' : audio.name,
               detail: `${Math.ceil(audio.size / 1024)} KB`, audioUri: audio.uri, durationMs: audio.durationMs,
               onRemove: () => { setAudio(null); uploadedAudioRef.current = null; } }] : []),
@@ -491,7 +521,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
         </ScrollView>
 
-        {showAttachments && <AttachmentSheet onAudio={file => { setAudio(file); uploadedAudioRef.current = null; setShowAttachments(false); }} onPickAudio={handlePickAudio} onLink={(url, preview) => { setLinkUrl(url); setLinkPreview(preview); setShowAttachments(false); }} onDocument={handlePickDocument} onGallery={() => handlePickImage('gallery')} onCamera={() => handlePickImage('camera')} onClose={() => setShowAttachments(false)} />}
+        {showAttachments && <AttachmentSheet onVideo={handlePickVideo} onAudio={file => { setAudio(file); uploadedAudioRef.current = null; setShowAttachments(false); }} onPickAudio={handlePickAudio} onLink={(url, preview) => { setLinkUrl(url); setLinkPreview(preview); setShowAttachments(false); }} onDocument={handlePickDocument} onGallery={() => handlePickImage('gallery')} onCamera={() => handlePickImage('camera')} onClose={() => setShowAttachments(false)} />}
 
         {showEmojis && <EmojiPicker onSelect={emoji => messageInputRef.current?.insertEmoji(emoji)} onClose={() => setShowEmojis(false)} />}
 

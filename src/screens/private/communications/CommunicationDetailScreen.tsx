@@ -1,3 +1,4 @@
+import { MessageVideo } from '@/components/MessageVideo';
 import { MessageAudio } from '@/components/MessageAudio';
 import { MessageLink } from '@/components/MessageLink';
 import { MessageDocument } from '@/components/MessageDocument';
@@ -191,6 +192,7 @@ export const CommunicationDetailScreen = () => {
         <View style={styles.noticeCard}>
           <MessageText style={styles.noticeTitle}>{communication.title}</MessageText>
           <MessageText style={styles.noticeContent}>{communication.description || communication.body}</MessageText>
+          {communication.data?.videoUrl && <MessageVideo uri={communication.data.videoUrl} name={communication.data.videoName} size={Number(communication.data.videoSize) || undefined} />}
           {communication.data?.audioUrl && <MessageAudio uri={communication.data.audioUrl} name={communication.data.audioName || 'Audio adjunto'} durationMs={Number(communication.data.audioDurationMs) || 0} />}
           {communication.data?.linkUrl && <MessageLink url={communication.data.linkUrl} preview={{ title: communication.data.linkTitle, description: communication.data.linkDescription, imageUrl: communication.data.linkImageUrl }} />}
           {communication.data?.documentUrl && (

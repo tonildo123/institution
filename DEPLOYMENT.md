@@ -294,3 +294,32 @@ Este cambio no agrega dependencias nativas ni modifica Storage. En desarrollo
 basta recargar la app después del despliegue; para distribuirlo, incluir el código
 actualizado en la siguiente versión. Probar un enlace con imagen, otro sin
 metadatos, cambiarlo antes de adjuntar y abrir el comunicado desde una familia.
+
+
+## Videos adjuntos
+
+Adjuntar → Video permite seleccionar un MP4, MOV o M4V de hasta 50 MB desde la
+galería. Se admite un video por comunicado, junto con los demás adjuntos. La
+selección muestra nombre, tamaño, reproducción y opción de quitar. El detalle
+recibido ofrece un reproductor con controles; los listados no muestran adjuntos.
+La reproducción se cierra al salir de la pantalla o pasar la app al fondo.
+La compatibilidad de codecs depende del dispositivo; MP4 con H.264/AAC es la
+opción más portable. No se agrega grabación de cámara ni compresión de videos.
+
+Se agregó `react-native-video` 6: recompilar y reinstalar Android e iOS. En iOS,
+instalar Pods antes de compilar. Las Functions ya conservan los campos `videoUrl`,
+`videoPath`, `videoName`, `videoSize`, `videoContentType` y `videoDurationMs` en
+`data`, por lo que no requieren un nuevo despliegue.
+
+Antes de probar subidas, publicar las reglas de Storage para la ruta
+`communication-videos/{uid}/{videoId}/{fileName}`:
+
+```bash
+firebase deploy --only storage --config firebase.storage.json --project institucion-59d9a
+```
+
+Prueba en teléfonos físicos Android e iOS: cancelar selección, seleccionar y
+quitar, previsualizar, enviar a un curso de prueba, reproducir como familia,
+pausar/adelantar/cerrar, salir de la pantalla y bloquear el teléfono. Comprobar
+el rechazo de archivos mayores a 50 MB y el error de conexión. Una subida fallida
+conserva el borrador y no envía el comunicado.

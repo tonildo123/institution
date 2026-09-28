@@ -10,13 +10,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const options: { title: string; description: string; icon: AttachmentIconName; color: string; background: string }[] = [
   { title: 'Documento', description: 'PDF, Word, Excel', icon: 'documento', color: '#C92329', background: '#FCE4E3' },
-  { title: 'Galería', description: 'Fotos y videos', icon: 'galeria', color: '#F3A52B', background: '#FDF0DC' },
+  { title: 'Galería', description: 'Fotos', icon: 'galeria', color: '#F3A52B', background: '#FDF0DC' },
+  { title: 'Video', description: 'Hasta 50 MB', icon: 'video', color: '#3973D1', background: '#E2EBFC' },
   { title: 'Cámara', description: 'Sacar una foto', icon: 'camara', color: '#31AB58', background: '#E0F1E5' },
   { title: 'Audio', description: 'Nota de voz o MP3', icon: 'audio', color: '#6424C7', background: '#EFE7FC' },
   { title: 'Enlace', description: 'Instagram, web', icon: 'enlace', color: '#3973D1', background: '#E2EBFC' },
 ];
 
-export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument, onLink, onAudio, onPickAudio }: { onClose: () => void; onGallery: () => void; onCamera: () => void; onDocument: () => void; onLink: (url: string, preview: LinkPreview | null) => void; onAudio: (file: MessageAudioFile) => void; onPickAudio: () => void }) => {
+export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument, onLink, onAudio, onPickAudio, onVideo }: { onVideo: () => void; onClose: () => void; onGallery: () => void; onCamera: () => void; onDocument: () => void; onLink: (url: string, preview: LinkPreview | null) => void; onAudio: (file: MessageAudioFile) => void; onPickAudio: () => void }) => {
   const [editingAudio, setEditingAudio] = useState(false);
   const [editingLink, setEditingLink] = useState(false);
   const [link, setLink] = useState('');
@@ -71,7 +72,7 @@ export const AttachmentSheet = ({ onClose, onGallery, onCamera, onDocument, onLi
           ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>
             {options.map(option => (
-              <TouchableOpacity key={option.title} style={styles.option} disabled={!['galeria', 'camara', 'documento', 'enlace', 'audio'].includes(option.icon)} onPress={option.icon === 'audio' ? () => setEditingAudio(true) : option.icon === 'enlace' ? () => setEditingLink(true) : option.icon === 'documento' ? onDocument : option.icon === 'camara' ? onCamera : onGallery} accessibilityRole="button" accessibilityLabel={option.title}>
+              <TouchableOpacity key={option.title} style={styles.option} disabled={!['galeria', 'camara', 'documento', 'enlace', 'audio', 'video'].includes(option.icon)} onPress={option.icon === 'video' ? onVideo : option.icon === 'audio' ? () => setEditingAudio(true) : option.icon === 'enlace' ? () => setEditingLink(true) : option.icon === 'documento' ? onDocument : option.icon === 'camara' ? onCamera : onGallery} accessibilityRole="button" accessibilityLabel={option.title}>
                 <View style={[styles.iconBox, { backgroundColor: option.background }]}>
                   <AttachmentIcon name={option.icon} />
                 </View>

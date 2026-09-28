@@ -1,3 +1,4 @@
+import { MessageVideo } from './MessageVideo';
 import { MessageAudio } from './MessageAudio';
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -9,6 +10,8 @@ export interface DraftAttachment {
   detail: string;
   imageUri?: string;
   kind?: 'enlace';
+  videoUri?: string;
+  size?: number;
   audioUri?: string;
   durationMs?: number;
   onRemove: () => void;
@@ -23,7 +26,7 @@ export const DraftAttachments = ({ items, disabled }: { items: DraftAttachment[]
         contentContainerStyle={styles.list}>
         {items.map(item => (
           <View key={item.id} style={styles.card}>
-            {item.audioUri ? (
+            {item.videoUri ? <View style={styles.audioInfo}><MessageVideo compact uri={item.videoUri} name={item.name} size={item.size} /></View> : item.audioUri ? (
               <View style={styles.audioInfo}><MessageAudio compact uri={item.audioUri} name={item.name} durationMs={item.durationMs} /></View>
             ) : <>
             {item.imageUri ? (

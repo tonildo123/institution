@@ -47,7 +47,7 @@ export async function uploadMessageImage(image: MessageImage): Promise<string> {
   return uploadMessageFile(image, 'communication-images', 5 * 1024 * 1024);
 }
 
-export async function uploadMessageFile(file: MessageImage, folder: 'communication-images' | 'communication-documents' | 'communication-audios', maxSize: number): Promise<string> {
+export async function uploadMessageFile(file: MessageImage, folder: 'communication-images' | 'communication-documents' | 'communication-audios' | 'communication-videos', maxSize: number): Promise<string> {
   await auth.authStateReady();
   if (!auth.currentUser) {
     throw new Error('Cerrá sesión e ingresá con tu cuenta habilitada en Firebase Auth para enviar archivos.');
