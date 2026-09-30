@@ -1,3 +1,4 @@
+import { cursoDisplayLabel } from '@/utils/cursoDisplayLabel';
 import { communicationLoadError } from '@/services/firebase/communications';
 import { pickMessageVideo, uploadMessageVideo, videoMessageData, MessageVideoFile } from '@/services/messageVideo';
 import { LinkPreview, linkPreviewData } from '@/services/linkPreview';
@@ -407,7 +408,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
                 <TouchableOpacity key={curso.id || 'nivel'} disabled={loading} onPress={() => setSelectedCurso(curso.id)}>
                   <View style={styles.messageRow}>
                     <View style={[styles.chatBubble, styles.receivedBubble]}>
-                      <Text style={styles.bubbleText}>{curso.label}</Text>
+                      <Text style={styles.bubbleText}>{cursoDisplayLabel(curso.label)}</Text>
                       <Text style={styles.chevron}>{selectedCurso === curso.id ? '✓' : ''}</Text>
                     </View>
                   </View>
@@ -524,7 +525,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
         {managingCourse && selectedLevel !== 'todos' && selectedCurso && (
           <FamiliasModal level={selectedLevel} cursoId={selectedCurso}
-            label={cursos.find(curso => curso.id === selectedCurso)!.label}
+            label={cursoDisplayLabel(cursos.find(curso => curso.id === selectedCurso)!.label)}
             onClose={() => setManagingCourse(false)} />
         )}
 

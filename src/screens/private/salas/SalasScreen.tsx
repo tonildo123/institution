@@ -1,3 +1,4 @@
+import { cursoDisplayLabel } from '@/utils/cursoDisplayLabel';
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { getCursos, SalaLevel } from '@/services/firebase/salas';
@@ -32,8 +33,8 @@ export const SalasScreen = () => {
               <Text style={styles.dropdown}>{expanded === sala.id ? '▲' : '▼'}</Text>
             </TouchableOpacity>
             {expanded === sala.id && getCursos(sala.id).map(curso => (
-              <TouchableOpacity key={curso.id} style={styles.cursoButton} onPress={() => setTarget({ level: sala.id, cursoId: curso.id, label: curso.label })}>
-                <Text style={styles.salaLabel}>{curso.label}</Text>
+              <TouchableOpacity key={curso.id} style={styles.cursoButton} onPress={() => setTarget({ level: sala.id, cursoId: curso.id, label: cursoDisplayLabel(curso.label) })}>
+                <Text style={styles.salaLabel}>{cursoDisplayLabel(curso.label)}</Text>
                 <Text style={styles.addButton}>+</Text>
               </TouchableOpacity>
             ))}

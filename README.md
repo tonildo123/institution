@@ -113,3 +113,9 @@ To learn more about React Native, take a look at the following resources:
 - recibir notificaciones con colores segun nivel inicial
 - cambiar todos por institucional
 
+
+# Agregar
+- Mensajes de audios transcriptos
+- Roles combinados - selector de pantallas
+- Dejar funcional "Dar de baja mi cuenta"
+- Reportar problema
