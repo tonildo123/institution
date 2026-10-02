@@ -10,7 +10,11 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { getAllUsers, createUser, updateUser, deleteUser } from '@/services/firebase/users';
 import { User, UserRole, CreateUserCredentials } from '@/types';
 import { styles } from './styles';
@@ -115,7 +119,7 @@ export const UsersManagementScreen = () => {
             await deleteUser(userId);
             setUsers(users.filter((u) => u.id !== userId));
             Alert.alert('Éxito', 'Usuario eliminado');
-          } catch (err: any) {
+          } catch {
             Alert.alert('Error', 'No se pudo eliminar el usuario');
           } finally {
             setSaving(false);
@@ -368,176 +372,193 @@ export const UsersManagementScreen = () => {
       />
 
       {/* Modal para crear/editar */}
-      <Modal visible={showModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {selectedUser ? 'Editar Usuario' : 'Nuevo Usuario'}
-              </Text>
-              <TouchableOpacity onPress={() => setShowModal(false)} disabled={saving}>
-                <Text style={styles.closeButton}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.formContainer}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Nombre Completo</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ej: Juan Pérez"
-                  placeholderTextColor="#999"
-                  value={formData.displayName}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, displayName: text })
-                  }
-                  editable={!saving}
-                />
-              </View>
-
-              {!selectedUser && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Rol</Text>
-                  <View style={styles.roleButtons}>
-                    {['admin', 'preceptor', 'familia', 'equipo directivo', 'representante legal'].map((role) => (
-                      <TouchableOpacity
-                        key={role}
-                        style={[
-                          styles.roleButton,
-                          formData.role === role &&
-                            styles.roleButtonActive,
-                        ]}
-                        onPress={() =>
-                          setFormData({ ...formData, role: role as any })
-                        }
-                      >
-                        <Text
-                          style={[
-                            styles.roleButtonText,
-                            formData.role === role &&
-                              styles.roleButtonActiveText,
-                          ]}
-                        >
-                          {getRoleLabel(role)}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+      <Modal
+        visible={showModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => { if (!saving) setShowModal(false); }}
+      >
+        <SafeAreaProvider>
+          <SafeAreaView style={styles.modalOverlay} edges={['top', 'left', 'right']}>
+            <KeyboardAvoidingView
+              style={styles.modalKeyboardContainer}
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+              <SafeAreaView style={styles.modalContent} edges={['bottom']}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>
+                    {selectedUser ? 'Editar Usuario' : 'Nuevo Usuario'}
+                  </Text>
+                  <TouchableOpacity onPress={() => setShowModal(false)} disabled={saving}>
+                    <Text style={styles.closeButton}>✕</Text>
+                  </TouchableOpacity>
                 </View>
-              )}
 
-              {formData.role !== 'familia' && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Email</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="usuario@institucion.com"
-                    placeholderTextColor="#999"
-                    value={formData.email}
-                    onChangeText={(text) =>
-                      setFormData({ ...formData, email: text })
-                    }
-                    editable={!saving}
-                    keyboardType="email-address"
-                  />
-                </View>
-              )}
-
-              {formData.role === 'familia' && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>DNI</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="12345678"
-                    placeholderTextColor="#999"
-                    value={formData.dni}
-                    onChangeText={(text) =>
-                      setFormData({ ...formData, dni: text })
-                    }
-                    editable={!saving}
-                    keyboardType="numeric"
-                  />
-                </View>
-              )}
-
-              {!selectedUser && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Contraseña</Text>
-                  <View style={styles.passwordWrapper}>
+                <ScrollView
+                  style={styles.formContainer}
+                  keyboardShouldPersistTaps="handled"
+                  keyboardDismissMode="on-drag"
+                >
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Nombre Completo</Text>
                     <TextInput
-                      style={[styles.input, styles.passwordInput]}
-                      placeholder="••••••••"
+                      style={styles.input}
+                      placeholder="Ej: Juan Pérez"
                       placeholderTextColor="#999"
-                      value={formData.password}
-                      onChangeText={text => setFormData({ ...formData, password: text })}
+                      value={formData.displayName}
+                      onChangeText={(text) =>
+                        setFormData({ ...formData, displayName: text })
+                      }
                       editable={!saving}
-                      secureTextEntry={!showPassword}
-                      autoCapitalize="none"
-                      autoCorrect={false}
                     />
+                  </View>
+
+                  {!selectedUser && (
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>Rol</Text>
+                      <View style={styles.roleButtons}>
+                        {['admin', 'preceptor', 'familia', 'equipo directivo', 'representante legal'].map((role) => (
+                          <TouchableOpacity
+                            key={role}
+                            style={[
+                              styles.roleButton,
+                              formData.role === role &&
+                                styles.roleButtonActive,
+                            ]}
+                            onPress={() =>
+                              setFormData({ ...formData, role: role as any })
+                            }
+                          >
+                            <Text
+                              style={[
+                                styles.roleButtonText,
+                                formData.role === role &&
+                                  styles.roleButtonActiveText,
+                              ]}
+                            >
+                              {getRoleLabel(role)}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+
+                  {formData.role !== 'familia' && (
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>Email</Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="usuario@institucion.com"
+                        placeholderTextColor="#999"
+                        value={formData.email}
+                        onChangeText={(text) =>
+                          setFormData({ ...formData, email: text })
+                        }
+                        editable={!saving}
+                        keyboardType="email-address"
+                      />
+                    </View>
+                  )}
+
+                  {formData.role === 'familia' && (
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>DNI</Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="12345678"
+                        placeholderTextColor="#999"
+                        value={formData.dni}
+                        onChangeText={(text) =>
+                          setFormData({ ...formData, dni: text })
+                        }
+                        editable={!saving}
+                        keyboardType="numeric"
+                      />
+                    </View>
+                  )}
+
+                  {!selectedUser && (
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>Contraseña</Text>
+                      <View style={styles.passwordWrapper}>
+                        <TextInput
+                          style={[styles.input, styles.passwordInput]}
+                          placeholder="••••••••"
+                          placeholderTextColor="#999"
+                          value={formData.password}
+                          onChangeText={text => setFormData({ ...formData, password: text })}
+                          editable={!saving}
+                          secureTextEntry={!showPassword}
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                        />
+                        <TouchableOpacity
+                          style={styles.passwordToggle}
+                          onPress={() => setShowPassword(visible => !visible)}
+                          disabled={saving}
+                          accessibilityRole="button"
+                          accessibilityLabel={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        >
+                          <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#536073" strokeWidth={1.8}>
+                            <Path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                            <Circle cx={12} cy={12} r={3} />
+                            {showPassword && <Line x1={3} y1={3} x2={21} y2={21} />}
+                          </Svg>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  )}
+
+                  <View
+                    style={[
+                      styles.inputGroup,
+                      {
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      },
+                    ]}
+                  >
+                    <Text style={styles.label}>Estado</Text>
                     <TouchableOpacity
-                      style={styles.passwordToggle}
-                      onPress={() => setShowPassword(visible => !visible)}
+                      style={[
+                        styles.toggleButton,
+                        {
+                          backgroundColor: formData.isEnabled
+                            ? '#25D366'
+                            : '#ccc',
+                        },
+                      ]}
+                      onPress={() =>
+                        setFormData({
+                          ...formData,
+                          isEnabled: !formData.isEnabled,
+                        })
+                      }
                       disabled={saving}
-                      accessibilityRole="button"
-                      accessibilityLabel={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     >
-                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#536073" strokeWidth={1.8}>
-                        <Path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
-                        <Circle cx={12} cy={12} r={3} />
-                        {showPassword && <Line x1={3} y1={3} x2={21} y2={21} />}
-                      </Svg>
+                      <Text style={styles.toggleButtonText}>
+                        {formData.isEnabled ? 'Activo' : 'Inactivo'}
+                      </Text>
                     </TouchableOpacity>
                   </View>
-                </View>
-              )}
 
-              <View
-                style={[
-                  styles.inputGroup,
-                  {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  },
-                ]}
-              >
-                <Text style={styles.label}>Estado</Text>
+                </ScrollView>
+
                 <TouchableOpacity
-                  style={[
-                    styles.toggleButton,
-                    {
-                      backgroundColor: formData.isEnabled
-                        ? '#25D366'
-                        : '#ccc',
-                    },
-                  ]}
-                  onPress={() =>
-                    setFormData({
-                      ...formData,
-                      isEnabled: !formData.isEnabled,
-                    })
-                  }
+                  style={[styles.saveButton, saving && { opacity: 0.6 }]}
+                  onPress={handleSaveUser}
                   disabled={saving}
                 >
-                  <Text style={styles.toggleButtonText}>
-                    {formData.isEnabled ? 'Activo' : 'Inactivo'}
+                  <Text style={styles.saveButtonText}>
+                    {saving ? 'Guardando...' : 'Guardar'}
                   </Text>
                 </TouchableOpacity>
-              </View>
-
-              <TouchableOpacity
-                style={[styles.saveButton, saving && { opacity: 0.6 }]}
-                onPress={handleSaveUser}
-                disabled={saving}
-              >
-                <Text style={styles.saveButtonText}>
-                  {saving ? 'Guardando...' : 'Guardar'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+              </SafeAreaView>
+            </KeyboardAvoidingView>
+          </SafeAreaView>
+        </SafeAreaProvider>
       </Modal>
     </View>
   );

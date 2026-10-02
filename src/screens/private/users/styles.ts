@@ -44,10 +44,15 @@ export const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+
+  modalKeyboardContainer: {
+    flex: 1,
     justifyContent: 'flex-end',
   },
 
   modalContent: {
+    maxHeight: '95%',
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -74,7 +79,7 @@ export const styles = StyleSheet.create({
   },
 
   formContainer: {
-    maxHeight: '80%',
+    flexShrink: 1,
   },
 
   inputGroup: {

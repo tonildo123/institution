@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../viandas"
+		},
+		{
+			"path": "../../../../mobile/getteup"
+		}
+	],
+	"settings": {}
+}
