@@ -119,3 +119,8 @@ To learn more about React Native, take a look at the following resources:
 - Roles combinados - selector de pantallas
 - Dejar funcional "Dar de baja mi cuenta"
 - Reportar problema
+- agrgear mas salas (institucional[docentes- nivel inicial - docentes nivel primario - doc nivel sec, [PRIMARIA] todos los docentes, docentes materia especial- docente, deparatamento de ingles, personal no docente]
+    , solo a docentes, etc [ a definir])
+- agregar bloqueo de pantalla
+- Quitar editar mensaje
+- eliminar mensaje - consultar / si queda por rol

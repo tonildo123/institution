@@ -2,6 +2,62 @@
 
 Ejecutar desde la carpeta `institucion`.
 
+## Generar APK para instalar o compartir
+
+El APK `release` incluye el código JavaScript y los recursos: funciona sin Metro
+y sin conectar el teléfono a la computadora.
+
+### Preparación
+
+- Usar Node.js 22.11 o superior y JDK 17.
+- Tener Android SDK instalado con Android Studio. El proyecto usa SDK y Build Tools
+  37, y NDK `27.1.12297006`.
+- Si todavía no están instaladas las dependencias, ejecutar `npm ci`.
+- Tener la configuración de Firebase del proyecto, incluido
+  `android/app/google-services.json`.
+- Configurar la ubicación del SDK en `android/local.properties`. En esta Mac:
+
+  ```properties
+  sdk.dir=/Users/xetro/Library/Android/sdk
+  ```
+
+  En otra computadora, ajustar la ruta. Este archivo es local y está excluido de Git.
+
+### Compilar
+
+Desde la carpeta `institucion`:
+
+```bash
+cd android
+./gradlew :app:assembleRelease
+cd ..
+```
+
+Esperar el mensaje `BUILD SUCCESSFUL`. La primera compilación puede demorar más
+porque descarga dependencias y compila las librerías nativas.
+
+El APK queda en:
+
+```text
+android/app/build/outputs/apk/release/app-release.apk
+```
+
+Se puede compartir ese archivo para instalarlo en un teléfono Android.
+Para instalar o actualizar por USB, reemplazar `ID_DISPOSITIVO` por el identificador
+que muestra `adb devices -l`:
+
+```bash
+adb -s ID_DISPOSITIVO install -r android/app/build/outputs/apk/release/app-release.apk
+```
+
+La opción `-r` conserva los datos al actualizar una instalación con firma compatible.
+Cada vez que se cambie el código, volver a compilar y reinstalar el APK.
+
+**Firma actual:** la variante `release` usa `android/app/debug.keystore`, según
+`android/app/build.gradle`. Este APK sirve para pruebas y distribución interna.
+Para publicar en Google Play, configurar una clave de firma propia y generar el
+artefacto de publicación correspondiente.
+
 ## Ver dispositivos conectados
 
 ```bash
