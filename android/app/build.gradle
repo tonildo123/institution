@@ -72,6 +72,18 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+// Local credentials are never committed. CI may supply the same names as env vars.
+def uploadProperties = new Properties()
+def uploadPropertiesFile = rootProject.file("keystore.properties")
+if (uploadPropertiesFile.exists()) {
+    uploadPropertiesFile.withInputStream { uploadProperties.load(it) }
+}
+def uploadValue = { name -> System.getenv(name) ?: uploadProperties.getProperty(name) }
+def uploadNames = ["INSTITUCION_UPLOAD_STORE_FILE", "INSTITUCION_UPLOAD_STORE_PASSWORD",
+                   "INSTITUCION_UPLOAD_KEY_ALIAS", "INSTITUCION_UPLOAD_KEY_PASSWORD"]
+def hasUploadSigning = uploadNames.every { uploadValue(it) }
+def uploadStore = uploadValue("INSTITUCION_UPLOAD_STORE_FILE")
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -82,10 +94,18 @@ android {
         applicationId "com.institucion"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode providers.gradleProperty("APP_VERSION_CODE").get().toInteger()
+        versionName providers.gradleProperty("APP_VERSION_NAME").get()
     }
     signingConfigs {
+        release {
+            if (hasUploadSigning) {
+                storeFile rootProject.file(uploadStore)
+                storePassword uploadValue("INSTITUCION_UPLOAD_STORE_PASSWORD")
+                keyAlias uploadValue("INSTITUCION_UPLOAD_KEY_ALIAS")
+                keyPassword uploadValue("INSTITUCION_UPLOAD_KEY_PASSWORD")
+            }
+        }
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'
@@ -98,12 +118,38 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+            debuggable false
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
+        internal {
+            initWith release
+            signingConfig signingConfigs.debug
+            matchingFallbacks = ["release"]
+        }
+    }
+}
+
+// Fail before packaging instead of silently producing an unsigned/debug-signed release.
+def validateUploadSigning = tasks.register("validateUploadSigning") {
+    doLast {
+        def missing = uploadNames.findAll { !uploadValue(it) }
+        if (!missing.empty) {
+            throw new GradleException("Falta configurar la firma de publicación: ${missing.join(', ')}. Ver PUBLICAR_ANDROID.md.")
+        }
+        if (!rootProject.file(uploadStore).isFile()) {
+            throw new GradleException("No existe el keystore configurado. Ver PUBLICAR_ANDROID.md.")
+        }
+        if (rootProject.file(uploadStore).canonicalFile == file("debug.keystore").canonicalFile ||
+            uploadValue("INSTITUCION_UPLOAD_KEY_ALIAS").equalsIgnoreCase("androiddebugkey")) {
+            throw new GradleException("Release requiere una clave de carga propia; no se admite la clave debug.")
+        }
+    }
+}
+tasks.configureEach {
+    if (name == "preReleaseBuild" || name == "validateSigningRelease") {
+        dependsOn(validateUploadSigning)
     }
 }
 

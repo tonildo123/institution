@@ -1,3 +1,12 @@
+# Institución
+
+## Android: pruebas y Google Play
+
+- [Comandos Android y APK de pruebas](COMANDOS_ANDROID.md)
+- [Configurar firma y generar el AAB para Google Play](PUBLICAR_ANDROID.md)
+- `npm run android:apk`: APK de pruebas que funciona sin Metro.
+- `npm run android:aab`: AAB de publicación; requiere configurar la clave de carga.
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started

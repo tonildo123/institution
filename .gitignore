@@ -84,3 +84,10 @@ yarn-error.log
 firebase-debug.log*
 google-services.json
 GoogleService-Info.plist
+
+# Android publication credentials and artifacts
+/android/keystore.properties
+*.jks
+*.p12
+*.aab
+*.apk
