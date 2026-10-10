@@ -1,5 +1,11 @@
 # Institución
 
+## iOS: Apple Developer y App Store Connect
+
+- [Configuración inicial, ejecución en iOS y TestFlight](PUBLICAR_IOS.md)
+- Abrir `ios/institucion.xcworkspace` en Xcode.
+- `npm run ios`: ejecutar en simulador con Metro; requiere completar Firebase iOS.
+
 ## Android: pruebas y Google Play
 
 - [Comandos Android y APK de pruebas](COMANDOS_ANDROID.md)
