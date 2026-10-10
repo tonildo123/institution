@@ -88,6 +88,23 @@ export async function registerDeviceToken(userId: string): Promise<string> {
       return '';
     }
 
+    if (Platform.OS === 'ios') {
+      if (!messaging().isDeviceRegisteredForRemoteMessages) {
+        await messaging().registerDeviceForRemoteMessages();
+      }
+
+      // APNs puede completar el registro después del permiso o del primer login.
+      let apnsToken = await messaging().getAPNSToken();
+      for (let attempt = 0; !apnsToken && attempt < 20; attempt += 1) {
+        await new Promise<void>(resolve => setTimeout(resolve, 500));
+        apnsToken = await messaging().getAPNSToken();
+      }
+      if (!apnsToken) {
+        console.warn('⚠️ APNs aún no registró el dispositivo. Reintentá al ingresar nuevamente.');
+        return '';
+      }
+    }
+
     // Obtener el token FCM
     console.log('📱 Obteniendo FCM token...');
     const token = await messaging().getToken();
@@ -152,11 +169,6 @@ export function initializePushNotifications() {
     // Listener en primer plano
     const unsubscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
       console.log('📲 Notificación en primer plano:', remoteMessage.notification);
-    });
-
-    // Handler en background
-    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      console.log('🔔 Notificación en background:', remoteMessage.notification);
     });
 
     console.log('✅ Push Notifications inicializado correctamente');

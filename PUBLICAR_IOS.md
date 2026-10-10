@@ -5,9 +5,8 @@
 - Nombre visible en iOS: **IMEP**.
 - Bundle ID en Debug y Release: `com.imep.institucional`.
 - Team ID: `8JZ4SGUJ5R`.
-- Firma automática habilitada en el proyecto. Falta agregar la cuenta a Xcode
-  para que pueda obtener los certificados y perfiles. El Bundle ID fue registrado
-  en Apple Developer, según confirmación del titular.
+- Firma automática habilitada y cuenta conectada en Xcode. El Bundle ID fue
+  registrado en Apple Developer y se verificó la firma en el iPhone.
 
 ## Integración de Firebase
 
@@ -18,8 +17,12 @@ Los pods se instalaron con CocoaPods 1.16.2 (`cd ios` y `pod install`); el
 entorno actual de Bundler requiere reparar sus gems antes de usar
 `bundle exec pod install`.
 
-Pendiente: habilitar las capabilities de notificaciones y cargar la clave APNs
-en Firebase para probar la entrega en un dispositivo físico.
+Push Notifications y Background Modes → Remote notifications están habilitados.
+El handler de background se registra desde `index.js` y el registro de tokens
+solicita permisos después del login. La compilación firmada y la instalación
+en iPhone fueron verificadas, incluyendo `aps-environment = development`.
+La clave APNs fue cargada en Firebase y el usuario confirmó la recepción de
+una push enviada desde Firebase Console y otra desde el script de prueba.
 
 ## Validación realizada
 
@@ -28,16 +31,19 @@ en Firebase para probar la entrega en un dispositivo físico.
 - Simulador apagado para liberar memoria.
 - Compilación Debug firmada para iPhone físico: correcta, con `-jobs 1`.
 - App instalada y proceso iniciado en el iPhone conectado.
-- Pendiente de comprobar visualmente el login y los flujos; las notificaciones
-  requieren completar APNs.
+- Login y recepción de push confirmados por el usuario.
+- Pendiente: envío desde las Cloud Functions de comunicaciones y apertura de
+  la comunicación al tocar la notificación.
+- Pendiente: validar la compilación y las notificaciones en TestFlight.
 
 ## Estado inicial
 
 El proyecto usa React Native y tiene un workspace en `ios/institucion.xcworkspace`.
 Abrir siempre el workspace, que incluye las dependencias de CocoaPods.
 
-Antes de ejecutar la app hay que completar Firebase nativo: el código utiliza
-`@react-native-firebase/messaging`, incluso al iniciar la navegación.
+En un checkout nuevo, restaurar `ios/institucion/GoogleService-Info.plist`,
+que está excluido de Git. El código utiliza `@react-native-firebase/messaging`,
+incluso al iniciar la navegación.
 
 ## 1. Cuenta y firma en Xcode
 
@@ -113,6 +119,22 @@ xcodebuild -workspace ios/institucion.xcworkspace -scheme institucion \
 
 Comprobar inicio de sesión, comunicaciones, adjuntos, audio y notificaciones.
 Validar las notificaciones también en un iPhone físico.
+
+## Prueba dirigida a un token
+
+El script envía una sola notificación mediante FCM HTTP v1 y no crea una
+comunicación ni llama a las Cloud Functions. El token se recibe por variable
+de entorno, sin guardarlo en el archivo:
+
+```sh
+FCM_AUTH_SOURCE=firebase-cli FCM_DEVICE_TOKEN='TOKEN_DEL_DISPOSITIVO' \
+  node functions/scripts/send-test-push.mjs
+```
+
+Requiere una sesión de `firebase login` con permisos de envío en el proyecto.
+La opción `firebase-cli` utiliza una API interna del CLI instalado, que puede
+cambiar al actualizarlo. Sin esa opción, usa `gcloud auth print-access-token`
+y requiere una sesión de `gcloud auth login` con los mismos permisos.
 
 ## 4. App Store Connect y TestFlight
 
