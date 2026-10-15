@@ -84,6 +84,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   }, [keepMessageVisible]);
 
   const [selectedLevel, setSelectedLevel] = useState<SalaLevel | 'todos'>('todos');
+  const [expandedLevel, setExpandedLevel] = useState<SalaLevel | null>(null);
   const [selectedCurso, setSelectedCurso] = useState<string | undefined>();
   const [managingCourse, setManagingCourse] = useState(false);
   const isTeacher = currentUser?.role === 'preceptor';
@@ -97,11 +98,12 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
     setTeacherError(false);
     setTeacherCursos([]);
     setSelectedLevel('todos');
+    setExpandedLevel(null);
     setSelectedCurso(undefined);
     getTeacherCursos(currentUser.id).then(assigned => {
       if (!active) return;
       setTeacherCursos(assigned);
-      if (assigned[0]) { setSelectedLevel(assigned[0].level); setSelectedCurso(assigned[0].id); }
+      if (assigned[0]) { setSelectedLevel(assigned[0].level); setExpandedLevel(assigned[0].level); setSelectedCurso(assigned[0].id); }
     }).catch(() => { if (active) setTeacherError(true); })
       .finally(() => { if (active) setTeacherLoading(false); });
     return () => { active = false; };
@@ -394,46 +396,56 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
           {isTeacher && <Text style={styles.bubbleText}>{teacherLoading ? 'Cargando tus salas...' : teacherError ? 'No se pudieron cargar tus salas. Volvé a abrir esta pantalla.' : teacherCursos.length === 0 ? 'No tenés salas asignadas. Solicitá la asignación a la institución.' : 'Elegí una de tus salas asignadas.'}</Text>}
           {/* Level options */}
           {levels.filter(level => !isTeacher || teacherCursos.some(curso => curso.level === level.id)).map((level) => (
-            <TouchableOpacity
-              key={level.id}
-              disabled={loading}
-              onPress={() => { setSelectedLevel(level.id); setSelectedCurso(isTeacher ? teacherCursos.find(curso => curso.level === level.id)?.id : undefined); }}
-            >
-              <View style={styles.messageRow}>
-                <View style={[styles.chatBubble, styles.receivedBubble, { width: '90%' }]}>
-                  <View
-                    style={[styles.levelSwatch, { backgroundColor: level.color }]}
-                  />
-                  <Text style={styles.bubbleText}>{level.label}</Text>
-                  <Text style={styles.chevron}>{selectedLevel === level.id ? '✓' : ''}</Text>
+            <View key={level.id}>
+              <TouchableOpacity
+                disabled={loading}
+                accessibilityRole="button"
+                accessibilityState={level.id !== 'todos' ? { expanded: expandedLevel === level.id } : undefined}
+                onPress={() => {
+                  setExpandedLevel(current => level.id === 'todos' || current === level.id ? null : level.id);
+                  if (selectedLevel !== level.id) {
+                    setSelectedLevel(level.id);
+                    setSelectedCurso(isTeacher ? teacherCursos.find(curso => curso.level === level.id)?.id : undefined);
+                  }
+                }}
+              >
+                <View style={styles.messageRow}>
+                  <View style={[styles.chatBubble, styles.receivedBubble, { width: '90%' }]}>
+                    <View
+                      style={[styles.levelSwatch, { backgroundColor: level.color }]}
+                    />
+                    <Text style={styles.bubbleText}>{level.label}</Text>
+                    <Text style={styles.chevron}>{selectedLevel === level.id ? '✓' : ''}</Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
 
-          {cursos.length > 0 && (
-            <View>
-              {(isTeacher ? cursos : [{ id: undefined, label: 'TODO EL NIVEL' }, ...cursos]).map(curso => (
-                <TouchableOpacity key={curso.id || 'nivel'} disabled={loading} onPress={() => setSelectedCurso(curso.id)}>
-                  <View style={styles.messageRow}>
-                    <View style={[styles.chatBubble, styles.receivedBubble]}>
-                      <Text style={styles.bubbleText}>{cursoDisplayLabel(curso.label)}</Text>
-                      <Text style={styles.chevron}>{selectedCurso === curso.id ? '✓' : ''}</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
-              {!isTeacher && selectedCurso && !selectedCurso.startsWith('turno-') && (
-                <TouchableOpacity disabled={loading} onPress={() => setManagingCourse(true)}>
-                  <View style={styles.messageRow}>
-                    <View style={[styles.chatBubble, styles.receivedBubble]}>
-                      <Text style={styles.bubbleText}>+ Agregar / ver familias y docentes</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
+              {expandedLevel === level.id && cursos.length > 0 && (
+                <View>
+                  {(isTeacher ? cursos : [{ id: undefined, label: 'TODO EL NIVEL' }, ...cursos]).map(curso => (
+                    <TouchableOpacity key={curso.id || 'nivel'} disabled={loading} onPress={() => setSelectedCurso(curso.id)}>
+                      <View style={styles.messageRow}>
+                        <View style={[styles.chatBubble, styles.receivedBubble]}>
+                          <Text style={styles.bubbleText}>{cursoDisplayLabel(curso.label)}</Text>
+                          <Text style={styles.chevron}>{selectedCurso === curso.id ? '✓' : ''}</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                  {!isTeacher && selectedCurso && !selectedCurso.startsWith('turno-') && (
+                    <TouchableOpacity disabled={loading} onPress={() => setManagingCourse(true)}>
+                      <View style={styles.messageRow}>
+                        <View style={[styles.chatBubble, styles.receivedBubble]}>
+                          <Text style={styles.bubbleText}>+ Agregar / ver familias y docentes</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                </View>
               )}
+
             </View>
-          )}
+          ))}
 
           {/* Input: Titulo del mensaje */}
           <View style={styles.messageRow}>
