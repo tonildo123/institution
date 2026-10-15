@@ -115,6 +115,7 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
 
+  passwordSection: { marginTop: 24 },
   salaSelector: { marginBottom: 20 },
   levelOptions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginVertical: 12 },
   levelOption: { padding: 10, borderWidth: 1, borderColor: '#ddd', borderRadius: 8 },

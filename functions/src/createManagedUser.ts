@@ -3,7 +3,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 const managerRoles = ['admin', 'equipo directivo', 'representante legal'];
-const emailRoles = [...managerRoles, 'preceptor'];
+const emailRoles = [...managerRoles, 'preceptor', 'familia'];
 
 export const createManagedUser = functions.https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'Ingresá con una cuenta administrativa de Firebase Auth');
@@ -17,21 +17,24 @@ export const createManagedUser = functions.https.onCall(async (data, context) =>
   const email = typeof data?.email === 'string' ? data.email.trim().toLowerCase() : '';
   const password = typeof data?.password === 'string' ? data.password : '';
   const role = data?.role;
+  const dni = typeof data?.dni === 'string' ? data.dni.trim() : '';
+  const family = role === 'familia';
   const isEnabled = data?.isEnabled ?? true;
   if (!displayName || displayName.length > 120 || !emailRoles.includes(role) ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 ||
+      (family ? !/^\d{7,8}$/.test(dni) : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) || email.length > 254 ||
       password.length < 6 || password.length > 128 || typeof isEnabled !== 'boolean') {
     throw new functions.https.HttpsError('invalid-argument', 'Revisá nombre, email, rol y contraseña (6 a 128 caracteres)');
   }
 
   // No apropiarse de perfiles anteriores que todavía esperan migración a Auth.
-  const existing = await db.collection('users').where('email', '==', email).limit(1).get();
+  const existing = await db.collection('users').where(family ? 'dni' : 'email', '==', family ? dni : email).limit(1).get();
   if (!existing.empty) throw new functions.https.HttpsError('already-exists', 'Ya existe un perfil con ese email');
 
   const auth = getAuth();
   let account;
   try {
-    account = await auth.createUser({ email, password, displayName, disabled: !isEnabled });
+    const familyId = family ? db.collection('users').doc().id : undefined;
+    account = await auth.createUser({ ...(familyId ? { uid: familyId } : {}), email: familyId ? `${familyId}@familias.imep.invalid` : email, password, displayName, disabled: !isEnabled });
   } catch (error: any) {
     if (error.code === 'auth/email-already-exists') {
       throw new functions.https.HttpsError('already-exists', 'Ya existe una cuenta con ese email');
@@ -44,7 +47,7 @@ export const createManagedUser = functions.https.onCall(async (data, context) =>
 
   const now = Timestamp.now();
   const profile = {
-    id: account.uid, email, displayName, role, isEnabled,
+    id: account.uid, ...(family ? { dni, ...(email ? { email } : {}) } : { email }), displayName, role, isEnabled,
     pushTokens: [], createdAt: now, updatedAt: now,
     ...(isEnabled ? { enabledAt: now } : {}),
   };

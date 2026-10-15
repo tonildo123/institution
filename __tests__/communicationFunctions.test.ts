@@ -2,41 +2,45 @@ const mockSend = jest.fn().mockResolvedValue('message-id');
 const mockSet = jest.fn().mockResolvedValue(undefined);
 const mockUpdate = jest.fn().mockResolvedValue(undefined);
 const mockUsers = Array.from({ length: 35 }, (_, i) => ({ id: `family-${i}`, exists: true, data: () => ({ pushTokens: [] }) }));
+const mockVerifyToken = jest.fn().mockResolvedValue({ uid: 'admin' });
+const mockActor = jest.fn().mockResolvedValue({ exists: true, data: () => ({ role: 'admin', isEnabled: true }) });
 const mockGetAll = jest.fn(async (...ids: string[]) => mockUsers.filter(user => ids.includes(user.id)));
 const mockDb = { getAll: mockGetAll, collection: (name: string) => name === 'users'
-  ? { get: async () => ({ docs: mockUsers, size: mockUsers.length }), doc: (id: string) => id }
+  ? { get: async () => ({ docs: mockUsers, size: mockUsers.length }), doc: (id: string) => id === 'admin' ? { get: mockActor } : id }
   : { doc: () => ({ id: 'communication', set: mockSet, update: mockUpdate }) } };
 jest.mock('firebase-functions', () => ({ https: { onRequest: (handler: unknown) => handler } }), { virtual: true });
+jest.mock('firebase-admin/auth', () => ({ getAuth: () => ({ verifyIdToken: mockVerifyToken }) }), { virtual: true });
 jest.mock('firebase-admin', () => ({}), { virtual: true });
 jest.mock('firebase-admin/app', () => ({ initializeApp: jest.fn() }), { virtual: true });
 jest.mock('firebase-admin/firestore', () => ({ getFirestore: () => mockDb }), { virtual: true });
 jest.mock('firebase-admin/messaging', () => ({ getMessaging: () => ({ send: mockSend }) }), { virtual: true });
 jest.mock('../functions/src/getLinkPreview.js', () => ({}), { virtual: true });
 jest.mock('../functions/src/createManagedUser.js', () => ({}), { virtual: true });
+jest.mock('../functions/src/setFamilyPassword.js', () => ({}), { virtual: true });
 const { sendCommunicationToAll, sendCommunicationToUsers } = require('../functions/src/index');
 const response = () => { const res: any = { set: jest.fn(), json: jest.fn(), send: jest.fn() }; res.status = jest.fn(() => res); return res; };
 beforeEach(() => jest.clearAllMocks());
 
 test('guarda destinatarios y segmentación antes de enviar a más de 30 familias', async () => {
-  await sendCommunicationToUsers({ method: 'POST', body: { title: 'Título', body: 'Mensaje', userId: 'admin',
+  await sendCommunicationToUsers({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'Título', body: 'Mensaje', userId: 'admin',
     userIds: mockUsers.map(user => user.id), level: 'inicial', cursoId: 'sala-4-tm', cursoLabel: 'SALA 4 TM' } }, response());
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ level: 'inicial', cursoId: 'sala-4-tm',
     cursoLabel: 'SALA 4 TM', targetUserIds: mockUsers.map(user => user.id) }));
   expect(mockGetAll).toHaveBeenCalledWith(...mockUsers.map(user => user.id));
 });
 test('compatibilidad con clientes que mandan segmentación dentro de data', async () => {
-  await sendCommunicationToUsers({ method: 'POST', body: { title: 'Título', body: 'Mensaje', userId: 'admin',
+  await sendCommunicationToUsers({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'Título', body: 'Mensaje', userId: 'admin',
     userIds: ['family-0'], data: { level: 'primario' } } }, response());
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ level: 'primario', cursoId: null, cursoLabel: null }));
 });
 test('institucional guarda todos los destinatarios sin depender del teléfono', async () => {
-  await sendCommunicationToAll({ method: 'POST', body: { title: 'Título', body: 'Mensaje', userId: 'admin' } }, response());
+  await sendCommunicationToAll({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'Título', body: 'Mensaje', userId: 'admin' } }, response());
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ level: 'todos', cursoId: null,
     targetUserIds: mockUsers.map(user => user.id) }));
 });
 test('rechaza un envío segmentado sin nivel antes de escribir', async () => {
   const res = response();
-  await sendCommunicationToUsers({ method: 'POST', body: { title: 'Título', body: 'Mensaje', userId: 'admin', userIds: ['family-0'] } }, res);
+  await sendCommunicationToUsers({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'Título', body: 'Mensaje', userId: 'admin', userIds: ['family-0'] } }, res);
   expect(res.status).toHaveBeenCalledWith(400);
   expect(mockSet).not.toHaveBeenCalled();
 });
@@ -51,7 +55,7 @@ test.each([
     documentSize: '1024', documentContentType: 'application/pdf',
   };
   const res = response();
-  await send({ method: 'POST', body: {
+  await send({ method: 'POST', headers: { authorization: 'Bearer test' }, body: {
     title: 'Test pdf', body: 'Pdf test', userId: 'admin', userIds: ['family-0'], level, data,
   } }, res);
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
@@ -63,7 +67,7 @@ test.each([
 ])('guarda el enlace adjunto al enviar a %s', async (level, send) => {
   const data = { type: 'communication', level, linkUrl: 'https://escuela.com/noticias' };
   const res = response();
-  await send({ method: 'POST', body: { title: 'Enlace', body: 'Información', userId: 'admin',
+  await send({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'Enlace', body: 'Información', userId: 'admin',
     userIds: ['family-0'], level, data } }, res);
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
   expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
@@ -77,7 +81,7 @@ test.each([
     audioPath: 'communication-audios/admin/id/nota.m4a', audioName: 'Nota de voz',
     audioSize: '2048', audioContentType: 'audio/mp4', audioDurationMs: '18200' };
   const res = response();
-  await send({ method: 'POST', body: { title: 'Nota', body: 'Información', userId: 'admin',
+  await send({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'Nota', body: 'Información', userId: 'admin',
     userIds: ['family-0'], level, data } }, res);
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
   expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
@@ -89,7 +93,7 @@ test('guarda la vista previa completa y mantiene pequeña la notificación push'
     linkDescription: 'Descripción', linkImageUrl: 'https://example.com/foto.jpg' };
   const spy = jest.spyOn(mockUsers[0], 'data').mockReturnValue({ pushTokens: ['token'] } as any);
   try {
-    await sendCommunicationToAll({ method: 'POST', body: { title: 'Aviso', body: 'Texto', userId: 'admin', data } }, response());
+    await sendCommunicationToAll({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'Aviso', body: 'Texto', userId: 'admin', data } }, response());
     expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
     expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({ data: { type: 'communication', communicationId: 'communication' } }));
   } finally { spy.mockRestore(); }
@@ -102,8 +106,17 @@ test.each([
     videoPath: 'communication-videos/admin/id/video.mp4', videoName: 'video.mp4',
     videoSize: '2048', videoContentType: 'video/mp4', videoDurationMs: '12000' };
   const res = response();
-  await send({ method: 'POST', body: { title: 'Video', body: 'Información', userId: 'admin',
+  await send({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'Video', body: 'Información', userId: 'admin',
     userIds: ['family-0'], level, data } }, res);
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ data }));
   expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+});
+
+test('rechaza enviar sin token y obtiene el emisor del token aunque el cuerpo sea falsificado', async () => {
+  const res = response();
+  await sendCommunicationToAll({ method: 'POST', headers: {}, body: { title: 'A', body: 'B', userId: 'victim' } }, res);
+  expect(res.status).toHaveBeenCalledWith(401);
+  expect(mockSet).not.toHaveBeenCalled();
+  await sendCommunicationToAll({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'A', body: 'B', userId: 'victim' } }, response());
+  expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ sentBy: 'admin' }));
 });

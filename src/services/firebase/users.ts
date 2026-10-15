@@ -2,7 +2,6 @@ import { createAccount } from './createAccount';
 import {
   collection,
   doc,
-  setDoc,
   updateDoc,
   deleteDoc,
   getDoc,
@@ -11,7 +10,7 @@ import {
   where,
   Timestamp,
 } from 'firebase/firestore';
-import { auth, db } from './firebaseConfig';
+import { db } from './firebaseConfig';
 import { User, CreateUserCredentials, UpdateUserData } from '@/types';
 
 /**
@@ -22,61 +21,14 @@ import { User, CreateUserCredentials, UpdateUserData } from '@/types';
 const USERS_COLLECTION = 'users';
 
 /**
- * Crear nuevo usuario en Firestore
- * (Admin panel - no crea en Firebase Auth, solo en Firestore)
+ * Crear usuario en Firebase Auth y Firestore mediante la función administrativa.
  */
 export const createUser = async (
   userId: string,
   credentials: CreateUserCredentials
 ): Promise<User> => {
   try {
-    if (credentials.role !== 'familia') {
-      await auth.authStateReady();
-      if (!auth.currentUser) {
-        throw new Error('Esta sesión es del acceso anterior. Para crear cuentas por email, ingresá con el administrador habilitado en Firebase Auth. Tu cuenta existente no se elimina al cerrar sesión.');
-      }
-      // La función crea Auth + Firestore sin cambiar la sesión del administrador.
-      return await createAccount(credentials);
-    }
-    const now = new Date();
-
-    const userData: User = {
-      id: userId,
-      displayName: credentials.displayName,
-      role: credentials.role,
-      email: credentials.email,
-      dni: credentials.dni,
-      photoURL: undefined,
-      createdAt: now,
-      updatedAt: now,
-      enabledAt: credentials.isEnabled ? now : undefined,
-      pushTokens: [],
-      isEnabled: credentials.isEnabled ?? true,
-    };
-
-    const dataToSave: any = {
-      displayName: userData.displayName,
-      role: userData.role,
-      createdAt: Timestamp.fromDate(now),
-      updatedAt: Timestamp.fromDate(now),
-      pushTokens: [],
-      isEnabled: userData.isEnabled,
-    };
-
-    // Solo agregar campos opcionales si existen
-    if (credentials.email) {
-      dataToSave.email = credentials.email;
-    }
-    if (credentials.dni) {
-      dataToSave.dni = credentials.dni;
-    }
-    if (credentials.isEnabled) {
-      dataToSave.enabledAt = Timestamp.fromDate(now);
-    }
-
-    await setDoc(doc(db, USERS_COLLECTION, userId), dataToSave);
-
-    return userData;
+    return await createAccount(credentials);
   } catch (error: any) {
     console.error('❌ Error creating user:', error);
     throw {
@@ -255,7 +207,8 @@ export const updateUser = async (
 ): Promise<void> => {
   try {
     const updateData: any = {
-      ...data,
+      // Los campos opcionales omitidos no deben enviarse como undefined a Firestore.
+      ...Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined)),
       updatedAt: Timestamp.fromDate(new Date()),
     };
 

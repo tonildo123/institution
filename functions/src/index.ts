@@ -7,6 +7,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 import { getMessaging } from 'firebase-admin/messaging';
 
 // Inicializar Firebase Admin
@@ -25,7 +26,22 @@ const COLLECTIONS = {
 function setCORS(res: any) {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
+/** El emisor se obtiene del token verificado, nunca de un ID proporcionado por el cliente. */
+async function authenticatedSender(req: functions.https.Request, res: functions.Response): Promise<string | null> {
+  const match = req.headers.authorization?.match(/^Bearer (.+)$/);
+  if (!match) { res.status(401).json({ error: 'Ingresá con una cuenta autenticada' }); return null; }
+  let uid: string;
+  try { uid = (await getAuth().verifyIdToken(match[1], true)).uid; }
+  catch { res.status(401).json({ error: 'Sesión inválida' }); return null; }
+  const profile = await db.collection(COLLECTIONS.USERS).doc(uid).get();
+  if (!profile.exists || profile.data()?.isEnabled !== true ||
+    !['admin', 'equipo directivo', 'representante legal', 'preceptor'].includes(profile.data()?.role)) {
+    res.status(403).json({ error: 'No tenés permiso para enviar mensajes' }); return null;
+  }
+  return uid;
 }
 
 /**
@@ -40,7 +56,9 @@ export const sendCommunicationToAll = functions.https.onRequest(
     }
 
     try {
-      const { title, body, description, data: additionalData, userId } = req.body;
+      const { title, body, description, data: additionalData } = req.body;
+      const userId = await authenticatedSender(req, res);
+      if (!userId) return;
 
       if (!title || !body || !userId) {
         res.status(400).json({ error: 'title, body y userId requeridos' });
@@ -171,7 +189,9 @@ export const sendCommunicationToUsers = functions.https.onRequest(
     }
 
     try {
-      const { title, body, description, data: additionalData, userId, userIds } = req.body;
+      const { title, body, description, data: additionalData, userIds } = req.body;
+      const userId = await authenticatedSender(req, res);
+      if (!userId) return;
 
       if (!title || !body || !userId || !userIds || !Array.isArray(userIds) || userIds.length === 0) {
         res.status(400).json({ error: 'title, body, userId y userIds (array no vacío) requeridos' });
@@ -330,3 +350,5 @@ export const healthCheck = functions.https.onRequest(
 export { createManagedUser } from './createManagedUser.js';
 
 export { getLinkPreview } from "./getLinkPreview.js";
+
+export { setFamilyPassword, setUserPassword } from './setFamilyPassword.js';

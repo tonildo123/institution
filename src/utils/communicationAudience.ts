@@ -1,16 +1,10 @@
+import { canReadCommunication } from '../services/firebase/communications';
 import type { Communication } from '../services/firebase/communications';
-import { getCursos, getDestinatarios, SalaLevel, UserSalasInfo } from '../services/firebase/salas';
+import { getDestinatarios, SalaLevel, UserSalasInfo } from '../services/firebase/salas';
 
-export function isCommunicationForFamily(comm: Communication, userId: string, assigned: UserSalasInfo): boolean {
-  if (comm.level === 'todos') return true;
-  if (comm.targetUserIds?.includes(userId)) return true;
-  if (!assigned.levels.includes(comm.level as SalaLevel)) return false;
-  if (!comm.cursoId) return true;
-  const levelCursos = getCursos(comm.level as SalaLevel);
-  if (comm.cursoId === 'turno-tm' || comm.cursoId === 'turno-tt') {
-    return levelCursos.some(curso => curso.id.endsWith(`-${comm.cursoId!.slice(-2)}`) && assigned.cursos.includes(curso.id));
-  }
-  return levelCursos.some(curso => curso.id === comm.cursoId && assigned.cursos.includes(curso.id));
+/** Compatibilidad: la pertenencia actual a una sala no concede acceso a mensajes anteriores. */
+export function isCommunicationForFamily(comm: Communication, userId: string, _assigned?: UserSalasInfo): boolean {
+  return canReadCommunication(comm, userId);
 }
 
 export function getDestinationLabel(comm: Communication): string {

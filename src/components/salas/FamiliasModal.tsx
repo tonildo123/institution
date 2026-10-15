@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, Scroll
 import Svg, { Circle, Path } from 'react-native-svg';
 import { getAllUsers } from '@/services/firebase/users';
 import { addUserToSala, getSalaUsers, removeUserFromSala, getTransferCursos, updateUserInSala, SalaLevel } from '@/services/firebase/salas';
+import { setFamilyPassword } from '@/services/firebase/createAccount';
 import { User } from '@/types';
 import { cursoDisplayLabel } from '@/utils/cursoDisplayLabel';
 import { styles } from '@/screens/private/salas/styles';
@@ -24,15 +25,35 @@ export const FamiliasModal = ({ level, cursoId, label, onClose }: Props) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [targetLevel, setTargetLevel] = useState<SalaLevel>(level);
   const [targetCurso, setTargetCurso] = useState(cursoId || '');
+  const [newPassword, setNewPassword] = useState('');
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ displayName: '', dni: '', email: '' });
 
   const openUser = (user: User, edit: boolean) => {
+    setNewPassword('');
     setTargetLevel(level);
     setTargetCurso(cursoId || '');
     setSelectedUser(user);
     setEditing(edit);
     setForm({ displayName: user.displayName, dni: user.dni || '', email: user.email || '' });
+  };
+
+  const savePassword = async () => {
+    if (saving || !selectedUser) return;
+    if (newPassword.length < 6 || newPassword.length > 128) {
+      Alert.alert('Contraseña inválida', 'Usá entre 6 y 128 caracteres.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await setFamilyPassword(selectedUser.id, newPassword);
+      setNewPassword('');
+      Alert.alert('Contraseña establecida', 'La familia ya puede ingresar con su DNI y esta contraseña.');
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'No se pudo establecer la contraseña.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const saveUser = async () => {
@@ -162,6 +183,15 @@ export const FamiliasModal = ({ level, cursoId, label, onClose }: Props) => {
               {editing && <TouchableOpacity style={styles.saveButton} onPress={saveUser} disabled={saving} accessibilityRole="button">
                 <Text style={styles.saveButtonText}>{saving ? 'Guardando...' : 'Guardar cambios'}</Text>
               </TouchableOpacity>}
+              {editing && <View style={styles.passwordSection}>
+                <Text style={styles.fieldLabel}>Contraseña de acceso de la familia</Text>
+                <TextInput style={styles.searchInput} secureTextEntry autoCapitalize="none" autoCorrect={false}
+                  value={newPassword} onChangeText={setNewPassword} editable={!saving} placeholder="Nueva contraseña (mínimo 6 caracteres)"
+                  accessibilityLabel="Nueva contraseña de la familia" />
+                <TouchableOpacity style={styles.saveButton} disabled={saving} onPress={savePassword} accessibilityRole="button">
+                  <Text style={styles.saveButtonText}>Establecer contraseña</Text>
+                </TouchableOpacity>
+              </View>}
               <TouchableOpacity style={styles.backButton} onPress={() => setSelectedUser(null)} disabled={saving} accessibilityRole="button">
                 <Text style={styles.fieldLabel}>Volver al curso</Text>
               </TouchableOpacity>

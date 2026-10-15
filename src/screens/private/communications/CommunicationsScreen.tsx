@@ -6,7 +6,7 @@ import { pickMessageAudio, uploadMessageAudio, audioMessageData, MessageAudioFil
 import { stopAudioPlayback } from '@/services/audioPlayback';
 import { normalizeMessageLink } from '@/utils/messageLinks';
 import { pickMessageDocument, uploadMessageDocument, documentMessageData, MessageDocumentFile } from '@/services/messageDocuments';
-import { isCommunicationForFamily, getDestinationLabel } from '@/utils/communicationAudience';
+import { getDestinationLabel } from '@/utils/communicationAudience';
 import { DraftAttachments } from '@/components/DraftAttachments';
 import { pickMessageImage, captureMessageImage, uploadMessageImage, MessageImage } from '@/services/messageImages';
 import { AttachmentSheet } from '@/components/AttachmentSheet';
@@ -303,24 +303,8 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
       }
 
       const { getAllCommunications } = await import('@/services/firebase/communications');
-      const { getUserAssignedSalas } = await import('@/services/firebase/salas');
-
-      const [allComms, assignedSalas] = await Promise.all([
-        getAllCommunications(messageLimit),
-        currentUser?.role === 'familia' && currentUser.id ? getUserAssignedSalas(currentUser.id) : Promise.resolve({ levels: [], cursos: [] }),
-      ]);
-
-      if (currentUser?.role === 'familia') {
-        const filtered = allComms.filter(comm =>
-          isCommunicationForFamily(comm, currentUser.id, assignedSalas));
-
-        setCommunications(filtered);
-        console.log(`✅ Comunicaciones filtradas para familia (${currentUser?.displayName}):`, filtered.length, 'de', allComms.length);
-      } else {
-        // Para directivos, admin y preceptores se muestran todas
-        setCommunications(allComms);
-        console.log('✅ Todas las comunicaciones cargadas:', allComms.length);
-      }
+      const visible = await getAllCommunications(messageLimit, currentUser.id);
+      setCommunications(visible);
     } catch (error) {
       setLoadError(communicationLoadError(error));
       console.error('❌ Error loading communications:', error);

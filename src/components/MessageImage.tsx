@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Image, Text, TouchableOpacity, Modal, StyleSheet, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export const MessageImage = ({ uri }: { uri: string }) => {
   const [expanded, setExpanded] = useState(false);
@@ -18,10 +18,12 @@ export const MessageImage = ({ uri }: { uri: string }) => {
         {failed && <Text>No se pudo cargar la imagen. Tocá para reintentar.</Text>}
       </TouchableOpacity>
       <Modal visible={expanded} onRequestClose={() => setExpanded(false)} animationType="fade">
-        <SafeAreaView style={styles.fullscreen}>
-          <TouchableOpacity onPress={() => setExpanded(false)} style={styles.close} accessibilityRole="button"><Text style={styles.closeText}>✕ Cerrar</Text></TouchableOpacity>
-          <Image source={{ uri }} style={styles.largeImage} resizeMode="contain" />
-        </SafeAreaView>
+        <SafeAreaProvider style={styles.fullscreen}>
+          <SafeAreaView style={styles.fullscreen} edges={['top', 'bottom', 'left', 'right']}>
+            <TouchableOpacity onPress={() => setExpanded(false)} style={styles.close} accessibilityRole="button" accessibilityLabel="Cerrar imagen"><Text style={styles.closeText}>✕ Cerrar</Text></TouchableOpacity>
+            <Image source={{ uri }} style={styles.largeImage} resizeMode="contain" />
+          </SafeAreaView>
+        </SafeAreaProvider>
       </Modal>
     </View>
   );

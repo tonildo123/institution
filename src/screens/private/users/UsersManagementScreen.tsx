@@ -15,6 +15,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { setUserPassword } from '@/services/firebase/createAccount';
 import { getAllUsers, createUser, updateUser, deleteUser } from '@/services/firebase/users';
 import { User, UserRole, CreateUserCredentials } from '@/types';
 import { styles } from './styles';
@@ -95,6 +96,7 @@ export const UsersManagementScreen = () => {
   };
 
   const handleEdit = (user: User) => {
+    setShowPassword(false);
     setSelectedUser(user);
     setFormData({
       displayName: user.displayName,
@@ -145,8 +147,9 @@ export const UsersManagementScreen = () => {
       return;
     }
 
-    if (!selectedUser && formData.role !== 'familia' && formData.password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+    if (saving) return;
+    if ((!selectedUser || formData.password !== '') && (formData.password.length < 6 || formData.password.length > 128)) {
+      Alert.alert('Error', 'La contraseña debe tener entre 6 y 128 caracteres');
       return;
     }
 
@@ -176,6 +179,14 @@ export const UsersManagementScreen = () => {
           )
         );
 
+        if (formData.password !== '') {
+          try {
+            await setUserPassword(selectedUser.id, formData.password);
+          } catch (error: any) {
+            Alert.alert('Contraseña sin actualizar', `Los datos del usuario se guardaron, pero no se pudo cambiar la contraseña. ${error.message || 'Intentá nuevamente.'}`);
+            return;
+          }
+        }
         Alert.alert('Éxito', 'Usuario actualizado');
       } else {
         // Crear
@@ -478,13 +489,12 @@ export const UsersManagementScreen = () => {
                     </View>
                   )}
 
-                  {!selectedUser && (
-                    <View style={styles.inputGroup}>
-                      <Text style={styles.label}>Contraseña</Text>
+                  <View style={styles.inputGroup}>
+                      <Text style={styles.label}>{selectedUser ? 'Nueva contraseña' : 'Contraseña'}</Text>
                       <View style={styles.passwordWrapper}>
                         <TextInput
                           style={[styles.input, styles.passwordInput]}
-                          placeholder="••••••••"
+                          placeholder={selectedUser ? 'Ingresá una nueva contraseña' : '••••••••'}
                           placeholderTextColor="#999"
                           value={formData.password}
                           onChangeText={text => setFormData({ ...formData, password: text })}
@@ -507,8 +517,8 @@ export const UsersManagementScreen = () => {
                           </Svg>
                         </TouchableOpacity>
                       </View>
+                      {selectedUser && <Text style={{ color: '#666', marginTop: 8 }}>Dejá este campo vacío para conservar la contraseña actual.</Text>}
                     </View>
-                  )}
 
                   <View
                     style={[

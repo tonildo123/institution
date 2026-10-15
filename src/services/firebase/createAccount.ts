@@ -31,3 +31,23 @@ export async function createAccount(credentials: CreateUserCredentials): Promise
     clearTimeout(timeout);
   }
 }
+
+/** Establecer la contraseña en Firebase Auth; nunca guardarla en Firestore. */
+async function saveAccountPassword(endpoint: string, userId: string, password: string): Promise<void> {
+  await auth.authStateReady();
+  if (!auth.currentUser) throw new Error('Ingresá con una cuenta administrativa.');
+  const token = await auth.currentUser.getIdToken();
+  const response = await fetch(`https://us-central1-${auth.app.options.projectId}.cloudfunctions.net/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ data: { userId, password } }),
+  });
+  const payload = await response.json();
+  if (!response.ok || payload.error) throw new Error(payload.error?.message || 'No se pudo establecer la contraseña.');
+}
+
+export const setFamilyPassword = (userId: string, password: string): Promise<void> =>
+  saveAccountPassword('setFamilyPassword', userId, password);
+
+export const setUserPassword = (userId: string, password: string): Promise<void> =>
+  saveAccountPassword('setUserPassword', userId, password);

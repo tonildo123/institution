@@ -6,6 +6,7 @@ import {
   updateProfile,
   User as FirebaseUser,
 } from 'firebase/auth';
+import { getUserByDNI } from './users';
 import { auth, db } from './firebaseConfig';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { LoginCredentials, SignUpCredentials, User } from '@/types';
@@ -138,5 +139,21 @@ export const updateUserData = async (
       code: error.code,
       message: error.message,
     };
+  }
+};
+
+/** El DNI identifica el perfil; Firebase Auth verifica la contraseña. */
+export const authenticateFamily = async (dni: string, password: string): Promise<User> => {
+  const profile = await getUserByDNI(dni.trim());
+  if (!profile || profile.role !== 'familia' || !profile.isEnabled) throw new Error('DNI o contraseña incorrectos, o cuenta no habilitada.');
+  try {
+    const result = await signInWithEmailAndPassword(auth, `${profile.id}@familias.imep.invalid`, password);
+    if (result.user.uid !== profile.id) {
+      await signOut(auth);
+      throw new Error('Identidad no vinculada');
+    }
+    return profile;
+  } catch {
+    throw new Error('DNI o contraseña incorrectos. Si todavía no tenés contraseña, solicitála a la institución.');
   }
 };

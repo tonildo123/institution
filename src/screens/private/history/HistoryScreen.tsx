@@ -1,5 +1,7 @@
 import { getDestinationLabel } from '@/utils/communicationAudience';
 import { MessageText } from '@/components/MessageText';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 import React, { useState } from 'react';
 import {
   View,
@@ -21,6 +23,7 @@ import { styles } from './styles';
 
 export const HistoryScreen = () => {
   const navigation = useNavigation();
+  const userId = useSelector((state: RootState) => state.auth.user?.id);
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,14 +39,16 @@ export const HistoryScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       loadCommunications();
-    }, [messageLimit])
+    }, [messageLimit, userId])
   );
 
   const loadCommunications = async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await getAllCommunications(messageLimit);
+      setCommunications([]);
+      if (!userId) return;
+      const data = await getAllCommunications(messageLimit, userId);
       setCommunications(data);
       console.log('✅ Comunicaciones cargadas:', data.length);
     } catch (err: any) {

@@ -3,6 +3,7 @@
  * Llama Cloud Functions para enviar mensajes a todos los usuarios
  */
 
+import { auth } from './firebase/firebaseConfig';
 import { RootState } from '@/redux/store';
 
 const CLOUD_FUNCTION_URL = 'https://us-central1-institucion-59d9a.cloudfunctions.net';
@@ -43,6 +44,7 @@ export async function sendCommunicationToAll(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
         },
         body: JSON.stringify({
           ...params,
@@ -90,6 +92,7 @@ export async function sendCommunicationToUsers(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
         },
         body: JSON.stringify({
           ...params,

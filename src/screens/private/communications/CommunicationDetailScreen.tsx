@@ -46,15 +46,18 @@ export const CommunicationDetailScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       loadCommunication();
-    }, [communicationId])
+    }, [communicationId, user?.id])
   );
 
   const loadCommunication = async () => {
     try {
       setLoading(true);
-      const data = await getCommunication(communicationId);
+      setCommunication(null);
+      if (!user?.id) return;
+      const data = await getCommunication(communicationId, user?.id);
       setCommunication(data);
     } catch (error) {
+      setCommunication(null);
       console.error('❌ Error:', error);
     } finally {
       setLoading(false);
@@ -83,7 +86,7 @@ export const CommunicationDetailScreen = () => {
       });
 
       // Recargar la comunicación
-      const updated = await getCommunication(communicationId);
+      const updated = await getCommunication(communicationId, user?.id);
       setCommunication(updated);
 
       setShowEditModal(false);
@@ -138,7 +141,7 @@ export const CommunicationDetailScreen = () => {
   if (!communication) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text>Comunicación no encontrada</Text>
+        <Text>Comunicación no disponible o sin acceso</Text>
       </View>
     );
   }

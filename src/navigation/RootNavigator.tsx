@@ -1,3 +1,4 @@
+import { auth } from '@/services/firebase/firebaseConfig';
 import { serializeUser } from '@/utils/serializeUser';
 import React, { useEffect, useRef, useCallback } from 'react';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
@@ -93,8 +94,10 @@ export const RootNavigator = () => {
       // Recuperar usuario guardado
       const userData = await AsyncStorage.getItem('user');
 
-      if (userData) {
-        dispatch(setUser(serializeUser(JSON.parse(userData))));
+      await auth.authStateReady();
+      const savedUser = userData ? JSON.parse(userData) : null;
+      if (savedUser && auth.currentUser?.uid === savedUser.id) {
+        dispatch(setUser(serializeUser(savedUser)));
       } else {
         dispatch(setUser(null));
       }

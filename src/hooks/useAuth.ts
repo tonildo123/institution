@@ -5,12 +5,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from '@/services/firebase/firebaseConfig';
 import {
   loginWithEmail,
+  authenticateFamily,
   signUpWithEmail,
   logout,
   sendPasswordReset,
   getUserData,
 } from '@/services/firebase/auth';
-import { getUserByDNI, getUserByEmail } from '@/services/firebase/users';
+import { getUserByEmail } from '@/services/firebase/users';
 import { LoginCredentials, SignUpCredentials, UserRole } from '@/types';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
@@ -40,7 +41,7 @@ export const useAuth = () => {
 
   /**
    * Monitorear cambios en Firebase Auth
-   * NOTA: Solo sincroniza Firebase Auth. Los logins de Firestore (DNI) se manejan en loginWithCredential
+   * Todos los roles requieren una sesión de Firebase Auth.
    */
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -56,16 +57,8 @@ export const useAuth = () => {
           }
         } else {
           console.log('🔐 Firebase Auth: Sin usuario');
-          // Usuario NO autenticado en Firebase Auth
-          // Pero NO reseteamos si hay un usuario activo en Redux (login de Firestore)
-          if (currentUser?.id?.startsWith('user_')) {
-            // Es un usuario de Firestore, lo mantenemos
-            console.log('🔐 Manteniendo usuario de Firestore:', currentUser.displayName);
-          } else {
-            // No hay usuario o fue de Firebase Auth, reseteamos
-            dispatch(setUser(null));
-            await AsyncStorage.removeItem('user');
-          }
+          dispatch(setUser(null));
+          await AsyncStorage.removeItem('user');
         }
       } catch (error) {
         console.error('Error en monitoreo de auth:', error);
@@ -122,20 +115,7 @@ export const useAuth = () => {
         dispatch(setLoading(true));
         dispatch(clearError());
 
-        // Buscar usuario por DNI
-        const user = await getUserByDNI(dni);
-
-        if (!user) {
-          throw new Error('Usuario no encontrado');
-        }
-
-        if (user.role !== 'familia') {
-          throw new Error('Este DNI no corresponde a una familia');
-        }
-
-        // Verificar contraseña (aquí iría la verificación real)
-        // Por ahora, asumimos que es válida
-        // En producción, esto debe hacerse de forma segura
+        const user = await authenticateFamily(dni, password);
 
         // Usuario autenticado
         const serializedUser = serializeUser(user);
@@ -197,36 +177,7 @@ export const useAuth = () => {
             throw new Error('La cuenta de Firebase Auth no está vinculada al usuario. Contactá al administrador para completar la vinculación.');
           }
         } else if (params.type === 'dni') {
-          console.log('🆔 Buscando por DNI...');
-          // Buscar por DNI
-          try {
-            console.log('⏳ Llamando getUserByDNI...');
-            user = await getUserByDNI(params.credential);
-            console.log('📋 Resultado de búsqueda:', user);
-          } catch (searchError: any) {
-            console.error('❌ Error en búsqueda:', searchError);
-            throw searchError;
-          }
-
-          if (!user) {
-            console.log('⚠️ Usuario no encontrado');
-            throw new Error('DNI no registrado');
-          }
-
-          console.log('✅ Usuario encontrado:', user.displayName);
-
-          if (!user.isEnabled) {
-            throw new Error('Cuenta deshabilitada');
-          }
-
-          // Validar que sea familia
-          if (user.role !== 'familia') {
-            throw new Error('Este DNI no corresponde a una familia');
-          }
-
-          console.log('✅ Usuario familia encontrado y validado');
-          // Para DNI, no hacemos login en Firebase Auth
-          // Solo usamos el usuario de Firestore
+          user = await authenticateFamily(params.credential, params.password);
         }
 
         if (!user) {

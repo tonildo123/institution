@@ -1,13 +1,20 @@
 import {
   collection,
+  doc,
+  getDocFromServer,
   getDocsFromServer,
   limit,
   query,
   orderBy,
+  where,
 } from 'firebase/firestore';
 import { auth, db } from './firebaseConfig';
 
 export const COMMUNICATIONS_LIMIT = 30;
+
+export function canReadCommunication(message: Pick<Communication, 'sentBy' | 'targetUserIds'>, userId?: string): boolean {
+  return Boolean(userId && (message.sentBy === userId || message.targetUserIds?.includes(userId)));
+}
 export function communicationLoadError(error: unknown): string {
   const code = (error as { code?: string })?.code;
   if (['unavailable', 'auth/network-request-failed', 'deadline-exceeded'].includes(code || '')) {
@@ -67,20 +74,21 @@ export interface Communication {
  * Obtener los últimos 30 comunicados, o hasta 100 al ampliar el listado.
  * Una caché vacía no confirma que no haya mensajes.
  */
-export const getAllCommunications = async (maxMessages: 30 | 100 = COMMUNICATIONS_LIMIT): Promise<Communication[]> => {
+export const getAllCommunications = async (maxMessages: 30 | 100 = COMMUNICATIONS_LIMIT, userId?: string): Promise<Communication[]> => {
   try {
     await auth.authStateReady();
     // El token puede necesitar renovarse tras restaurar la sesión.
     await auth.currentUser?.getIdToken();
-    const q = query(
-      collection(db, 'communications'),
-      orderBy('createdAt', 'desc'),
-      limit(maxMessages === 100 ? 100 : COMMUNICATIONS_LIMIT)
-    );
+    const viewerId = auth.currentUser?.uid;
+    if (!viewerId || (userId && userId !== viewerId)) return [];
+    const max = maxMessages === 100 ? 100 : COMMUNICATIONS_LIMIT;
+    const snapshots = await Promise.all([
+      getDocsFromServer(query(collection(db, 'communications'), where('sentBy', '==', viewerId), orderBy('createdAt', 'desc'), limit(max))),
+      getDocsFromServer(query(collection(db, 'communications'), where('targetUserIds', 'array-contains', viewerId), orderBy('createdAt', 'desc'), limit(max))),
+    ]);
+    const docs = [...new Map(snapshots.flatMap(snapshot => snapshot.docs).map(doc => [doc.id, doc])).values()];
 
-    const snapshot = await getDocsFromServer(q);
-
-    return snapshot.docs.map((doc) => {
+    return docs.map((doc) => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -100,7 +108,9 @@ export const getAllCommunications = async (maxMessages: 30 | 100 = COMMUNICATION
         totalUsers: data.totalUsers || 0,
         data: data.data,
       } as Communication;
-    });
+    }).filter(message => canReadCommunication(message, viewerId))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id))
+      .slice(0, max);
   } catch (error: any) {
     console.error('❌ Error fetching communications:', error);
     throw error;
@@ -110,16 +120,19 @@ export const getAllCommunications = async (maxMessages: 30 | 100 = COMMUNICATION
 /**
  * Obtener una comunicación por ID
  */
-export const getCommunication = async (id: string): Promise<Communication | null> => {
+export const getCommunication = async (id: string, userId?: string): Promise<Communication | null> => {
   try {
-    const { getDoc, doc } = await import('firebase/firestore');
-    const docSnap = await getDoc(doc(db, 'communications', id));
+    await auth.authStateReady();
+    const viewerId = auth.currentUser?.uid;
+    if (!viewerId || (userId && userId !== viewerId)) return null;
+    const docSnap = await getDocFromServer(doc(db, 'communications', id));
 
     if (!docSnap.exists()) {
       return null;
     }
 
     const data = docSnap.data();
+    if (!canReadCommunication({ sentBy: data.sentBy, targetUserIds: Array.isArray(data.targetUserIds) ? data.targetUserIds : [] }, viewerId)) return null;
     return {
       id: docSnap.id,
       title: data.title || '',

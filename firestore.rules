@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function enabled() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isEnabled == true;
+    }
+    function manager() {
+      return enabled() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        in ['admin', 'equipo directivo', 'representante legal'];
+    }
+    function participant() {
+      return enabled() && (resource.data.get('sentBy', '') == request.auth.uid ||
+        request.auth.uid in resource.data.get('targetUserIds', []));
+    }
+    match /communications/{messageId} {
+      allow read: if participant();
+      // Los envíos se crean exclusivamente en Cloud Functions.
+      allow create: if false;
+      allow delete: if manager() && participant();
+      allow update: if manager() && participant() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'description', 'body', 'updatedAt']);
+    }
+    match /users/{userId} {
+      // Se conserva la búsqueda de perfiles previa al login por email/DNI.
+      // Las contraseñas se almacenan exclusivamente en Firebase Auth.
+      allow read: if true;
+      allow create, delete: if manager();
+      allow update: if manager() || (enabled() && request.auth.uid == userId &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL', 'pushTokens', 'updatedAt']));
+    }
+    match /salas/{level} {
+      allow read: if enabled();
+      allow write: if manager();
+      match /cursos/{cursoId} {
+        allow read: if enabled();
+        allow write: if manager();
+      }
+    }
+  }
+}

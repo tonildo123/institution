@@ -13,7 +13,7 @@ jest.mock('firebase-admin/auth', () => ({ getAuth: () => ({ createUser: mockCrea
 jest.mock('firebase-admin/firestore', () => ({
   Timestamp: { now: () => ({ toDate: () => new Date('2026-09-23T00:00:00Z') }) },
   getFirestore: () => ({ collection: () => ({
-    doc: () => ({ get: mockActor, create: mockCreateProfile }),
+    doc: () => ({ id: 'family-id', get: mockActor, create: mockCreateProfile }),
     where: () => ({ limit: () => ({ get: mockExisting }) }),
   }) }),
 }), { virtual: true });
@@ -56,4 +56,12 @@ test('rechaza contraseña inválida y crea deshabilitados en ambos servicios', a
   const result = await call({ ...input, isEnabled: false }, context);
   expect(mockCreateAuth).toHaveBeenCalledWith(expect.objectContaining({ disabled: true }));
   expect(result.isEnabled).toBe(false);
+});
+
+test('crea familias con DNI, contraseña en Auth y el mismo UID en el perfil', async () => {
+  mockCreateAuth.mockResolvedValue({ uid: 'family-id' });
+  const result = await call({ displayName: 'Familia', role: 'familia', dni: '70000000', password: 'family-secret', isEnabled: true }, context);
+  expect(mockCreateAuth).toHaveBeenCalledWith(expect.objectContaining({ uid: 'family-id', email: 'family-id@familias.imep.invalid', password: 'family-secret' }));
+  expect(result).toMatchObject({ id: 'family-id', dni: '70000000', role: 'familia' });
+  expect(result.password).toBeUndefined();
 });
