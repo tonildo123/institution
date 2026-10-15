@@ -146,3 +146,20 @@ To learn more about React Native, take a look at the following resources:
 # Estimaciones pendientes de aprobado
 - Biometria (3hs)| classroom (aula kit)(20 hs) | estimar costos - 23 hs mas
 - WEB para las tiendas + configuracion de email (10 hs)
+
+### trabajamos en estas mejoras de la aplicación:
+- Privacidad de los mensajes: ajustamos el historial para que cada usuario vea los mensajes que envió o recibió. La protección completa en Firebase todavía requiere finalizar la migración de las cuentas familiares.
+- Acceso de las familias: ingreso con DNI y contraseña. Desde la administración se pueden crear usuarios y cambiar sus contraseñas.
+- Docentes por sala: se pueden asignar docentes a cursos específicos. Cada docente puede enviar mensajes únicamente a sus cursos.
+- Gestión de alumnos: desde Salas se puede consultar su información, editarla o quitar al alumno del curso sin eliminar su cuenta.
+- Cambio de curso: permite pasar a otro curso del mismo año o al año siguiente, en cualquiera de sus turnos.
+- Gestión de usuarios: los contadores de administradores, docentes y familias funcionan como filtros.
+- Mensajes: ocultamos el botón de editar y permitimos que los docentes eliminen sus propios mensajes, con confirmación previa.
+- Selección de destinatarios: corregimos la ubicación de las listas desplegables y permitimos cerrarlas tocando nuevamente el botón.
+- Perfil personal: cada usuario puede actualizar su nombre, correo, contraseña y foto. Las contraseñas tienen un botón para mostrarlas u ocultarlas.
+- Perfil de familias: muestra el curso y turno al que pertenecen.
+- Fotos de usuarios: aparecen al consultar el detalle desde Salas. También corregimos un problema que impedía cargar fotos JPG desde iPhone.
+- Baja de cuenta: el usuario puede deshabilitar su cuenta con confirmación previa; luego se cierra su sesión y se conservan sus datos.
+- Seguridad biométrica: incorporamos Face ID o huella para ingresar, desbloquear la aplicación y confirmar envíos. Falta completar la validación en dispositivos físicos.
+- Correcciones en iPhone: ajustamos el visor de imágenes para poder cerrarlo correctamente.
+Quedan pendientes la opción Reportar problema, la activación final de la privacidad en Firebase y las pruebas de biometría en teléfonos físicos.
