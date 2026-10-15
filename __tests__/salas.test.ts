@@ -1,4 +1,5 @@
 jest.mock('firebase/firestore', () => ({
+  Timestamp: { fromDate: jest.fn(() => 'timestamp') },
   collection: jest.fn((...args) => args.slice(1).join('/')),
   doc: jest.fn((...args) => args.slice(1).join('/')),
   getDoc: jest.fn(), getDocs: jest.fn(), setDoc: jest.fn(),
@@ -122,4 +123,65 @@ test.each([true, false])('baja conserva el nivel solo si quedan asignaciones: %s
     assignedLevels: quedaOtro ? { union: 'inicial' } : { remove: ['inicial'] },
     assignedCursos: { remove: ['sala-4-tm'] },
   });
+});
+
+
+test.each([
+  ['inicial', 'sala-3-tm', ['sala-3-tm', 'sala-3-tt', 'sala-4-tm', 'sala-4-tt']],
+  ['inicial', 'sala-5-tt', ['sala-5-tm', 'sala-5-tt', 'grado-1-tm', 'grado-1-tt']],
+  ['primario', 'grado-1-tm', ['grado-1-tm', 'grado-1-tt', 'grado-2-tm', 'grado-2-tt']],
+  ['primario', 'grado-6-tt', ['grado-6-tm', 'grado-6-tt', 'sec-1']],
+  ['secundario', 'sec-1', ['sec-1', 'sec-2']],
+  ['secundario', 'sec-6', ['sec-6']],
+])('desde %s %s permite solo el mismo año y el siguiente', (level, cursoId, expected) => {
+  const { getTransferCursos } = require('../src/services/firebase/salas');
+  expect(getTransferCursos(level, cursoId).map((curso: { id: string }) => curso.id)).toEqual(expected);
+});
+
+test.each([
+  ['primario', 'grado-1-tm', 'inicial', 'sala-5-tm'],
+  ['primario', 'grado-1-tm', 'primario', 'grado-3-tm'],
+  ['inicial', 'sala-3-tm', 'primario', 'grado-1-tm'],
+  ['secundario', 'sec-3', 'secundario', 'sec-2'],
+])('rechaza retrocesos y saltos desde %s %s hacia %s %s sin escribir', async (level, cursoId, targetLevel, targetCurso) => {
+  const { updateUserInSala } = require('../src/services/firebase/salas');
+  const { writeBatch } = require('firebase/firestore');
+  await expect(updateUserInSala('familia', { level, cursoId },
+    { level: targetLevel, cursoId: targetCurso }, {})).rejects.toThrow('mismo año o al siguiente');
+  expect(writeBatch).not.toHaveBeenCalled();
+});
+
+test.each([true, false])('traslado guarda perfil y salas juntos y conserva otras asignaciones: %s', async remains => {
+  const { updateUserInSala } = require('../src/services/firebase/salas');
+  const { updateDoc, writeBatch } = require('firebase/firestore');
+  (getDocs as jest.Mock).mockImplementation(async path => ({ docs:
+    path.includes('inicial') ? [
+      { id: 'sala-5-tm', data: () => ({ users: ['familia'] }) },
+      ...(remains ? [{ id: 'sala-5-tt', data: () => ({ users: ['familia'] }) }] : []),
+    ] : path.includes('secundario') ? [{ id: 'sec-2', data: () => ({ users: ['familia'] }) }] : [],
+  }));
+  await updateUserInSala('familia', { level: 'inicial', cursoId: 'sala-5-tm' },
+    { level: 'primario', cursoId: 'grado-1-tm' }, { displayName: 'Nuevo nombre', dni: '70000000', email: '' });
+  expect(updateDoc).toHaveBeenCalledWith('salas/inicial/cursos/sala-5-tm', { users: { remove: ['familia'] } });
+  expect(setDoc).toHaveBeenCalledWith('salas/primario/cursos/grado-1-tm', {
+    level: 'primario', users: { union: 'familia' },
+  }, { merge: true });
+  expect(updateDoc).toHaveBeenCalledWith('users/familia', {
+    displayName: 'Nuevo nombre', dni: '70000000', email: '', updatedAt: 'timestamp',
+    assignedLevels: [...(remains ? ['inicial'] : []), 'secundario', 'primario'],
+    assignedCursos: [...(remains ? ['sala-5-tt'] : []), 'sec-2', 'grado-1-tm'],
+  });
+  expect(writeBatch).toHaveBeenCalledTimes(1);
+  expect(writeBatch.mock.results[0].value.commit).toHaveBeenCalledTimes(1);
+});
+
+test('editar sin cambiar de curso solo actualiza los datos personales', async () => {
+  const { updateUserInSala } = require('../src/services/firebase/salas');
+  const { updateDoc } = require('firebase/firestore');
+  await updateUserInSala('familia', { level: 'inicial', cursoId: 'sala-3-tm' },
+    { level: 'inicial', cursoId: 'sala-3-tm' }, { displayName: 'Nombre' });
+  expect(getDocs).not.toHaveBeenCalled();
+  expect(setDoc).not.toHaveBeenCalled();
+  expect(updateDoc).toHaveBeenCalledTimes(1);
+  expect(updateDoc).toHaveBeenCalledWith('users/familia', { displayName: 'Nombre', updatedAt: 'timestamp' });
 });

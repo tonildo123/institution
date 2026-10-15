@@ -6,8 +6,10 @@ import {
   writeBatch,
   arrayUnion,
   arrayRemove,
+  Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
+import { UpdateUserData } from '@/types';
 
 export type SalaLevel = 'inicial' | 'primario' | 'secundario';
 
@@ -140,6 +142,57 @@ export const removeUserFromSala = async (level: SalaLevel, userId: string, curso
     assignedLevels: stillAssigned ? arrayUnion(level) : arrayRemove(level),
     ...(cursoId ? { assignedCursos: arrayRemove(cursoId) } : {}),
   });
+  await batch.commit();
+};
+
+/** Destinos del mismo año o del siguiente, incluyendo todos sus turnos. */
+export const getTransferCursos = (level: SalaLevel, cursoId?: string): (Curso & { level: SalaLevel })[] => {
+  const levels: SalaLevel[] = ['inicial', 'primario', 'secundario'];
+  const progression = levels.flatMap(item => {
+    const cursos = getCursos(item);
+    const years = [...new Set(cursos.map(curso => curso.id.match(/\d+/)?.[0]))];
+    return years.map(year => cursos.filter(curso => curso.id.match(/\d+/)?.[0] === year)
+      .map(curso => ({ ...curso, level: item })));
+  });
+  const current = progression.findIndex(group => group.some(curso => curso.level === level && curso.id === cursoId));
+  return current < 0 ? [] : progression.slice(current, current + 2).flat();
+};
+
+/** Guardar los datos y el traslado juntos para evitar asignaciones parciales. */
+export const updateUserInSala = async (
+  userId: string,
+  source: { level: SalaLevel; cursoId?: string },
+  target: { level: SalaLevel; cursoId: string },
+  updates: Pick<UpdateUserData, 'displayName' | 'dni' | 'email'>,
+): Promise<void> => {
+  if (!getTransferCursos(source.level, source.cursoId).some(curso =>
+    curso.level === target.level && curso.id === target.cursoId)) {
+    throw new Error('Solo podés cambiar al mismo año o al siguiente, en cualquiera de sus turnos.');
+  }
+  const sourceRef = getSalaRef(source.level, source.cursoId);
+  const targetRef = getSalaRef(target.level, target.cursoId);
+  const moved = source.level !== target.level || source.cursoId !== target.cursoId;
+  const batch = writeBatch(db);
+  const profile: Record<string, unknown> = { ...updates, updatedAt: Timestamp.fromDate(new Date()) };
+  if (moved) {
+    const [assigned, sala, cursos] = await Promise.all([
+      getUserAssignedSalas(userId),
+      getDoc(doc(db, 'salas', source.level)),
+      getDocs(collection(db, 'salas', source.level, 'cursos')),
+    ]);
+    const staysInSourceLevel = source.level === target.level ||
+      (Boolean(source.cursoId) && sala.exists() && (sala.data().users || []).includes(userId)) ||
+      cursos.docs.some(curso => curso.id !== source.cursoId && (curso.data().users || []).includes(userId));
+    profile.assignedLevels = [...new Set([
+      ...assigned.levels.filter(level => level !== source.level || staysInSourceLevel), target.level,
+    ])];
+    profile.assignedCursos = [...new Set([
+      ...assigned.cursos.filter(id => id !== source.cursoId), target.cursoId,
+    ])];
+    batch.update(sourceRef, { users: arrayRemove(userId) });
+    batch.set(targetRef, { level: target.level, users: arrayUnion(userId) }, { merge: true });
+  }
+  batch.update(doc(db, 'users', userId), profile);
   await batch.commit();
 };
 

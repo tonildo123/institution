@@ -115,7 +115,23 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
 
+  salaSelector: { marginBottom: 20 },
+  levelOptions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginVertical: 12 },
+  levelOption: { padding: 10, borderWidth: 1, borderColor: '#ddd', borderRadius: 8 },
+  courseOption: { padding: 12, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, marginBottom: 6 },
+  selectedOption: { borderColor: '#0c6b58', backgroundColor: '#E1F1EC' },
+  assignedUserInfo: { flex: 1, minWidth: 0 },
+  userActions: { flexDirection: 'row', alignItems: 'center', marginLeft: 4 },
+  userActionButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  fieldLabel: { fontSize: 14, fontWeight: '600', color: '#555', marginBottom: 6 },
+  fieldValue: { fontSize: 16, color: '#1a1a1a', marginBottom: 20 },
+  saveButton: { backgroundColor: '#0c6b58', borderRadius: 8, padding: 14, alignItems: 'center' },
+  saveButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+  backButton: { padding: 16, alignItems: 'center' },
+
   userItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#f9f9f9',
     padding: 10,
     borderRadius: 8,
