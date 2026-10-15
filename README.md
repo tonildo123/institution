@@ -141,3 +141,8 @@ To learn more about React Native, take a look at the following resources:
 - agregar bloqueo de pantalla
 - Quitar editar mensaje ✅ 
 - eliminar mensaje - consultar / si queda por rol
+
+
+# Estimaciones pendientes de aprobado
+- Biometria (3hs)| classroom (aula kit)(20 hs) | estimar costos - 23 hs mas
+- WEB para las tiendas + configuracion de email (10 hs)

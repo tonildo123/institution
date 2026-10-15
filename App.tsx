@@ -10,6 +10,7 @@ import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import { store } from '@/redux/store';
+import { BiometricLock } from '@/components/BiometricLock';
 import RootNavigator from '@/navigation/RootNavigator';
 import { NotificationProvider } from '@/components/NotificationProvider';
 
@@ -33,7 +34,7 @@ function App() {
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         />
         <NotificationProvider>
-          <RootNavigator />
+          <BiometricLock><RootNavigator /></BiometricLock>
         </NotificationProvider>
       </SafeAreaProvider>
     </Provider>

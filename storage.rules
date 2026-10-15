@@ -5,6 +5,14 @@ service firebase.storage {
       let user = firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
       return user.isEnabled == true && user.role in ['admin', 'preceptor', 'equipo directivo', 'representante legal'];
     }
+    match /profile-photos/{uid}/{photoId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isEnabled == true;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isEnabled == true
+        && request.resource.size > 0 && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp'];
+    }
     match /communication-documents/{uid}/{documentId}/{fileName} {
       allow read: if request.auth != null && request.auth.uid == uid && sender();
       allow create, update: if request.auth != null && request.auth.uid == uid && sender()

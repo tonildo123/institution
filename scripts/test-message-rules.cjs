@@ -54,6 +54,14 @@ add('docente no elimina mensajes que solo recibe', 'recipient', 'preceptor', 'de
 add('docente no elimina mensajes ajenos', 'outsider', 'preceptor', 'delete', 'DENY');
 add('familia no elimina aunque figure como emisor', 'sender', 'familia', 'delete', 'DENY');
 add('docente deshabilitado no elimina', 'sender', 'preceptor', 'delete', 'DENY', message, message, false);
+for (const collection of ['biometricDevices', 'biometricAccounts', 'biometricChallenges']) {
+  for (const method of ['get', 'create', 'update']) {
+    add(`cliente no accede a ${collection}: ${method}`, 'sender', 'preceptor', method, 'DENY');
+    cases[cases.length - 1].test.request.path = `/databases/(default)/documents/${collection}/sender`;
+  }
+  add(`administrador no cambia ${collection} directamente`, 'sender', 'admin', 'update', 'DENY');
+  cases[cases.length - 1].test.request.path = `/databases/(default)/documents/${collection}/sender`;
+}
 const rulesFile = sending ? 'firestore.sending.rules' : 'firestore.rules';
 (async () => {
   const account = auth.getGlobalDefaultAccount();

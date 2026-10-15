@@ -1,4 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getBiometricDevice, loginWithBiometrics } from '@/services/biometrics';
+import { useDispatch } from 'react-redux';
+import { setUser } from '@/redux/slices/authSlice';
+import { serializeUser } from '@/utils/serializeUser';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/navigation/AuthNavigator';
 import {
@@ -11,6 +16,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useLoginLogic } from './useLoginLogic';
 import { styles } from './styles';
@@ -39,6 +45,21 @@ const LoginScreen = ({ navigation }: NativeStackScreenProps<AuthStackParamList, 
     handleLogin,
     setShowPassword,
   } = useLoginLogic();
+
+  const dispatch = useDispatch();
+  const [biometricReady, setBiometricReady] = useState(false);
+  const [biometricBusy, setBiometricBusy] = useState(false);
+  useEffect(() => { let active = true; getBiometricDevice().then(device => { if (active) setBiometricReady(Boolean(device)); }); return () => { active = false; }; }, []);
+  const biometricLogin = async () => {
+    if (biometricBusy || isLoading) return;
+    setBiometricBusy(true);
+    try {
+      const profile = serializeUser(await loginWithBiometrics());
+      dispatch(setUser(profile));
+      await AsyncStorage.setItem('user', JSON.stringify(profile));
+    } catch (error: any) { Alert.alert('No se pudo ingresar', error.message || 'Ingresá con tu contraseña.'); }
+    finally { setBiometricBusy(false); }
+  };
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -112,7 +133,7 @@ const LoginScreen = ({ navigation }: NativeStackScreenProps<AuthStackParamList, 
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
-                disabled={isLoading}
+                disabled={isLoading || biometricBusy}
                 style={styles.eyeButton}
               >
                 <Text style={styles.eyeIcon}>{showPassword ? '👁' : '👁'}</Text>
@@ -128,7 +149,7 @@ const LoginScreen = ({ navigation }: NativeStackScreenProps<AuthStackParamList, 
             style={styles.forgotPasswordButton}
             accessibilityRole="button"
             onPress={() => navigation.navigate('ForgotPassword')}
-            disabled={isLoading}
+            disabled={isLoading || biometricBusy}
           >
             <Text style={styles.forgotPasswordText}>Olvidé mi contraseña</Text>
           </TouchableOpacity>
@@ -137,7 +158,7 @@ const LoginScreen = ({ navigation }: NativeStackScreenProps<AuthStackParamList, 
           <TouchableOpacity
             style={[styles.loginBtn, isLoading && styles.loginBtnDisabled]}
             onPress={handleLogin}
-            disabled={isLoading}
+            disabled={isLoading || biometricBusy}
           >
             {isLoading ? (
               <ActivityIndicator size="large" color="#fff" />
@@ -145,6 +166,9 @@ const LoginScreen = ({ navigation }: NativeStackScreenProps<AuthStackParamList, 
               <Text style={styles.loginBtnText}>INICIAR SESIÓN</Text>
             )}
           </TouchableOpacity>
+          {biometricReady && <TouchableOpacity style={[styles.loginBtn, { marginTop: 12 }]} onPress={biometricLogin} disabled={biometricBusy || isLoading} accessibilityRole="button" accessibilityLabel="Ingresar con datos biométricos">
+            <Text style={styles.loginBtnText}>{biometricBusy ? 'Verificando...' : 'INGRESAR CON FACE ID / HUELLA'}</Text>
+          </TouchableOpacity>}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

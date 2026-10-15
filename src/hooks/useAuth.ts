@@ -1,3 +1,4 @@
+import { allowSessionUnlock } from '@/services/biometrics';
 import { serializeUser } from '@/utils/serializeUser';
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -6,12 +7,12 @@ import { auth } from '@/services/firebase/firebaseConfig';
 import {
   loginWithEmail,
   authenticateFamily,
+  authenticateEmailProfile,
   signUpWithEmail,
   logout,
   sendPasswordReset,
   getUserData,
 } from '@/services/firebase/auth';
-import { getUserByEmail } from '@/services/firebase/users';
 import { LoginCredentials, SignUpCredentials, UserRole } from '@/types';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
@@ -50,10 +51,14 @@ export const useAuth = () => {
           console.log('🔐 Firebase Auth: Usuario autenticado');
           // Usuario autenticado en Firebase Auth
           const userData = await getUserData(firebaseUser.uid);
-          if (userData && auth.currentUser?.uid === firebaseUser.uid) {
+          if (userData?.isEnabled && auth.currentUser?.uid === firebaseUser.uid) {
             dispatch(setUser(serializeUser(userData)));
             // Guardar en AsyncStorage para persistencia
             await AsyncStorage.setItem('user', JSON.stringify(serializeUser(userData)));
+          } else if (auth.currentUser?.uid === firebaseUser.uid && (!userData || !userData.isEnabled)) {
+            dispatch(setUser(null));
+            await AsyncStorage.removeItem('user');
+            await logout();
           }
         } else {
           console.log('🔐 Firebase Auth: Sin usuario');
@@ -85,6 +90,7 @@ export const useAuth = () => {
 
         // Login con Firebase
         const firebaseUser = await loginWithEmail(credentials);
+        allowSessionUnlock(firebaseUser.uid);
 
         // Obtener datos del usuario
         const userData = await getUserData(firebaseUser.uid);
@@ -116,6 +122,7 @@ export const useAuth = () => {
         dispatch(clearError());
 
         const user = await authenticateFamily(dni, password);
+        allowSessionUnlock(user.id);
 
         // Usuario autenticado
         const serializedUser = serializeUser(user);
@@ -155,29 +162,11 @@ export const useAuth = () => {
         let user = null;
 
         if (params.type === 'email') {
-          console.log('📧 Buscando por email...');
-          // Buscar por email
-          user = await getUserByEmail(params.credential);
-          if (!user) {
-            throw new Error('Email no registrado');
-          }
-          if (!user.isEnabled) {
-            throw new Error('Cuenta deshabilitada');
-          }
-
-          // Validar que sea admin, preceptor, equipo directivo o representante legal
-          if (user.role !== 'admin' && user.role !== 'preceptor' && user.role !== 'equipo directivo' && user.role !== 'representante legal') {
-            throw new Error('Este email no tiene permisos para acceder');
-          }
-
-          console.log('✅ Usuario email encontrado y validado:', user.displayName);
-          const authenticated = await loginWithEmail({ email: user.email!, password: params.password });
-          if (authenticated.uid !== user.id) {
-            await logout();
-            throw new Error('La cuenta de Firebase Auth no está vinculada al usuario. Contactá al administrador para completar la vinculación.');
-          }
+          user = await authenticateEmailProfile(params.credential, params.password);
+          allowSessionUnlock(user.id);
         } else if (params.type === 'dni') {
           user = await authenticateFamily(params.credential, params.password);
+          allowSessionUnlock(user.id);
         }
 
         if (!user) {

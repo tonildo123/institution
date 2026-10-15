@@ -60,3 +60,9 @@ test('explica permiso denegado o cámara no disponible', async () => {
   (launchCamera as jest.Mock).mockResolvedValue({ errorCode: 'camera_unavailable' });
   await expect(captureMessageImage()).rejects.toThrow('No hay una cámara');
 });
+
+test.each([false, true])('acepta image/jpg de iOS para adjuntos (cámara: %s)', async camera => {
+  const picker = camera ? launchCamera : launchImageLibrary;
+  (picker as jest.Mock).mockResolvedValueOnce({ assets: [{ uri: 'file://photo.jpg', type: 'image/jpg', fileSize: 1024 }] });
+  expect(await (camera ? captureMessageImage() : pickMessageImage())).toEqual(selected);
+});

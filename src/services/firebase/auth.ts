@@ -157,3 +157,14 @@ export const authenticateFamily = async (dni: string, password: string): Promise
     throw new Error('DNI o contraseña incorrectos. Si todavía no tenés contraseña, solicitála a la institución.');
   }
 };
+
+/** Resolver el perfil por UID evita confundir correos de contacto familiares con cuentas de acceso. */
+export const authenticateEmailProfile = async (email: string, password: string): Promise<User> => {
+  const account = await loginWithEmail({ email: email.trim().toLowerCase(), password });
+  const profile = await getUserData(account.uid);
+  if (!profile || !profile.isEnabled || !['admin', 'equipo directivo', 'representante legal', 'preceptor'].includes(profile.role)) {
+    await logout();
+    throw new Error('La cuenta no está habilitada para ingresar por correo.');
+  }
+  return profile;
+};

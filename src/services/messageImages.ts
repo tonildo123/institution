@@ -2,6 +2,7 @@ import { launchImageLibrary, launchCamera, ImagePickerResponse } from 'react-nat
 import { ref, getDownloadURL } from 'firebase/storage';
 import { doc, collection } from 'firebase/firestore';
 import { auth, db, storage } from './firebase/firebaseConfig';
+import { imageContentType } from './imageContentType';
 
 export interface MessageImage {
   uri: string;
@@ -33,12 +34,13 @@ function imageFromResult(result: ImagePickerResponse): MessageImage | null {
   if (result.errorCode) throw new Error('No se pudo obtener la foto. Intentá nuevamente.');
   const asset = result.assets?.[0];
   if (!asset?.uri) throw new Error('No se pudo leer la imagen');
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(asset.type || '')) {
+  const contentType = imageContentType(asset.type);
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(contentType)) {
     throw new Error('Seleccioná una imagen JPG, PNG o WebP');
   }
   if ((asset.fileSize || 0) > 5 * 1024 * 1024) throw new Error('La imagen debe pesar menos de 5 MB');
   return {
-    uri: asset.uri, contentType: asset.type!,
+    uri: asset.uri, contentType,
     path: `communication-images/${auth.currentUser?.uid || 'pending'}/${doc(collection(db, 'communications')).id}`,
   };
 }
@@ -47,7 +49,7 @@ export async function uploadMessageImage(image: MessageImage): Promise<string> {
   return uploadMessageFile(image, 'communication-images', 5 * 1024 * 1024);
 }
 
-export async function uploadMessageFile(file: MessageImage, folder: 'communication-images' | 'communication-documents' | 'communication-audios' | 'communication-videos', maxSize: number): Promise<string> {
+export async function uploadMessageFile(file: MessageImage, folder: 'profile-photos' | 'communication-images' | 'communication-documents' | 'communication-audios' | 'communication-videos', maxSize: number): Promise<string> {
   await auth.authStateReady();
   if (!auth.currentUser) {
     throw new Error('Cerrá sesión e ingresá con tu cuenta habilitada en Firebase Auth para enviar archivos.');

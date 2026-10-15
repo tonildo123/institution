@@ -3,6 +3,7 @@
  * Llama Cloud Functions para enviar mensajes a todos los usuarios
  */
 
+import { authorizeBiometricMessage } from './biometrics';
 import { auth } from './firebase/firebaseConfig';
 import { RootState } from '@/redux/store';
 
@@ -38,6 +39,7 @@ export async function sendCommunicationToAll(
   try {
     console.log('📤 Enviando comunicación a TODOS los usuarios...');
 
+    const body = await authorizeBiometricMessage({ ...params, userId: getUserIdFromStore(store) });
     const response = await fetch(
       `${CLOUD_FUNCTION_URL}/sendCommunicationToAll`,
       {
@@ -46,18 +48,12 @@ export async function sendCommunicationToAll(
           'Content-Type': 'application/json',
           Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
         },
-        body: JSON.stringify({
-          ...params,
-          userId: getUserIdFromStore(store),
-        }),
+        body: JSON.stringify(body),
       }
     );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
     const result = await response.json();
+    if (!response.ok) throw new Error(result.error || `No se pudo enviar (HTTP ${response.status})`);
 
     console.log('✅ Resultado:', result);
     return result;
@@ -86,6 +82,7 @@ export async function sendCommunicationToUsers(
   try {
     console.log(`📤 Enviando comunicación a ${userIds.length} usuarios específicos...`);
 
+    const body = await authorizeBiometricMessage({ ...params, userId: getUserIdFromStore(store), userIds });
     const response = await fetch(
       `${CLOUD_FUNCTION_URL}/sendCommunicationToUsers`,
       {
@@ -94,19 +91,12 @@ export async function sendCommunicationToUsers(
           'Content-Type': 'application/json',
           Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
         },
-        body: JSON.stringify({
-          ...params,
-          userId: getUserIdFromStore(store),
-          userIds: userIds,
-        }),
+        body: JSON.stringify(body),
       }
     );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
     const result = await response.json();
+    if (!response.ok) throw new Error(result.error || `No se pudo enviar (HTTP ${response.status})`);
 
     console.log('✅ Resultado:', result);
     return result;

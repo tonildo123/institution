@@ -18,6 +18,8 @@ jest.mock('firebase-admin/messaging', () => ({ getMessaging: () => ({ send: mock
 jest.mock('../functions/src/getLinkPreview.js', () => ({}), { virtual: true });
 jest.mock('../functions/src/createManagedUser.js', () => ({}), { virtual: true });
 jest.mock('../functions/src/setFamilyPassword.js', () => ({}), { virtual: true });
+jest.mock('../functions/src/biometrics.js', () => ({ verifySendBiometrics: jest.fn().mockResolvedValue(undefined) }), { virtual: true });
+jest.mock('../functions/src/updateOwnProfile.js', () => ({}), { virtual: true });
 const { sendCommunicationToAll, sendCommunicationToUsers } = require('../functions/src/index');
 const response = () => { const res: any = { set: jest.fn(), json: jest.fn(), send: jest.fn() }; res.status = jest.fn(() => res); return res; };
 beforeEach(() => { jest.clearAllMocks(); mockActor.mockResolvedValue({ exists: true, data: () => ({ role: 'admin', isEnabled: true }) }); });

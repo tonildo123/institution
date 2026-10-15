@@ -20,3 +20,12 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+// react-native-biometrics 3.x no declara el namespace requerido por AGP actual.
+subprojects { subproject ->
+    if (subproject.name == 'react-native-biometrics') {
+        subproject.plugins.withId('com.android.library') {
+            subproject.android.namespace = 'com.rnbiometrics'
+        }
+    }
+}
