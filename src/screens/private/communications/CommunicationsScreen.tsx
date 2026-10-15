@@ -35,7 +35,7 @@ import { RootState } from '@/redux/store';
 import { store } from '@/redux/store';
 import { sendCommunicationToAll, sendCommunicationToUsers } from '@/services/communicationsService';
 import { Communication } from '@/services/firebase/communications';
-import { getSalaUsers, getDestinatarios, SalaLevel } from '@/services/firebase/salas';
+import { getTeacherCursos, TeacherCurso, getSalaUsers, getDestinatarios, SalaLevel } from '@/services/firebase/salas';
 import { FamiliasModal } from '@/components/salas/FamiliasModal';
 import { styles } from './styles';
 
@@ -86,7 +86,27 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
   const [selectedLevel, setSelectedLevel] = useState<SalaLevel | 'todos'>('todos');
   const [selectedCurso, setSelectedCurso] = useState<string | undefined>();
   const [managingCourse, setManagingCourse] = useState(false);
-  const cursos = selectedLevel === 'todos' ? [] : getDestinatarios(selectedLevel);
+  const isTeacher = currentUser?.role === 'preceptor';
+  const [teacherCursos, setTeacherCursos] = useState<TeacherCurso[]>([]);
+  const [teacherLoading, setTeacherLoading] = useState(false);
+  const [teacherError, setTeacherError] = useState(false);
+  useFocusEffect(useCallback(() => {
+    if (!isTeacher || !currentUser?.id) return;
+    let active = true;
+    setTeacherLoading(true);
+    setTeacherError(false);
+    setTeacherCursos([]);
+    setSelectedLevel('todos');
+    setSelectedCurso(undefined);
+    getTeacherCursos(currentUser.id).then(assigned => {
+      if (!active) return;
+      setTeacherCursos(assigned);
+      if (assigned[0]) { setSelectedLevel(assigned[0].level); setSelectedCurso(assigned[0].id); }
+    }).catch(() => { if (active) setTeacherError(true); })
+      .finally(() => { if (active) setTeacherLoading(false); });
+    return () => { active = false; };
+  }, [isTeacher, currentUser?.id]));
+  const cursos = selectedLevel === 'todos' ? [] : isTeacher ? teacherCursos.filter(curso => curso.level === selectedLevel) : getDestinatarios(selectedLevel);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [messageInputKey, setMessageInputKey] = useState(0);
@@ -151,6 +171,10 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
   const handleSend = async () => {
     if (loading || pickingImage) return;
+    if (isTeacher && (teacherLoading || !teacherCursos.some(curso => curso.level === selectedLevel && curso.id === selectedCurso))) {
+      Alert.alert('Sala no habilitada', 'Solo podés enviar mensajes a los cursos que tenés asignados.');
+      return;
+    }
     if (!title.trim()) {
       Alert.alert('Error', 'Por favor ingresa un título');
       return;
@@ -367,12 +391,13 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
             </View>
           </View>
 
+          {isTeacher && <Text style={styles.bubbleText}>{teacherLoading ? 'Cargando tus salas...' : teacherError ? 'No se pudieron cargar tus salas. Volvé a abrir esta pantalla.' : teacherCursos.length === 0 ? 'No tenés salas asignadas. Solicitá la asignación a la institución.' : 'Elegí una de tus salas asignadas.'}</Text>}
           {/* Level options */}
-          {levels.map((level) => (
+          {levels.filter(level => !isTeacher || teacherCursos.some(curso => curso.level === level.id)).map((level) => (
             <TouchableOpacity
               key={level.id}
               disabled={loading}
-              onPress={() => { setSelectedLevel(level.id); setSelectedCurso(undefined); }}
+              onPress={() => { setSelectedLevel(level.id); setSelectedCurso(isTeacher ? teacherCursos.find(curso => curso.level === level.id)?.id : undefined); }}
             >
               <View style={styles.messageRow}>
                 <View style={[styles.chatBubble, styles.receivedBubble, { width: '90%' }]}>
@@ -388,7 +413,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
           {cursos.length > 0 && (
             <View>
-              {[{ id: undefined, label: 'TODO EL NIVEL' }, ...cursos].map(curso => (
+              {(isTeacher ? cursos : [{ id: undefined, label: 'TODO EL NIVEL' }, ...cursos]).map(curso => (
                 <TouchableOpacity key={curso.id || 'nivel'} disabled={loading} onPress={() => setSelectedCurso(curso.id)}>
                   <View style={styles.messageRow}>
                     <View style={[styles.chatBubble, styles.receivedBubble]}>
@@ -398,11 +423,11 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
                   </View>
                 </TouchableOpacity>
               ))}
-              {selectedCurso && !selectedCurso.startsWith('turno-') && (
+              {!isTeacher && selectedCurso && !selectedCurso.startsWith('turno-') && (
                 <TouchableOpacity disabled={loading} onPress={() => setManagingCourse(true)}>
                   <View style={styles.messageRow}>
                     <View style={[styles.chatBubble, styles.receivedBubble]}>
-                      <Text style={styles.bubbleText}>+ Agregar / ver alumnos y familias</Text>
+                      <Text style={styles.bubbleText}>+ Agregar / ver familias y docentes</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -507,7 +532,7 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
         {showEmojis && <EmojiPicker onSelect={emoji => messageInputRef.current?.insertEmoji(emoji)} onClose={() => setShowEmojis(false)} />}
 
-        {managingCourse && selectedLevel !== 'todos' && selectedCurso && (
+        {!isTeacher && managingCourse && selectedLevel !== 'todos' && selectedCurso && (
           <FamiliasModal level={selectedLevel} cursoId={selectedCurso}
             label={cursoDisplayLabel(cursos.find(curso => curso.id === selectedCurso)!.label)}
             onClose={() => setManagingCourse(false)} />
@@ -516,9 +541,9 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         {/* Send Button Bar */}
         <View style={styles.sendButtonBar}>
           <TouchableOpacity
-            style={[styles.sendButtonChat, loading && { opacity: 0.6 }]}
+            style={[styles.sendButtonChat, (loading || (isTeacher && (teacherLoading || teacherCursos.length === 0))) && { opacity: 0.6 }]}
             onPress={handleSend}
-            disabled={loading || pickingImage}
+            disabled={loading || pickingImage || (isTeacher && (teacherLoading || teacherCursos.length === 0))}
           >
             <Image source={require('../../../assets/icons/send-message.png')} style={styles.sendButtonChatIcon} resizeMode="contain" accessible={false} />
             <Text style={styles.sendButtonChatText}>

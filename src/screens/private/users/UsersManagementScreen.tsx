@@ -27,6 +27,7 @@ import { styles } from './styles';
 
 export const UsersManagementScreen = () => {
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admins' | 'preceptor' | 'familia'>('all');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -222,7 +223,13 @@ export const UsersManagementScreen = () => {
   };
 
   const term = search.trim().toLocaleLowerCase();
-  const filteredUsers = users.filter(user =>
+  const matchesRole = (user: User, filter: typeof roleFilter) => filter === 'all' ||
+    (filter === 'admins' ? ['admin', 'equipo directivo', 'representante legal'].includes(user.role) : user.role === filter);
+  const filters: { id: typeof roleFilter; label: string }[] = [
+    { id: 'all', label: 'Total' }, { id: 'admins', label: 'Admins' },
+    { id: 'preceptor', label: 'Docentes' }, { id: 'familia', label: 'Familias' },
+  ];
+  const filteredUsers = users.filter(user => matchesRole(user, roleFilter) &&
     [user.displayName, user.email, user.dni].some(value => value?.toLocaleLowerCase().includes(term)),
   );
 
@@ -266,30 +273,17 @@ export const UsersManagementScreen = () => {
         </View>
       )}
 
-      {/* Estadísticas */}
+      {/* Contadores y filtros por rol */}
       <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{users.length}</Text>
-          <Text style={styles.statLabel}>Total</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>
-            {users.filter((u) => u.role === 'admin' || u.role === 'equipo directivo' || u.role === 'representante legal').length}
-          </Text>
-          <Text style={styles.statLabel}>Admins</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>
-            {users.filter((u) => u.role === 'preceptor').length}
-          </Text>
-          <Text style={styles.statLabel}>Docentes</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>
-            {users.filter((u) => u.role === 'familia').length}
-          </Text>
-          <Text style={styles.statLabel}>Familias</Text>
-        </View>
+        {filters.map(filter => (
+          <TouchableOpacity key={filter.id} onPress={() => setRoleFilter(filter.id)}
+            style={[styles.statItem, roleFilter === filter.id && styles.statItemSelected]}
+            accessibilityRole="button" accessibilityLabel={`Filtrar ${filter.label}`}
+            accessibilityState={{ selected: roleFilter === filter.id }}>
+            <Text style={styles.statNumber}>{users.filter(user => matchesRole(user, filter.id)).length}</Text>
+            <Text style={[styles.statLabel, roleFilter === filter.id && styles.statLabelSelected]}>{filter.label}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <View style={styles.searchContainer}>
@@ -377,7 +371,7 @@ export const UsersManagementScreen = () => {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={{ padding: 20, alignItems: 'center' }}>
-            <Text style={{ color: '#999' }}>{term ? 'No se encontraron usuarios' : 'No hay usuarios'}</Text>
+            <Text style={{ color: '#999' }}>{term || roleFilter !== 'all' ? 'No se encontraron usuarios' : 'No hay usuarios'}</Text>
           </View>
         }
       />

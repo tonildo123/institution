@@ -4,8 +4,9 @@ const mockUpdate = jest.fn().mockResolvedValue(undefined);
 const mockUsers = Array.from({ length: 35 }, (_, i) => ({ id: `family-${i}`, exists: true, data: () => ({ pushTokens: [] }) }));
 const mockVerifyToken = jest.fn().mockResolvedValue({ uid: 'admin' });
 const mockActor = jest.fn().mockResolvedValue({ exists: true, data: () => ({ role: 'admin', isEnabled: true }) });
+const mockCourse = jest.fn();
 const mockGetAll = jest.fn(async (...ids: string[]) => mockUsers.filter(user => ids.includes(user.id)));
-const mockDb = { getAll: mockGetAll, collection: (name: string) => name === 'users'
+const mockDb = { getAll: mockGetAll, collection: (name: string) => name === 'salas' ? { doc: () => ({ collection: () => ({ doc: () => ({ get: mockCourse }) }) }) } : name === 'users'
   ? { get: async () => ({ docs: mockUsers, size: mockUsers.length }), doc: (id: string) => id === 'admin' ? { get: mockActor } : id }
   : { doc: () => ({ id: 'communication', set: mockSet, update: mockUpdate }) } };
 jest.mock('firebase-functions', () => ({ https: { onRequest: (handler: unknown) => handler } }), { virtual: true });
@@ -19,7 +20,7 @@ jest.mock('../functions/src/createManagedUser.js', () => ({}), { virtual: true }
 jest.mock('../functions/src/setFamilyPassword.js', () => ({}), { virtual: true });
 const { sendCommunicationToAll, sendCommunicationToUsers } = require('../functions/src/index');
 const response = () => { const res: any = { set: jest.fn(), json: jest.fn(), send: jest.fn() }; res.status = jest.fn(() => res); return res; };
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => { jest.clearAllMocks(); mockActor.mockResolvedValue({ exists: true, data: () => ({ role: 'admin', isEnabled: true }) }); });
 
 test('guarda destinatarios y segmentación antes de enviar a más de 30 familias', async () => {
   await sendCommunicationToUsers({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'Título', body: 'Mensaje', userId: 'admin',
@@ -119,4 +120,34 @@ test('rechaza enviar sin token y obtiene el emisor del token aunque el cuerpo se
   expect(mockSet).not.toHaveBeenCalled();
   await sendCommunicationToAll({ method: 'POST', headers: { authorization: 'Bearer test' }, body: { title: 'A', body: 'B', userId: 'victim' } }, response());
   expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ sentBy: 'admin' }));
+});
+
+
+test.each([null, 'turno-tt', 'other-course'])('docentes no envían a todos, turnos o cursos no asignados: %s', async cursoId => {
+  mockActor.mockResolvedValue({ exists: true, data: () => ({ role: 'preceptor', isEnabled: true }) });
+  mockCourse.mockResolvedValue({ exists: true, data: () => ({ teacherIds: [], users: ['family-0'] }) });
+  const res = response();
+  await sendCommunicationToUsers({ method: 'POST', headers: { authorization: 'Bearer test' }, body: {
+    title: 'T', body: 'B', level: 'primario', cursoId, userIds: ['family-0'],
+  } }, res);
+  expect(res.status).toHaveBeenCalledWith(403);
+  expect(mockSet).not.toHaveBeenCalled();
+});
+
+test('docente asignado puede enviar al curso y no puede ampliar los destinatarios ni enviar a todos', async () => {
+  mockActor.mockResolvedValue({ exists: true, data: () => ({ role: 'preceptor', isEnabled: true }) });
+  mockCourse.mockResolvedValue({ exists: true, data: () => ({ teacherIds: ['admin'], users: ['family-0'] }) });
+  const req = { method: 'POST', headers: { authorization: 'Bearer test' }, body: {
+    title: 'T', body: 'B', level: 'primario', cursoId: 'grado-3-tt', userIds: ['family-0'],
+  } };
+  await sendCommunicationToUsers(req, response());
+  expect(mockSet).toHaveBeenCalledTimes(1);
+  mockSet.mockClear();
+  const invalid = response();
+  await sendCommunicationToUsers({ ...req, body: { ...req.body, userIds: ['family-1'] } }, invalid);
+  expect(invalid.status).toHaveBeenCalledWith(403);
+  const all = response();
+  await sendCommunicationToAll(req, all);
+  expect(all.status).toHaveBeenCalledWith(403);
+  expect(mockSet).not.toHaveBeenCalled();
 });

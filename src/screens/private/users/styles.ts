@@ -13,6 +13,8 @@ export const styles = StyleSheet.create({
   addButtonText: { color: '#D92323', fontWeight: '700', fontSize: 13 },
   statsContainer: { flexDirection: 'row', paddingHorizontal: 8, paddingVertical: 15, backgroundColor: '#fff' },
   statItem: { flex: 1, alignItems: 'center', borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: '#EEE' },
+  statItemSelected: { backgroundColor: '#FFF0EF', borderRadius: 8 },
+  statLabelSelected: { color: '#D92323', fontWeight: '700' },
   statNumber: { fontSize: 22, fontWeight: '700', color: '#D92323' },
   statLabel: { fontSize: 12, color: '#85858F', marginTop: 2 },
   searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 24, marginHorizontal: 16, marginTop: 12, marginBottom: 8, paddingHorizontal: 16 },

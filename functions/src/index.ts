@@ -59,6 +59,11 @@ export const sendCommunicationToAll = functions.https.onRequest(
       const { title, body, description, data: additionalData } = req.body;
       const userId = await authenticatedSender(req, res);
       if (!userId) return;
+      const actor = await db.collection(COLLECTIONS.USERS).doc(userId).get();
+      if (actor.data()?.role === 'preceptor') {
+        res.status(403).json({ error: 'Los docentes solo pueden enviar a sus cursos asignados' });
+        return;
+      }
 
       if (!title || !body || !userId) {
         res.status(400).json({ error: 'title, body y userId requeridos' });
@@ -207,6 +212,20 @@ export const sendCommunicationToUsers = functions.https.onRequest(
           (cursoLabel !== null && typeof cursoLabel !== 'string')) {
         res.status(400).json({ error: 'Segmentación o destinatarios inválidos' });
         return;
+      }
+      const actor = await db.collection(COLLECTIONS.USERS).doc(userId).get();
+      if (actor.data()?.role === 'preceptor') {
+        if (!['inicial', 'primario', 'secundario'].includes(level) || !cursoId || cursoId.includes('/') || cursoId.startsWith('turno-')) {
+          res.status(403).json({ error: 'Elegí uno de tus cursos asignados' }); return;
+        }
+        const course = await db.collection('salas').doc(level).collection('cursos').doc(cursoId).get();
+        if (!course.exists || !(course.data()?.teacherIds || []).includes(userId)) {
+          res.status(403).json({ error: 'No tenés permiso para enviar a este curso' }); return;
+        }
+        const members: string[] = course.data()?.users || [];
+        if (userIds.some((id: string) => !members.includes(id))) {
+          res.status(403).json({ error: 'Los destinatarios deben pertenecer al curso asignado' }); return;
+        }
       }
       const targetUserIds = [...new Set<string>(userIds)];
       // getAll evita el límite de IDs de una consulta con "in".

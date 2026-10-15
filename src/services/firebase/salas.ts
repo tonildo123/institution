@@ -212,3 +212,28 @@ export const getAllSalas = async (): Promise<Sala[]> => {
     throw error;
   }
 };
+
+export interface TeacherCurso extends Curso { level: SalaLevel }
+
+export const getTeacherCursos = async (userId: string): Promise<TeacherCurso[]> => {
+  const levels: SalaLevel[] = ['inicial', 'primario', 'secundario'];
+  const assigned = await Promise.all(levels.map(async level => {
+    const snapshot = await getDocs(collection(db, 'salas', level, 'cursos'));
+    const ids = new Set(snapshot.docs.filter(curso => (curso.data().teacherIds || []).includes(userId)).map(curso => curso.id));
+    return getCursos(level).filter(curso => ids.has(curso.id)).map(curso => ({ ...curso, level }));
+  }));
+  return assigned.flat();
+};
+
+export const getSalaTeachers = async (level: SalaLevel, cursoId: string): Promise<string[]> => {
+  const snapshot = await getDoc(getSalaRef(level, cursoId));
+  return snapshot.exists() ? snapshot.data().teacherIds || [] : [];
+};
+
+export const setTeacherInSala = async (level: SalaLevel, cursoId: string, userId: string, assigned: boolean): Promise<void> => {
+  const teacher = await getDoc(doc(db, 'users', userId));
+  if (!teacher.exists() || teacher.data().role !== 'preceptor') throw new Error('El usuario debe tener rol docente.');
+  const batch = writeBatch(db);
+  batch.set(getSalaRef(level, cursoId), { level, teacherIds: assigned ? arrayUnion(userId) : arrayRemove(userId) }, { merge: true });
+  await batch.commit();
+};

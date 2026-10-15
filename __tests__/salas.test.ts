@@ -185,3 +185,29 @@ test('editar sin cambiar de curso solo actualiza los datos personales', async ()
   expect(updateDoc).toHaveBeenCalledTimes(1);
   expect(updateDoc).toHaveBeenCalledWith('users/familia', { displayName: 'Nombre', updatedAt: 'timestamp' });
 });
+
+
+test('los cursos docentes se obtienen de teacherIds y no de los alumnos del curso', async () => {
+  const { getTeacherCursos } = require('../src/services/firebase/salas');
+  (getDocs as jest.Mock).mockImplementation(async path => ({ docs: path.includes('primario') ? [
+    { id: 'grado-3-tt', data: () => ({ teacherIds: ['teacher'], users: ['family'] }) },
+    { id: 'grado-3-tm', data: () => ({ teacherIds: ['other'], users: ['teacher'] }) },
+  ] : [] }));
+  expect(await getTeacherCursos('teacher')).toEqual([{ id: 'grado-3-tt', label: '3° GRADO TT', level: 'primario' }]);
+});
+
+test.each([true, false])('asignar o quitar docente solo modifica teacherIds: %s', async assigned => {
+  const { setTeacherInSala } = require('../src/services/firebase/salas');
+  (getDoc as jest.Mock).mockResolvedValue({ exists: () => true, data: () => ({ role: 'preceptor' }) });
+  await setTeacherInSala('primario', 'grado-3-tt', 'teacher', assigned);
+  expect(setDoc).toHaveBeenCalledWith('salas/primario/cursos/grado-3-tt', {
+    level: 'primario', teacherIds: assigned ? { union: 'teacher' } : { remove: ['teacher'] },
+  }, { merge: true });
+});
+
+test('no permite asignar familias como docentes', async () => {
+  const { setTeacherInSala } = require('../src/services/firebase/salas');
+  (getDoc as jest.Mock).mockResolvedValue({ exists: () => true, data: () => ({ role: 'familia' }) });
+  await expect(setTeacherInSala('primario', 'grado-3-tt', 'family', true)).rejects.toThrow('rol docente');
+  expect(setDoc).not.toHaveBeenCalled();
+});

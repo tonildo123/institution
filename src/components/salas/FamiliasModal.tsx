@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { getAllUsers } from '@/services/firebase/users';
-import { addUserToSala, getSalaUsers, removeUserFromSala, getTransferCursos, updateUserInSala, SalaLevel } from '@/services/firebase/salas';
+import { getSalaTeachers, setTeacherInSala, addUserToSala, getSalaUsers, removeUserFromSala, getTransferCursos, updateUserInSala, SalaLevel } from '@/services/firebase/salas';
 import { setFamilyPassword } from '@/services/firebase/createAccount';
 import { User } from '@/types';
 import { cursoDisplayLabel } from '@/utils/cursoDisplayLabel';
@@ -16,6 +16,9 @@ interface Props {
 }
 
 export const FamiliasModal = ({ level, cursoId, label, onClose }: Props) => {
+  const [teachers, setTeachers] = useState<User[]>([]);
+  const [teacherIds, setTeacherIds] = useState<string[]>([]);
+  const [teacherSearch, setTeacherSearch] = useState('');
   const [familias, setFamilias] = useState<User[]>([]);
   const [members, setMembers] = useState<string[]>([]);
   const [search, setSearch] = useState('');
@@ -102,9 +105,11 @@ export const FamiliasModal = ({ level, cursoId, label, onClose }: Props) => {
 
   useEffect(() => {
     let active = true;
-    Promise.all([getAllUsers(), getSalaUsers(level, cursoId)])
-      .then(([users, ids]) => {
+    Promise.all([getAllUsers(), getSalaUsers(level, cursoId), cursoId ? getSalaTeachers(level, cursoId) : Promise.resolve([])])
+      .then(([users, ids, docentes]) => {
         if (!active) return;
+        setTeachers(users.filter(user => user.role === 'preceptor'));
+        setTeacherIds(docentes);
         setFamilias(users.filter(user => user.role === 'familia'));
         setMembers(ids);
       })
@@ -126,6 +131,23 @@ export const FamiliasModal = ({ level, cursoId, label, onClose }: Props) => {
       setSaving(false);
     }
   };
+
+  const assignTeacher = async (user: User, assigned: boolean) => {
+    if (saving || !cursoId) return;
+    setSaving(true);
+    try {
+      await setTeacherInSala(level, cursoId, user.id, assigned);
+      setTeacherIds(current => assigned ? [...new Set([...current, user.id])] : current.filter(id => id !== user.id));
+      setTeacherSearch('');
+    } catch {
+      Alert.alert('Error', 'No se pudo actualizar la asignación del docente.');
+    } finally { setSaving(false); }
+  };
+
+  const removeTeacher = (user: User) => Alert.alert('Quitar docente', `¿Querés quitar a ${user.displayName} de ${label}? Perderá el permiso para enviar a este curso.`, [
+    { text: 'Cancelar', style: 'cancel' },
+    { text: 'Quitar', style: 'destructive', onPress: () => { void assignTeacher(user, false); } },
+  ]);
 
   const transferCursos = getTransferCursos(level, cursoId);
   const transferLevels = [...new Set(transferCursos.map(curso => curso.level))];
@@ -200,6 +222,24 @@ export const FamiliasModal = ({ level, cursoId, label, onClose }: Props) => {
             <Text style={styles.noResultsText}>No se pudieron cargar las familias. Cerrá y volvé a abrir el curso.</Text>
           ) : (
             <ScrollView keyboardShouldPersistTaps="handled">
+              {cursoId && <View style={styles.usersInSalaContainer}>
+                <Text style={styles.usersInSalaTitle}>Docentes asignados ({teacherIds.length})</Text>
+                {teachers.filter(user => teacherIds.includes(user.id)).map(user => (
+                  <View key={user.id} style={styles.userSearchItem}>
+                    <View style={styles.assignedUserInfo}><Text style={styles.userName}>{user.displayName}</Text><Text style={styles.userEmail}>{user.email}</Text></View>
+                    <TouchableOpacity disabled={saving} accessibilityRole="button" accessibilityLabel={`Quitar docente ${user.displayName}`} onPress={() => removeTeacher(user)}><Text style={styles.addButton}>Quitar</Text></TouchableOpacity>
+                  </View>
+                ))}
+                {teacherIds.length === 0 && <Text style={styles.userEmail}>No hay docentes asignados a este curso.</Text>}
+                <TextInput style={styles.searchInput} value={teacherSearch} onChangeText={setTeacherSearch} editable={!saving}
+                  placeholder="Buscar docente por nombre o email..." accessibilityLabel="Buscar docente" />
+                {teacherSearch.trim() !== '' && teachers.filter(user => !teacherIds.includes(user.id) && user.isEnabled &&
+                  [user.displayName, user.email].some(value => value?.toLowerCase().includes(teacherSearch.trim().toLowerCase()))).map(user => (
+                  <TouchableOpacity key={user.id} style={styles.userSearchItem} disabled={saving} onPress={() => { void assignTeacher(user, true); }} accessibilityRole="button" accessibilityLabel={`Asignar docente ${user.displayName}`}>
+                    <View style={styles.assignedUserInfo}><Text style={styles.userName}>{user.displayName}</Text><Text style={styles.userEmail}>{user.email}</Text></View><Text style={styles.addButton}>+</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>}
               <Text style={styles.usersInSalaTitle}>Agregar alumno/familia registrada</Text>
               <TextInput style={styles.searchInput} placeholder="Buscar por nombre, email o DNI..." placeholderTextColor="#999" value={search} onChangeText={setSearch} editable={!saving} />
               {saving && <ActivityIndicator />}

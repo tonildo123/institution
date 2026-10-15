@@ -19,7 +19,7 @@ export const SalasScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Salas</Text>
-        <Text style={styles.headerSubtitle}>Seleccioná una sala o curso para agregar alumnos y familias</Text>
+        <Text style={styles.headerSubtitle}>Seleccioná una sala o curso para agregar alumnos, familias y docentes</Text>
       </View>
       <ScrollView>
       <View style={styles.content}>

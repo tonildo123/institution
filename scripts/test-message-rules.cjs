@@ -28,13 +28,40 @@ add('administrador participante elimina', 'sender', 'admin', 'delete', 'ALLOW');
 add('familia participante no elimina', 'recipient', 'familia', 'delete', 'DENY');
 add('no se puede ampliar destinatarios', 'sender', 'admin', 'update', 'DENY', message, { ...message, targetUserIds: ['recipient', 'outsider'] });
 add('edición conserva audiencia', 'sender', 'admin', 'update', 'ALLOW', message, { ...message, title: 'Corregido', updatedAt: 'after' });
+const sending = process.argv.includes('--sending');
+if (sending) {
+  cases.length = 0;
+  const resource = { teacherIds: ['other'], users: ['family'] };
+  for (const role of ['preceptor', 'familia']) {
+    add(`${role}: no se autoasigna`, 'sender', role, 'update', 'DENY', resource, { ...resource, teacherIds: ['sender'] });
+    cases[cases.length - 1].test.request.path = '/databases/(default)/documents/salas/primario/cursos/grado-3-tt';
+    add(`${role}: no se convierte en administrador`, 'sender', role, 'update', 'DENY', { role, isEnabled: true }, { role: 'admin', isEnabled: true });
+    cases[cases.length - 1].test.request.path = '/databases/(default)/documents/users/sender';
+    add(`${role}: no crea mensajes directamente`, 'sender', role, 'create', 'DENY');
+  }
+  for (const role of ['admin', 'equipo directivo', 'representante legal']) {
+    add(`${role}: asigna docente`, 'sender', role, 'update', 'ALLOW', resource, { ...resource, teacherIds: ['sender'] });
+    cases[cases.length - 1].test.request.path = '/databases/(default)/documents/salas/primario/cursos/grado-3-tt';
+  }
+  for (const role of ['admin', 'preceptor', 'familia', 'user']) {
+    add(`registro propio con rol ${role}`, 'sender', 'user', 'create', role === 'user' ? 'ALLOW' : 'DENY', {}, { role });
+    cases[cases.length - 1].test.request.path = '/databases/(default)/documents/users/sender';
+  }
+  add('la transición conserva la lectura anterior', null, 'familia', 'get', 'ALLOW');
+}
+add('docente elimina su propio mensaje', 'sender', 'preceptor', 'delete', 'ALLOW');
+add('docente no elimina mensajes que solo recibe', 'recipient', 'preceptor', 'delete', 'DENY');
+add('docente no elimina mensajes ajenos', 'outsider', 'preceptor', 'delete', 'DENY');
+add('familia no elimina aunque figure como emisor', 'sender', 'familia', 'delete', 'DENY');
+add('docente deshabilitado no elimina', 'sender', 'preceptor', 'delete', 'DENY', message, message, false);
+const rulesFile = sending ? 'firestore.sending.rules' : 'firestore.rules';
 (async () => {
   const account = auth.getGlobalDefaultAccount();
   if (!account) throw new Error('Iniciá sesión con firebase login');
   const token = await auth.getAccessToken(account.tokens.refresh_token, ['https://www.googleapis.com/auth/cloud-platform']);
   const response = await fetch('https://firebaserules.googleapis.com/v1/projects/institucion-59d9a:test', {
     method: 'POST', headers: { Authorization: `Bearer ${token.access_token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ source: { files: [{ name: 'firestore.rules', content: fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8') }] }, testSuite: { testCases: cases.map(item => item.test) } }),
+    body: JSON.stringify({ source: { files: [{ name: rulesFile, content: fs.readFileSync(path.join(root, rulesFile), 'utf8') }] }, testSuite: { testCases: cases.map(item => item.test) } }),
   });
   const result = await response.json();
   if (!response.ok) throw new Error(JSON.stringify(result));

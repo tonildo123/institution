@@ -1,6 +1,6 @@
 import React from 'react';
 import { act, create, ReactTestRenderer } from 'react-test-renderer';
-import { Alert, TextInput, TouchableOpacity, Text } from 'react-native';
+import { Alert, FlatList, TextInput, TouchableOpacity, Text } from 'react-native';
 jest.mock('react-native-svg', () => ({ __esModule: true, default: 'Svg', Path: 'Path', Circle: 'Circle', Line: 'Line' }));
 jest.mock('react-native-safe-area-context', () => ({ SafeAreaProvider: 'SafeAreaProvider', SafeAreaView: 'SafeAreaView' }));
 jest.mock('../src/services/firebase/users', () => ({ getAllUsers: jest.fn(), updateUser: jest.fn(), createUser: jest.fn(), deleteUser: jest.fn() }));
@@ -50,4 +50,28 @@ test('informa el resultado parcial y conserva el formulario si falla Auth', asyn
   await open(); await password('new-password'); await save();
   expect(Alert.alert).toHaveBeenCalledWith('Contraseña sin actualizar', expect.stringContaining('Los datos del usuario se guardaron'));
   expect(tree.root.findAllByType(TextInput).find(input => input.props.placeholder === 'Ingresá una nueva contraseña')!.props.value).toBe('new-password');
+});
+
+
+test('los contadores filtran por grupo, se combinan con búsqueda y Total restablece el rol', async () => {
+  (getAllUsers as jest.Mock).mockResolvedValue([
+    { id: 'admin', role: 'admin', displayName: 'Admin' },
+    { id: 'director', role: 'equipo directivo', displayName: 'Dirección' },
+    { id: 'legal', role: 'representante legal', displayName: 'Representante' },
+    { id: 'teacher', role: 'preceptor', displayName: 'Docente' },
+    { id: 'family', role: 'familia', displayName: 'Familia' },
+  ]);
+  await act(async () => { tree = create(<UsersManagementScreen />); });
+  const ids = () => tree.root.findByType(FlatList).props.data.map((user: { id: string }) => user.id);
+  const select = async (label: string) => { await act(async () => {
+    tree.root.findAllByType(TouchableOpacity).find(button => button.props.accessibilityLabel === `Filtrar ${label}`)!.props.onPress();
+  }); };
+  await select('Admins'); expect(ids()).toEqual(['admin', 'director', 'legal']);
+  await select('Docentes'); expect(ids()).toEqual(['teacher']);
+  await select('Familias'); expect(ids()).toEqual(['family']);
+  await select('Total'); expect(ids()).toHaveLength(5);
+  await act(async () => { tree.root.findAllByType(TextInput).find(input => input.props.accessibilityLabel === 'Buscar usuario')!.props.onChangeText('Dirección'); });
+  await select('Admins'); expect(ids()).toEqual(['director']);
+  await select('Docentes'); expect(ids()).toEqual([]);
+  await select('Total'); expect(ids()).toEqual(['director']);
 });

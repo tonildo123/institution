@@ -98,8 +98,13 @@ export const CommunicationDetailScreen = () => {
     }
   };
 
+  const canDelete = Boolean(user && communication && (
+    ['admin', 'equipo directivo', 'representante legal'].includes(user.role) ||
+    (user.role === 'preceptor' && communication.sentBy === user.id)
+  ));
+
   const handleDelete = () => {
-    if (user?.role !== 'admin' && user?.role !== 'equipo directivo' && user?.role !== 'representante legal') return;
+    if (!canDelete) return;
 
     Alert.alert(
       '🗑️ Eliminar Comunicación',
@@ -172,7 +177,7 @@ export const CommunicationDetailScreen = () => {
         </View>
 
         {/* Acciones disponibles según el rol; edición oculta. */}
-        {(user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal') && (
+        {canDelete && (
           <View style={{ flexDirection: 'row', gap: 12 }}>
             {SHOW_EDIT_ACTION && (
             <TouchableOpacity
@@ -185,6 +190,8 @@ export const CommunicationDetailScreen = () => {
             )}
             <TouchableOpacity
               onPress={handleDelete}
+              accessibilityRole="button"
+              accessibilityLabel="Eliminar comunicación"
               disabled={deleting}
               style={{ opacity: deleting ? 0.5 : 1 }}
             >
