@@ -26,6 +26,9 @@ import { styles } from './detailStyles';
  * Maquetado tipo chat con header verde
  */
 
+// Mantener la edición implementada, pero oculta para todos los roles.
+const SHOW_EDIT_ACTION = false;
+
 export const CommunicationDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -165,9 +168,10 @@ export const CommunicationDetailScreen = () => {
           <Text style={styles.headerSub}>Comunicación</Text>
         </View>
 
-        {/* Edit & Delete buttons - solo para admin */}
+        {/* Acciones disponibles según el rol; edición oculta. */}
         {(user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal') && (
           <View style={{ flexDirection: 'row', gap: 12 }}>
+            {SHOW_EDIT_ACTION && (
             <TouchableOpacity
               onPress={handleEdit}
               disabled={saving}
@@ -175,6 +179,7 @@ export const CommunicationDetailScreen = () => {
             >
               <Text style={styles.menuDots}>✏️</Text>
             </TouchableOpacity>
+            )}
             <TouchableOpacity
               onPress={handleDelete}
               disabled={deleting}

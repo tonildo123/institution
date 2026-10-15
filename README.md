@@ -128,14 +128,16 @@ To learn more about React Native, take a look at the following resources:
 - recibir notificaciones con colores segun nivel inicial
 - cambiar todos por institucional
 
-
+✅ Realizado
+🟡 Pendiente
+❌ (Sin realizar)
 # Agregar
 - Mensajes de audios transcriptos
 - Roles combinados - selector de pantallas
 - Dejar funcional "Dar de baja mi cuenta"
 - Reportar problema
-- agrgear mas salas (institucional[docentes- nivel inicial - docentes nivel primario - doc nivel sec, [PRIMARIA] todos los docentes, docentes materia especial- docente, deparatamento de ingles, personal no docente]
+- agrgear mas salas (institucional[docentes- nivel inicial - docentes nivel primario - doc nivel sec, [PRIMARIA] todos los docentes, docentes materia especial- docente, deparatamento de ingles, personal no docente] - consultar / si queda por rol
     , solo a docentes, etc [ a definir])
 - agregar bloqueo de pantalla
-- Quitar editar mensaje
+- Quitar editar mensaje ✅ 
 - eliminar mensaje - consultar / si queda por rol
