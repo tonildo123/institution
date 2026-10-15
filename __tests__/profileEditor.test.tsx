@@ -2,9 +2,10 @@ import React from 'react';
 import { act, create, ReactTestRenderer } from 'react-test-renderer';
 import { Alert, TextInput, TouchableOpacity } from 'react-native';
 jest.mock('react-native-svg', () => ({ __esModule: true, default: 'Svg', Path: 'Path', Circle: 'Circle', Line: 'Line' }));
+jest.mock('../src/services/firebase/salas', () => ({ getCursos: (level: string) => level === 'primario' ? [{ id: 'grado-1-tt', label: '1° GRADO TT' }] : [] }));
 const mockDispatch = jest.fn();
 const mockLogout = jest.fn();
-const mockUser = { id: 'self', role: 'familia', displayName: 'Familia', email: '', dni: '70000000', isEnabled: true };
+const mockUser = { id: 'self', role: 'familia', displayName: 'Familia', email: '', dni: '70000000', isEnabled: true, assignedCursos: ['grado-1-tt'] };
 jest.mock('@react-native-async-storage/async-storage', () => ({ getItem: jest.fn(), setItem: jest.fn(), removeItem: jest.fn() }));
 jest.mock('../src/redux/slices/authSlice', () => ({ setUser: (payload: unknown) => ({ type: 'auth/setUser', payload }) }));
 jest.mock('react-redux', () => ({ useSelector: (selector: any) => selector({ auth: { user: mockUser } }), useDispatch: () => mockDispatch }));
@@ -97,4 +98,9 @@ test('si falla la baja conserva la sesión y muestra el error', async () => {
   await act(async () => { await options.find((item: any) => item.text === 'Dar de baja').onPress(); });
   expect(mockLogout).not.toHaveBeenCalled();
   expect(Alert.alert).toHaveBeenCalledWith('No se pudo dar de baja la cuenta', 'Sin conexión');
+});
+
+test('el perfil familiar muestra el curso con su nivel y turno', async () => {
+  await open();
+  expect(JSON.stringify(tree.toJSON())).toContain('Primario · 1° Grado Turno Tarde');
 });

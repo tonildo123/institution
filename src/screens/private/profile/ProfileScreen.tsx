@@ -23,6 +23,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { useAuth } from '@/hooks/useAuth';
 import { styles } from './styles';
+import { getCursos } from '@/services/firebase/salas';
+import { cursoDisplayLabel } from '@/utils/cursoDisplayLabel';
 
 /**
  * Pantalla de Perfil
@@ -156,6 +158,11 @@ export const ProfileScreen = () => {
 
   const roleLabel = user?.role === 'admin' || user?.role === 'equipo directivo' || user?.role === 'representante legal'
     ? 'Administrador' : user?.role === 'preceptor' ? 'Docente' : 'Familia';
+  const familyCourses = user?.role === 'familia'
+    ? (['inicial', 'primario', 'secundario'] as const).flatMap(level =>
+      getCursos(level).filter(course => user.assignedCursos?.includes(course.id))
+        .map(course => `${level === 'inicial' ? 'Inicial' : level === 'primario' ? 'Primario' : 'Secundario'} · ${cursoDisplayLabel(course.label)}`))
+    : [];
 
   return (
     <View style={styles.container}>
@@ -187,6 +194,12 @@ export const ProfileScreen = () => {
               <View style={styles.infoItem}>
                 <Text style={styles.infoLabel}>DNI</Text>
                 <Text style={styles.infoValue}>{user.dni}</Text>
+              </View>
+            )}
+            {user?.role === 'familia' && (
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>{familyCourses.length > 1 ? 'Cursos' : 'Curso'}</Text>
+                <Text style={styles.infoValue}>{familyCourses.length ? familyCourses.join('\n') : 'Sin curso asignado'}</Text>
               </View>
             )}
             <View style={styles.infoItem}>

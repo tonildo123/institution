@@ -125,6 +125,7 @@ export const styles = StyleSheet.create({
   userActions: { flexDirection: 'row', alignItems: 'center', marginLeft: 4 },
   userActionButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   fieldLabel: { fontSize: 14, fontWeight: '600', color: '#555', marginBottom: 6 },
+  userDetailPhoto: { width: 120, height: 120, borderRadius: 60, alignSelf: 'center', marginBottom: 24 },
   fieldValue: { fontSize: 16, color: '#1a1a1a', marginBottom: 20 },
   saveButton: { backgroundColor: '#0c6b58', borderRadius: 8, padding: 14, alignItems: 'center' },
   saveButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },

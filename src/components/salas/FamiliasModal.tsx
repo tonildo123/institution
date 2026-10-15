@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { getAllUsers } from '@/services/firebase/users';
 import { getSalaTeachers, setTeacherInSala, addUserToSala, getSalaUsers, removeUserFromSala, getTransferCursos, updateUserInSala, SalaLevel } from '@/services/firebase/salas';
@@ -168,6 +168,10 @@ export const FamiliasModal = ({ level, cursoId, label, onClose }: Props) => {
           </View>
           {selectedUser ? (
             <ScrollView keyboardShouldPersistTaps="handled">
+              {!editing && selectedUser.photoURL && (
+                <Image source={{ uri: selectedUser.photoURL }} style={styles.userDetailPhoto}
+                  resizeMode="cover" accessibilityLabel={`Foto de perfil de ${selectedUser.displayName}`} />
+              )}
               {(['displayName', 'dni', 'email'] as const).map(field => (
                 <View key={field}>
                   <Text style={styles.fieldLabel}>{field === 'displayName' ? 'Nombre completo' : field === 'dni' ? 'DNI' : 'Correo electrónico'}</Text>
