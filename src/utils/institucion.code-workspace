@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "../../../../mobile/getteup"
+		},
+		{
+			"path": "../../../PedidosSP"
 		}
 	],
 	"settings": {}
