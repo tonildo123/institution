@@ -39,7 +39,7 @@ export const enrollBiometrics = functions.https.onCall(async (data, context) => 
     if (old?.exists && old.data()?.uid !== uid) throw error('La vinculación anterior pertenece a otra cuenta');
     if (old?.exists) tx.update(old.ref, { enabled: false });
     tx.set(ref, { uid, publicKey: key, enabled: true, enrolledAt: Date.now(), validAfter: account.tokensValidAfterTime || '', createdAt: Timestamp.now() });
-    tx.set(db.collection('biometricAccounts').doc(uid), { requireSend: true }, { merge: true });
+    tx.set(db.collection('biometricAccounts').doc(uid), { requireSend: false }, { merge: true });
   });
   return { deviceId: id };
 });

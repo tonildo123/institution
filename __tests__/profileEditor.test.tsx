@@ -1,3 +1,4 @@
+jest.mock('../src/services/firebase/problemReports', () => ({ canManageReports: (role: string) => ['admin', 'equipo directivo'].includes(role) }));
 import React from 'react';
 import { act, create, ReactTestRenderer } from 'react-test-renderer';
 import { Alert, TextInput, TouchableOpacity } from 'react-native';

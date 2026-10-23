@@ -33,11 +33,12 @@ test('la activación confirma posesión de clave y guarda solo IDs, sin contrase
   expect([...mockStorage.values()]).toEqual([JSON.stringify({ uid: 'self', deviceId, publicKey: 'public-key' })]);
   expect(JSON.stringify((fetch as jest.Mock).mock.calls)).not.toContain('current-password');
 });
-test('cancelar la biometría impide llamar al endpoint de envío', async () => {
+test('enviar mensajes no solicita biometría aunque esté activada', async () => {
   enrolled(); mockNative.createSignature.mockResolvedValue({ success: false });
   const store = { getState: () => ({ auth: { user: { id: 'self' } } }) };
-  await expect(sendCommunicationToUsers({ title: 'Mensaje', body: 'Contenido' }, store, ['family'])).rejects.toThrow('cancelado');
-  expect((fetch as jest.Mock).mock.calls.every(call => call[0].includes('biometricChallenge'))).toBe(true);
+  await sendCommunicationToUsers({ title: 'Mensaje', body: 'Contenido' }, store, ['family']);
+  expect(mockNative.createSignature).not.toHaveBeenCalled();
+  expect(fetch).toHaveBeenCalledWith(expect.stringContaining('/sendCommunicationToUsers'), expect.anything());
 });
 test('cada mensaje obtiene una confirmación nueva y agrega la firma al cuerpo', async () => {
   enrolled();

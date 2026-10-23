@@ -1,3 +1,5 @@
+import { ProblemReportsModal } from './ProblemReportsModal';
+import { canManageReports } from '@/services/firebase/problemReports';
 import { pickProfilePhoto, uploadProfilePhoto } from '@/services/profilePhotos';
 import type { MessageImage } from '@/services/messageImages';
 import { biometricAvailability, getBiometricDevice, enableBiometrics, disableBiometrics } from '@/services/biometrics';
@@ -34,6 +36,7 @@ export const ProfileScreen = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const { logout } = useAuth();
   const dispatch = useDispatch();
+  const [reportsOpen, setReportsOpen] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
   const confirmDeactivation = () => {
     if (deactivating) return;
@@ -72,7 +75,7 @@ export const ProfileScreen = () => {
       else await disableBiometrics(biometricPassword);
       setBiometricStatus(current => ({ ...current, enabled: enable }));
       setBiometricPassword('');
-      Alert.alert('Datos biométricos', enable ? 'Activados para ingresar, desbloquear la app y confirmar cada envío desde este teléfono.' : 'Desactivados en tus dispositivos. Podés seguir ingresando con contraseña.');
+      Alert.alert('Datos biométricos', enable ? 'Activados para iniciar sesión desde este teléfono.' : 'Desactivados en tus dispositivos. Podés seguir ingresando con contraseña.');
     } catch (error: any) { Alert.alert('Datos biométricos', error.message || 'No se pudo completar la configuración.'); }
     finally { setBiometricBusy(false); }
   };
@@ -234,9 +237,9 @@ export const ProfileScreen = () => {
               <Text style={styles.actionText}>Datos biométricos</Text>
               <Text style={styles.chevron} accessible={false}>›</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionRow} accessibilityRole="button">
+            <TouchableOpacity style={styles.actionRow} accessibilityRole="button" onPress={() => setReportsOpen(true)}>
               <Text style={styles.actionIcon} accessible={false}>!</Text>
-              <Text style={styles.actionText}>Reportar problema</Text>
+              <Text style={styles.actionText}>{canManageReports(user?.role) ? 'Reportes de problemas' : 'Reportar problema'}</Text>
               <Text style={styles.chevron} accessible={false}>›</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionRow} accessibilityRole="button" accessibilityLabel="Dar de baja mi cuenta" onPress={confirmDeactivation} disabled={deactivating}>
@@ -251,6 +254,7 @@ export const ProfileScreen = () => {
           </View>
         </View>
       </ScrollView>
+      {reportsOpen && user && <ProblemReportsModal user={user} onClose={() => setReportsOpen(false)} />}
       <Modal visible={biometricOpen} animationType="slide" transparent onRequestClose={() => { if (!biometricBusy) setBiometricOpen(false); }}>
         <SafeAreaProvider><SafeAreaView style={styles.modalOverlay} edges={['top', 'left', 'right']}>
           <KeyboardAvoidingView style={styles.keyboardContainer} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -260,7 +264,7 @@ export const ProfileScreen = () => {
               </View>
               <ScrollView keyboardShouldPersistTaps="handled">
                 <Text style={styles.infoValue}>{biometricStatus.label} · {biometricStatus.enabled ? 'Activado en este teléfono' : 'Sin activar en este teléfono'}</Text>
-                <Text style={styles.helpText}>Al activarlo podrás ingresar incluso después de cerrar sesión, desbloquear la app y confirmar cada envío de mensajes. Tu huella y los datos de Face ID permanecen en el teléfono.</Text>
+                <Text style={styles.helpText}>Al activarlo podrás iniciar sesión con Face ID o huella, incluso después de cerrar sesión. Tu huella y los datos de Face ID permanecen en el teléfono.</Text>
                 {!biometricStatus.available && <Text style={styles.helpText}>Necesitás un teléfono compatible con Face ID o huella configurada y la versión actualizada de la app.</Text>}
                 <Text style={styles.infoLabel}>Contraseña actual</Text>
                 <TextInput style={styles.input} value={biometricPassword} onChangeText={setBiometricPassword} secureTextEntry editable={!biometricBusy} autoCapitalize="none" autoCorrect={false} accessibilityLabel="Contraseña para configurar biometría" />

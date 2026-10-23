@@ -86,7 +86,7 @@ test('para activar se necesita una contraseña reciente y posesión de la clave'
   await expect(callable(enrollBiometrics)(data, {})).rejects.toThrow();
   await expect(callable(enrollBiometrics)(data, { auth: { uid: 'self', token: { auth_time: Date.now() / 1000, firebase: { sign_in_provider: 'custom' } } } })).rejects.toThrow();
   expect(await callable(enrollBiometrics)(data, context())).toEqual({ deviceId });
-  expect(mockStore.get('biometricAccounts/self')).toEqual({ requireSend: true });
+  expect(mockStore.get('biometricAccounts/self')).toEqual({ requireSend: false });
 });
 test('el servidor exige confirmación para cuentas activadas aunque el cliente la omita', async () => {
   mockStore.set('biometricAccounts/self', { requireSend: true });

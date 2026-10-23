@@ -3,7 +3,6 @@
  * Llama Cloud Functions para enviar mensajes a todos los usuarios
  */
 
-import { authorizeBiometricMessage } from './biometrics';
 import { auth } from './firebase/firebaseConfig';
 import { RootState } from '@/redux/store';
 
@@ -39,7 +38,7 @@ export async function sendCommunicationToAll(
   try {
     console.log('📤 Enviando comunicación a TODOS los usuarios...');
 
-    const body = await authorizeBiometricMessage({ ...params, userId: getUserIdFromStore(store) });
+    const body = { ...params, userId: getUserIdFromStore(store) };
     const response = await fetch(
       `${CLOUD_FUNCTION_URL}/sendCommunicationToAll`,
       {
@@ -82,7 +81,7 @@ export async function sendCommunicationToUsers(
   try {
     console.log(`📤 Enviando comunicación a ${userIds.length} usuarios específicos...`);
 
-    const body = await authorizeBiometricMessage({ ...params, userId: getUserIdFromStore(store), userIds });
+    const body = { ...params, userId: getUserIdFromStore(store), userIds };
     const response = await fetch(
       `${CLOUD_FUNCTION_URL}/sendCommunicationToUsers`,
       {

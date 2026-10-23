@@ -24,21 +24,13 @@ Se crea una clave RSA de 2048 bits protegida por la autenticación biométrica d
 
 Se admite una cuenta biométrica vinculada por instalación. Para cambiarla, ingresar con la cuenta anterior y desactivarla primero. Una cuenta puede tener varios dispositivos.
 
-Una vez activada:
-
-- El inicio de sesión ofrece Face ID/huella incluso después de Cerrar sesión. La vinculación se conserva intencionalmente al cerrar sesión; el dispositivo debe verificar la biometría para obtener un token nuevo.
-- Las sesiones restauradas y el regreso desde segundo plano quedan bloqueados hasta confirmar la identidad. El estado `inactive` de un diálogo biométrico no dispara otro bloqueo.
-- Cada envío requiere una firma nueva. El servidor comprueba identidad, clave activa, vencimiento, acción, contenido y destinatarios. Una confirmación no sirve para otro mensaje ni puede reutilizarse.
-- Si se cancela la biometría no se llama al endpoint de envío. Los borradores se conservan.
-- Se puede ingresar con contraseña para recuperar acceso y configurar nuevamente la biometría si el sensor o la clave dejan de estar disponibles.
-
-Para una cuenta que no activó biometría, el ingreso y envío por sesión autenticada conservan el comportamiento anterior. Al activar al menos un dispositivo, el servidor exige confirmación biométrica en sus envíos; borrar los datos locales no elimina ese requisito. Desde otro teléfono, se debe vincular ese dispositivo o desactivar la configuración con la contraseña.
+Una vez activada, el inicio de sesión ofrece Face ID/huella cuando el teléfono tiene biometría configurada. La vinculación se conserva al cerrar sesión. Siempre se puede ingresar con contraseña. No se solicita biometría al volver desde segundo plano ni al enviar mensajes. El componente de bloqueo y los métodos antiguos de confirmación se conservan por compatibilidad, sin conectarlos al flujo actual.
 
 Desactivar requiere contraseña actual, pide confirmación y revoca todos los dispositivos de esa cuenta. Los desafíos ya emitidos dejan de funcionar. Si se cambia/restablece la contraseña o el correo de acceso, volver a vincular el teléfono: el servidor rechaza las claves asociadas a la vigencia anterior de la cuenta.
 
 ## Servidor y reglas
 
-Funciones: `updateOwnProfile`, `enrollBiometrics`, `disableBiometrics`, `biometricChallenge`, `verifyBiometricLogin`, `verifyBiometricUnlock`. Los dos endpoints de envío verifican además la confirmación cuando la cuenta tiene biometría activada.
+Funciones: `updateOwnProfile`, `enrollBiometrics`, `disableBiometrics`, `biometricChallenge`, `verifyBiometricLogin`, `verifyBiometricUnlock`. Los endpoints de envío usan la sesión autenticada y no exigen biometría, incluso para cuentas vinculadas anteriormente.
 
 Las colecciones `biometricDevices`, `biometricAccounts` y `biometricChallenges` no admiten lectura ni escritura directa del cliente, incluidos administradores de la app. Las gestionan exclusivamente las funciones. Las reglas actuales ya deniegan esas rutas.
 
@@ -50,4 +42,4 @@ La activación pendiente de la privacidad estricta de lectura de comunicaciones 
 
 Pruebas de perfil, reautenticación, firmas reales RSA, modificación de mensajes, repetición de desafíos, expiración, revocación, cancelación, restauración y bloqueo de sesiones. Compilaciones Debug de iOS y Android. Pruebas de reglas contra Firebase Rules API sin publicar nuevas reglas.
 
-La suite general `App.test.tsx` mantiene el problema previo de carga ESM en Jest; las suites de esta funcionalidad pasan. Reportar problema queda para el siguiente paso. La baja de cuenta ya pide confirmación y llama a `deactivateOwnAccount`: el servidor toma el UID autenticado, actualiza únicamente `isEnabled: false` y `updatedAt`, y la app cierra sesión tras confirmar el guardado. No elimina el perfil ni sus datos. Si falla el guardado conserva la sesión y permite reintentar; para volver a ingresar, la institución debe habilitar la cuenta.
+La suite general `App.test.tsx` mantiene el problema previo de carga ESM en Jest; las suites de esta funcionalidad pasan. Reportar problema permite enviar título, descripción y una imagen opcional JPG/PNG/WebP de hasta 5 MB. Mis reportes muestra únicamente los reportes propios con estado y comentarios de administración en tiempo real. Admin y equipo directivo ven la bandeja completa, cambian estados y comentan; cada comentario es visible para el reportante. Los adjuntos se guardan en problem-report-images, con carga restringida al propietario y lectura para propietario y gestores. La baja de cuenta ya pide confirmación y llama a `deactivateOwnAccount`: el servidor toma el UID autenticado, actualiza únicamente `isEnabled: false` y `updatedAt`, y la app cierra sesión tras confirmar el guardado. No elimina el perfil ni sus datos. Si falla el guardado conserva la sesión y permite reintentar; para volver a ingresar, la institución debe habilitar la cuenta.

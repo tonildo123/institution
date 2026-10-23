@@ -13,6 +13,42 @@ service cloud.firestore {
       return enabled() && (resource.data.get('sentBy', '') == request.auth.uid ||
         request.auth.uid in resource.data.get('targetUserIds', []));
     }
+    function reportManager() {
+      return enabled() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        in ['admin', 'equipo directivo'];
+    }
+    function validText(value, maximum) {
+      return value is string && value.size() > 0 && value.size() <= maximum;
+    }
+    match /problemReports/{reportId} {
+      allow read: if reportManager() || (enabled() && resource.data.reporterId == request.auth.uid);
+      allow create: if enabled() && !reportManager() &&
+        request.resource.data.keys().hasOnly(['title', 'description', 'reporterId', 'reporterName', 'reporterRole', 'status', 'createdAt', 'updatedAt', 'imageURL', 'imagePath']) &&
+        request.resource.data.reporterId == request.auth.uid &&
+        request.resource.data.reporterRole == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role &&
+        request.resource.data.reporterName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.displayName &&
+        validText(request.resource.data.title, 120) && validText(request.resource.data.description, 4000) &&
+        ((!request.resource.data.keys().hasAny(['imageURL', 'imagePath'])) ||
+          (request.resource.data.imagePath is string &&
+           request.resource.data.imagePath.matches('problem-report-images/' + request.auth.uid + '/[^/]+') &&
+           validText(request.resource.data.imageURL, 2000) &&
+           request.resource.data.imageURL.matches('https://firebasestorage.googleapis.com/.*'))) &&
+        request.resource.data.status == 'pendiente' &&
+        request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
+      allow update: if reportManager() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']) &&
+        request.resource.data.status in ['pendiente', 'en_revision', 'resuelto'] && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+      match /comments/{commentId} {
+        allow read: if reportManager() || (enabled() && get(/databases/$(database)/documents/problemReports/$(reportId)).data.reporterId == request.auth.uid);
+        allow create: if reportManager() && exists(/databases/$(database)/documents/problemReports/$(reportId)) &&
+          request.resource.data.keys().hasOnly(['body', 'authorId', 'authorName', 'createdAt']) &&
+          request.resource.data.authorId == request.auth.uid &&
+          request.resource.data.authorName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.displayName &&
+          validText(request.resource.data.body, 2000) && request.resource.data.createdAt == request.time;
+        allow update, delete: if false;
+      }
+    }
     match /communications/{messageId} {
       allow read: if participant();
       // Los envíos se crean exclusivamente en Cloud Functions.

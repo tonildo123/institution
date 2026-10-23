@@ -5,6 +5,20 @@ service firebase.storage {
       let user = firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
       return user.isEnabled == true && user.role in ['admin', 'preceptor', 'equipo directivo', 'representante legal'];
     }
+    match /problem-report-images/{uid}/{imageId} {
+      function reportUser() {
+        return request.auth != null &&
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isEnabled == true;
+      }
+      function reportManager() {
+        return reportUser() && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in ['admin', 'equipo directivo'];
+      }
+      allow read: if reportUser() && (request.auth.uid == uid || reportManager());
+      allow create: if reportUser() && request.auth.uid == uid && !reportManager()
+        && request.resource.size > 0 && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp'];
+      allow update, delete: if false;
+    }
     match /profile-photos/{uid}/{photoId} {
       allow read, delete: if request.auth != null && request.auth.uid == uid
         && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isEnabled == true;

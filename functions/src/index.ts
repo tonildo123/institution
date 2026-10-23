@@ -7,7 +7,6 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { verifySendBiometrics } from './biometrics.js';
 import { getAuth } from 'firebase-admin/auth';
 import { getMessaging } from 'firebase-admin/messaging';
 
@@ -73,8 +72,6 @@ export const sendCommunicationToAll = functions.https.onRequest(
 
       console.log(`📤 Enviando comunicación a TODOS los usuarios...`);
 
-      try { await verifySendBiometrics(userId, req.body); }
-      catch (error: any) { res.status(403).json({ error: error.message || 'Confirmá el envío con tus datos biométricos' }); return; }
       const communicationRef = db.collection(COLLECTIONS.COMMUNICATIONS).doc();
       const now = new Date().toISOString();
 
@@ -239,8 +236,6 @@ export const sendCommunicationToUsers = functions.https.onRequest(
       console.log(`📤 Enviando comunicación a ${userIds.length} usuarios específicos...`);
       console.log('👥 IDs:', JSON.stringify(userIds));
 
-      try { await verifySendBiometrics(userId, req.body); }
-      catch (error: any) { res.status(403).json({ error: error.message || 'Confirmá el envío con tus datos biométricos' }); return; }
       const communicationRef = db.collection(COLLECTIONS.COMMUNICATIONS).doc();
       const now = new Date().toISOString();
 

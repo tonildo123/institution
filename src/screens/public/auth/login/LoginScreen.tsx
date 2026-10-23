@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getBiometricDevice, loginWithBiometrics } from '@/services/biometrics';
+import { getBiometricDevice, biometricAvailability, loginWithBiometrics } from '@/services/biometrics';
 import { useDispatch } from 'react-redux';
 import { setUser } from '@/redux/slices/authSlice';
 import { serializeUser } from '@/utils/serializeUser';
@@ -49,7 +49,7 @@ const LoginScreen = ({ navigation }: NativeStackScreenProps<AuthStackParamList, 
   const dispatch = useDispatch();
   const [biometricReady, setBiometricReady] = useState(false);
   const [biometricBusy, setBiometricBusy] = useState(false);
-  useEffect(() => { let active = true; getBiometricDevice().then(device => { if (active) setBiometricReady(Boolean(device)); }); return () => { active = false; }; }, []);
+  useEffect(() => { let active = true; Promise.all([getBiometricDevice(), biometricAvailability()]).then(([device, sensor]) => { if (active) setBiometricReady(Boolean(device) && sensor.available); }).catch(() => { if (active) setBiometricReady(false); }); return () => { active = false; }; }, []);
   const biometricLogin = async () => {
     if (biometricBusy || isLoading) return;
     setBiometricBusy(true);
