@@ -45,6 +45,8 @@ export interface Classroom {
     timestamp: string;
     imageUrl?: string;
     imagePath?: string;
+    photoUrl?: string;
+    photoPath?: string;
     videoUrl?: string;
     videoPath?: string;
     videoName?: string;

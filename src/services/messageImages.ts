@@ -29,6 +29,9 @@ export async function captureMessageImage(): Promise<MessageImage | null> {
 
 function imageFromResult(result: ImagePickerResponse): MessageImage | null {
   if (result.didCancel) return null;
+  if (result.errorCode || !result.assets?.length) {
+    console.warn('Selector de imagen sin resultado', { errorCode: result.errorCode, errorMessage: result.errorMessage });
+  }
   if (result.errorCode === 'permission') throw new Error('Permití el acceso a la cámara en Ajustes para sacar una foto.');
   if (result.errorCode === 'camera_unavailable') throw new Error('No hay una cámara disponible en este dispositivo.');
   if (result.errorCode) throw new Error('No se pudo obtener la foto. Intentá nuevamente.');

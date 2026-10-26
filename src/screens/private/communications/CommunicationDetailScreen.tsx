@@ -215,6 +215,7 @@ export const CommunicationDetailScreen = () => {
               size={Number(communication.data.documentSize) || 0} url={communication.data.documentUrl} />
           )}
           {communication.data?.imageUrl && <MessageImage key={communication.data.imageUrl} uri={communication.data.imageUrl} />}
+          {communication.data?.photoUrl && <MessageImage key={communication.data.photoUrl} uri={communication.data.photoUrl} />}
         </View>
 
       </ScrollView>

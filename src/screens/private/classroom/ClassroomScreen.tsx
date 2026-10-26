@@ -6,6 +6,7 @@ import { pickMessageAudio, uploadMessageAudio, audioMessageData, MessageAudioFil
 import { stopAudioPlayback } from '@/services/audioPlayback';
 import { normalizeMessageLink } from '@/utils/messageLinks';
 import { pickMessageDocument, uploadMessageDocument, documentMessageData, MessageDocumentFile } from '@/services/messageDocuments';
+import { waitForSheetDismiss } from '@/utils/attachmentPicker';
 import { getDestinationLabel } from '@/utils/communicationAudience';
 import { DraftAttachments } from '@/components/DraftAttachments';
 import { pickMessageImage, captureMessageImage, uploadMessageImage, MessageImage } from '@/services/messageImages';
@@ -67,9 +68,11 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
   const [document, setDocument] = useState<MessageDocumentFile | null>(null);
   const uploadedDocumentRef = useRef<{ path: string; url: string } | null>(null);
   const [attachment, setAttachment] = useState<MessageImage | null>(null);
+  const [cameraPhoto, setCameraPhoto] = useState<MessageImage | null>(null);
   const [pickingImage, setPickingImage] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const uploadedImageRef = useRef<{ path: string; url: string } | null>(null);
+  const uploadedPhotoRef = useRef<{ path: string; url: string } | null>(null);
   const [showAttachments, setShowAttachments] = useState(false);
   const messageScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const descriptionFocused = useRef(false);
@@ -129,8 +132,12 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
     setShowAttachments(false);
     setPickingImage(true);
     try {
+      await waitForSheetDismiss();
       const picked = await (source === 'camera' ? captureMessageImage() : pickMessageImage());
-      if (picked) { setAttachment(picked); uploadedImageRef.current = null; }
+      if (picked) {
+        if (source === 'camera') { setCameraPhoto(picked); uploadedPhotoRef.current = null; }
+        else { setAttachment(picked); uploadedImageRef.current = null; }
+      }
     } catch (error: any) {
       Alert.alert('Imagen', error.message || 'No se pudo seleccionar la imagen');
     } finally { setPickingImage(false); }
@@ -141,6 +148,7 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
     setShowAttachments(false);
     setPickingImage(true);
     try {
+      await waitForSheetDismiss();
       const picked = await pickMessageDocument();
       if (picked) { setDocument(picked); uploadedDocumentRef.current = null; }
     } catch (error: any) {
@@ -153,6 +161,7 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
     setShowAttachments(false);
     setPickingImage(true);
     try {
+      await waitForSheetDismiss();
       const picked = await pickMessageAudio();
       if (picked) { setAudio(picked); uploadedAudioRef.current = null; }
     } catch (error: any) {
@@ -165,6 +174,7 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
     setShowAttachments(false);
     setPickingImage(true);
     try {
+      await waitForSheetDismiss();
       const picked = await pickMessageVideo();
       if (picked) { setVideo(picked); uploadedVideoRef.current = null; }
     } catch (error: any) {
@@ -220,6 +230,15 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
           uploadedImageRef.current = { path: attachment.path, url: imageUrl };
         } finally { setUploadingImage(false); }
       }
+      let photoUrl: string | undefined;
+      if (cameraPhoto) {
+        setUploadingImage(true);
+        try {
+          photoUrl = uploadedPhotoRef.current?.path === cameraPhoto.path
+            ? uploadedPhotoRef.current.url : await uploadMessageImage(cameraPhoto);
+          uploadedPhotoRef.current = { path: cameraPhoto.path, url: photoUrl };
+        } finally { setUploadingImage(false); }
+      }
       let documentData: Record<string, string> = {};
       if (document) {
         setUploadingImage(true);
@@ -265,6 +284,7 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
           ...videoData,
           ...(linkUrl ? { linkUrl: normalizeMessageLink(linkUrl), ...linkPreviewData(linkPreview?.url === linkUrl ? linkPreview : null) } : {}),
           ...(imageUrl ? { imageUrl, imagePath: attachment!.path } : {}),
+          ...(photoUrl ? { photoUrl, photoPath: cameraPhoto!.path } : {}),
           level: selectedLevel,
           ...(selectedCurso ? { cursoId: selectedCurso, cursoLabel: cursos.find(curso => curso.id === selectedCurso)!.label } : {}),
           timestamp: new Date().toISOString(),
@@ -297,6 +317,8 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
       setLinkPreview(null);
       uploadedDocumentRef.current = null;
       uploadedImageRef.current = null;
+      setCameraPhoto(null);
+      uploadedPhotoRef.current = null;
       setMessageInputKey(key => key + 1);
       setSelectedLevel('todos');
       setSelectedCurso(undefined);
@@ -451,6 +473,13 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
               detail: attachment.contentType.replace('image/', '').toUpperCase(),
               imageUri: attachment.uri,
               onRemove: () => { setAttachment(null); uploadedImageRef.current = null; },
+            }] : []),
+            ...(cameraPhoto ? [{
+              id: cameraPhoto.path,
+              name: 'Foto de cámara',
+              detail: cameraPhoto.contentType.replace('image/', '').toUpperCase(),
+              imageUri: cameraPhoto.uri,
+              onRemove: () => { setCameraPhoto(null); uploadedPhotoRef.current = null; },
             }] : []),
           ]} />
 

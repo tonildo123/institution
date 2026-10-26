@@ -25,7 +25,8 @@ export const MessageVideo = ({ uri, name = 'Video adjunto', size, compact = fals
       <SafeAreaView style={styles.screen}>
         <TouchableOpacity accessibilityRole="button" onPress={() => setOpen(false)} style={styles.close}><Text style={styles.white}>Cerrar ✕</Text></TouchableOpacity>
         <Text numberOfLines={2} style={styles.caption}>{name}</Text>
-        {open && !failed && <Video source={{ uri }} style={styles.video} controls resizeMode="contain"
+        {/* Sin pantalla completa nativa: el reproductor nativo tapaba el botón Cerrar. */}
+        {open && !failed && <Video source={{ uri }} style={styles.video} controls controlsStyles={{ hideFullscreen: true }} resizeMode="contain"
           playInBackground={false} playWhenInactive={false} ignoreSilentSwitch="ignore"
           onLoad={() => setBusy(false)} onBuffer={({ isBuffering }) => setBusy(isBuffering)}
           onError={() => { setBusy(false); setFailed(true); }} />}

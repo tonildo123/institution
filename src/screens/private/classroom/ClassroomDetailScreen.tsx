@@ -211,6 +211,7 @@ export const ClassroomDetailScreen = () => {
               size={Number(classroom.data.documentSize) || 0} url={classroom.data.documentUrl} />
           )}
           {classroom.data?.imageUrl && <MessageImage key={classroom.data.imageUrl} uri={classroom.data.imageUrl} />}
+          {classroom.data?.photoUrl && <MessageImage key={classroom.data.photoUrl} uri={classroom.data.photoUrl} />}
         </View>
 
       </ScrollView>
