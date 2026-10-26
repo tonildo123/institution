@@ -1,0 +1,318 @@
+import { MessageVideo } from '@/components/MessageVideo';
+import { MessageAudio } from '@/components/MessageAudio';
+import { MessageLink } from '@/components/MessageLink';
+import { MessageDocument } from '@/components/MessageDocument';
+import { MessageImage } from '@/components/MessageImage';
+import { MessageText } from '@/components/MessageText';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  TextInput,
+} from 'react-native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { getClassroom, deleteClassroom, updateClassroom, Classroom } from '@/services/firebase/classroom';
+import { styles } from './detailStyles';
+
+/**
+ * Pantalla de Detalle de Comunicación
+ * Maquetado tipo chat con header verde
+ */
+
+// Mantener la edición implementada, pero oculta para todos los roles.
+const SHOW_EDIT_ACTION = false;
+
+export const ClassroomDetailScreen = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const { classroomId } = route.params as { classroomId: string };
+
+  const [classroom, setClassroom] = useState<Classroom | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadClassroom();
+    }, [classroomId, user?.id])
+  );
+
+  const loadClassroom = async () => {
+    try {
+      setLoading(true);
+      setClassroom(null);
+      if (!user?.id) return;
+      const data = await getClassroom(classroomId, user?.id);
+      setClassroom(data);
+    } catch (error) {
+      setClassroom(null);
+      console.error('❌ Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = () => {
+    if ((user?.role !== 'admin' && user?.role !== 'equipo directivo' && user?.role !== 'representante legal') || !classroom) return;
+    setEditTitle(classroom.title);
+    setEditDescription(classroom.description);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editTitle.trim() || !editDescription.trim()) {
+      Alert.alert('⚠️ Error', 'Título y descripción son requeridos');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await updateClassroom(classroomId, {
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        body: editDescription.trim(),
+      });
+
+      // Recargar la comunicación
+      const updated = await getClassroom(classroomId, user?.id);
+      setClassroom(updated);
+
+      setShowEditModal(false);
+      Alert.alert('✅ Éxito', 'Comunicación actualizada correctamente');
+    } catch (error: any) {
+      Alert.alert('❌ Error', error.message || 'Error al actualizar la comunicación');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const canDelete = Boolean(user && classroom && (
+    ['admin', 'equipo directivo', 'representante legal'].includes(user.role) ||
+    (user.role === 'preceptor' && classroom.sentBy === user.id)
+  ));
+
+  const handleDelete = () => {
+    if (!canDelete) return;
+
+    Alert.alert(
+      '🗑️ Eliminar Comunicación',
+      '¿Estás seguro de que deseas eliminar este mensaje? Esta acción no se puede deshacer.',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          onPress: async () => {
+            try {
+              setDeleting(true);
+              await deleteClassroom(classroomId);
+              Alert.alert('✅ Éxito', 'Comunicación eliminada correctamente');
+              navigation.goBack();
+            } catch (error: any) {
+              Alert.alert('❌ Error', error.message || 'Error al eliminar la comunicación');
+            } finally {
+              setDeleting(false);
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#d21f1a" />
+      </View>
+    );
+  }
+
+  if (!classroom) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Comunicación no disponible o sin acceso</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.backArrow}>←</Text>
+        </TouchableOpacity>
+
+        <View style={styles.headerAvatar}>
+          <View style={styles.avatarBadge}>
+            <View style={styles.avatarBars}>
+              <View style={[styles.avatarBar, { backgroundColor: '#e63946' }]} />
+              <View style={[styles.avatarBar, { backgroundColor: '#f4a300' }]} />
+              <View style={[styles.avatarBar, { backgroundColor: '#2a9d5c' }]} />
+              <View style={[styles.avatarBar, { backgroundColor: '#2a4d9d' }]} />
+            </View>
+            <Text style={styles.avatarBadgeText}>IMEP</Text>
+          </View>
+        </View>
+
+        <View style={styles.headerText}>
+          <Text style={styles.headerTitle}>KIT IMEP</Text>
+          <Text style={styles.headerSub}>Comunicación</Text>
+        </View>
+
+        {/* Acciones disponibles según el rol; edición oculta. */}
+        {canDelete && (
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            {SHOW_EDIT_ACTION && (
+            <TouchableOpacity
+              onPress={handleEdit}
+              disabled={saving}
+              style={{ opacity: saving ? 0.5 : 1 }}
+            >
+              <Text style={styles.menuDots}>✏️</Text>
+            </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={handleDelete}
+              accessibilityRole="button"
+              accessibilityLabel="Eliminar comunicación"
+              disabled={deleting}
+              style={{ opacity: deleting ? 0.5 : 1 }}
+            >
+              <Text style={styles.menuDots}>{deleting ? '⏳' : '🗑️'}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
+      {/* Chat Content */}
+      <ScrollView style={styles.chatArea} contentContainerStyle={styles.chatContent}>
+        {/* Notice Card */}
+        <View style={styles.noticeCard}>
+          <MessageText style={styles.noticeTitle}>{classroom.title}</MessageText>
+          <MessageText style={styles.noticeContent}>{classroom.description || classroom.body}</MessageText>
+          {classroom.data?.videoUrl && <MessageVideo uri={classroom.data.videoUrl} name={classroom.data.videoName} size={Number(classroom.data.videoSize) || undefined} />}
+          {classroom.data?.audioUrl && <MessageAudio uri={classroom.data.audioUrl} name={classroom.data.audioName || 'Audio adjunto'} durationMs={Number(classroom.data.audioDurationMs) || 0} />}
+          {classroom.data?.linkUrl && <MessageLink url={classroom.data.linkUrl} preview={{ title: classroom.data.linkTitle, description: classroom.data.linkDescription, imageUrl: classroom.data.linkImageUrl }} />}
+          {classroom.data?.documentUrl && (
+            <MessageDocument name={classroom.data.documentName || 'Documento adjunto'}
+              size={Number(classroom.data.documentSize) || 0} url={classroom.data.documentUrl} />
+          )}
+          {classroom.data?.imageUrl && <MessageImage key={classroom.data.imageUrl} uri={classroom.data.imageUrl} />}
+        </View>
+
+      </ScrollView>
+
+      {/* Edit Modal */}
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => !saving && setShowEditModal(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <Text style={{ fontSize: 18, fontWeight: '700' }}>✏️ Editar Comunicación</Text>
+              <TouchableOpacity onPress={() => !saving && setShowEditModal(false)}>
+                <Text style={{ fontSize: 24 }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Título */}
+            <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8 }}>Título</Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: '#ddd',
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 16,
+                fontSize: 16,
+              }}
+              placeholder="Título del mensaje"
+              value={editTitle}
+              onChangeText={setEditTitle}
+              maxLength={100}
+              editable={!saving}
+            />
+
+            {/* Descripción */}
+            <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8 }}>Descripción</Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: '#ddd',
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 20,
+                fontSize: 16,
+                minHeight: 100,
+                textAlignVertical: 'top',
+              }}
+              placeholder="Contenido del mensaje"
+              value={editDescription}
+              onChangeText={setEditDescription}
+              multiline
+              maxLength={1000}
+              editable={!saving}
+            />
+
+            {/* Botones */}
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  backgroundColor: '#f0f0f0',
+                  borderRadius: 8,
+                  alignItems: 'center',
+                }}
+                onPress={() => !saving && setShowEditModal(false)}
+                disabled={saving}
+              >
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#666' }}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  backgroundColor: saving ? '#ccc' : '#FF3B30',
+                  borderRadius: 8,
+                  alignItems: 'center',
+                }}
+                onPress={handleSaveEdit}
+                disabled={saving}
+              >
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>
+                  {saving ? '⏳ Guardando...' : '💾 Guardar'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+};
+
+export default ClassroomDetailScreen;

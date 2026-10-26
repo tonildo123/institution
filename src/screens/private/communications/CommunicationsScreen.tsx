@@ -353,30 +353,6 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={insets.top}
       >
-        {/* Header */}
-        <View style={styles.chatHeader}>
-          <View style={styles.headerAvatar}>
-            <View style={styles.avatarBadge}>
-              <View style={styles.avatarBars}>
-                <View style={[styles.avatarBar, { backgroundColor: '#e63946' }]} />
-                <View style={[styles.avatarBar, { backgroundColor: '#f4a300' }]} />
-                <View style={[styles.avatarBar, { backgroundColor: '#2a9d5c' }]} />
-                <View style={[styles.avatarBar, { backgroundColor: '#2a4d9d' }]} />
-              </View>
-              <Text style={styles.avatarBadgeText}>IMEP</Text>
-            </View>
-          </View>
-
-          <View style={styles.headerText}>
-            <Text style={styles.headerTitle}>KIT IMEP</Text>
-            <Text style={styles.headerSub}>last seen today at 13:25</Text>
-          </View>
-
-          <TouchableOpacity>
-            <Text style={styles.headerMenuDots}>⋮</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Chat Area */}
         <ScrollView
           ref={messageScrollRef}
@@ -598,10 +574,6 @@ export const CommunicationsScreen: React.FC<CommunicationsScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.receiveHeader}>
-        <Text style={styles.receiveHeaderTitle}>IMEP</Text>
-      </View>
-
       {Boolean(loadError) && <View style={{ padding: 16 }}>
         <Text accessibilityRole="alert">{loadError}</Text>
         <TouchableOpacity accessibilityRole="button" onPress={() => loadCommunicationsData(true)}><Text>Reintentar</Text></TouchableOpacity>

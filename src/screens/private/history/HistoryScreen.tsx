@@ -13,47 +13,69 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getAllCommunications, communicationLoadError, Communication } from '@/services/firebase/communications';
+import { getAllClassroom, classroomLoadError, Classroom } from '@/services/firebase/classroom';
+import { SourceTabs } from '@/components/SourceTabs';
 import { styles } from './styles';
 
 /**
- * Pantalla de Historial de Comunicaciones - Admin
+ * Pantalla de Historial - Admin y Preceptor
+ * Dividida en Mensajes (comunicaciones) y Classroom.
  * Muestra los últimos 30 mensajes; Ver más amplía el listado hasta 100
  * Carga mensajes reales desde Firestore
  */
 
+type HistorySource = 'mensajes' | 'classroom';
+
+const sources: { id: HistorySource; label: string }[] = [
+  { id: 'mensajes', label: 'Mensajes' },
+  { id: 'classroom', label: 'Classroom' },
+];
+
 export const HistoryScreen = () => {
   const navigation = useNavigation();
   const userId = useSelector((state: RootState) => state.auth.user?.id);
-  const [communications, setCommunications] = useState<Communication[]>([]);
+  const [source, setSource] = useState<HistorySource>('mensajes');
+  const [items, setItems] = useState<(Communication | Classroom)[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [messageLimit, setMessageLimit] = useState<30 | 100>(30);
   const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const term = search.trim().toLocaleLowerCase();
-  const filteredCommunications = communications.filter(item =>
+  const filteredItems = items.filter(item =>
     [item.title, item.description].some(value => value?.toLocaleLowerCase().includes(term)),
   );
+  const emptyLabel = source === 'classroom' ? 'mensajes de Classroom' : 'comunicaciones';
 
   // Recargar cuando la screen obtiene el foco (después de volver del detalle)
   useFocusEffect(
     React.useCallback(() => {
-      loadCommunications();
-    }, [messageLimit, userId])
+      loadItems();
+    }, [messageLimit, userId, source])
   );
 
-  const loadCommunications = async () => {
+  const selectSource = (next: HistorySource) => {
+    if (next === source) return;
+    setSearch('');
+    setShowSearch(false);
+    setMessageLimit(30);
+    setSource(next);
+  };
+
+  const loadItems = async () => {
     try {
       setLoading(true);
       setError('');
-      setCommunications([]);
+      setItems([]);
       if (!userId) return;
-      const data = await getAllCommunications(messageLimit, userId);
-      setCommunications(data);
-      console.log('✅ Comunicaciones cargadas:', data.length);
+      const data = source === 'classroom'
+        ? await getAllClassroom(messageLimit, userId)
+        : await getAllCommunications(messageLimit, userId);
+      setItems(data);
+      console.log(`✅ ${source === 'classroom' ? 'Classroom' : 'Comunicaciones'} cargadas:`, data.length);
     } catch (err: any) {
       console.error('❌ Error:', err);
-      setError(communicationLoadError(err));
+      setError(source === 'classroom' ? classroomLoadError(err) : communicationLoadError(err));
     } finally {
       setLoading(false);
     }
@@ -101,6 +123,7 @@ export const HistoryScreen = () => {
           )}
         </TouchableOpacity>
       </View>
+      <SourceTabs options={sources} selected={source} onSelect={selectSource} />
       {showSearch && (
         <View style={styles.searchContainer}>
           <TextInput
@@ -119,7 +142,7 @@ export const HistoryScreen = () => {
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity onPress={loadCommunications} accessibilityRole="button"><Text>Reintentar</Text></TouchableOpacity>
+          <TouchableOpacity onPress={loadItems} accessibilityRole="button"><Text>Reintentar</Text></TouchableOpacity>
         </View>
       )}
 
@@ -129,21 +152,20 @@ export const HistoryScreen = () => {
         </View>
       ) : <FlatList
         refreshing={loading}
-        onRefresh={loadCommunications}
+        onRefresh={loadItems}
         keyboardShouldPersistTaps="handled"
         ListFooterComponent={messageLimit === 30 && !error ? <TouchableOpacity
           accessibilityRole="button" style={{ padding: 20, alignItems: 'center' }} onPress={() => setMessageLimit(100)}>
           <Text style={{ color: '#0c6b58', fontWeight: '700' }}>Ver más</Text>
         </TouchableOpacity> : undefined}
-        data={filteredCommunications}
+        data={filteredItems}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.levelRow}
             onPress={() => {
-              navigation.navigate('CommunicationDetail' as any, {
-                communicationId: item.id,
-              });
+              if (source === 'classroom') navigation.navigate('ClassroomDetail' as any, { classroomId: item.id });
+              else navigation.navigate('CommunicationDetail' as any, { communicationId: item.id });
             }}
           >
             {/* Avatar con icono de nivel */}
@@ -184,7 +206,7 @@ export const HistoryScreen = () => {
         contentContainerStyle={styles.levelListContent}
         ListEmptyComponent={error ? undefined :
           <View style={{ padding: 20, alignItems: 'center' }}>
-            <Text style={{ color: '#999' }}>{term ? 'No se encontraron comunicaciones' : 'No hay comunicaciones'}</Text>
+            <Text style={{ color: '#999' }}>{term ? `No se encontraron ${emptyLabel}` : `No hay ${emptyLabel}`}</Text>
           </View>
         }
       />}

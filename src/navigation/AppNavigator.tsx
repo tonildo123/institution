@@ -4,10 +4,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator, BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import { CommunicationsScreen } from '@/screens/private/communications/CommunicationsScreen';
+import { MensajesTabScreen } from '@/screens/private/messages/MensajesTabScreen';
 import { ProfileScreen } from '@/screens/private/profile/ProfileScreen';
 import { HistoryScreen } from '@/screens/private/history/HistoryScreen';
 import { CommunicationDetailScreen } from '@/screens/private/communications/CommunicationDetailScreen';
+import { ClassroomDetailScreen } from '@/screens/private/classroom/ClassroomDetailScreen';
 import { UsersManagementScreen } from '@/screens/private/users/UsersManagementScreen';
 import { SalasScreen } from '@/screens/private/salas/SalasScreen';
 import { TabIcon } from '@/components/TabIcon';
@@ -37,7 +38,7 @@ const centeredTabOptions: BottomTabNavigationOptions = {
 
 /**
  * History Stack Navigator
- * Contiene HistoryScreen y CommunicationDetailScreen
+ * Contiene HistoryScreen y los detalles de Mensajes y Classroom
  */
 const HistoryStackNavigator = () => {
   return (
@@ -62,15 +63,23 @@ const HistoryStackNavigator = () => {
           </ScreenWrapper>
         )}
       />
+      <Stack.Screen
+        name="ClassroomDetail"
+        children={() => (
+          <ScreenWrapper>
+            <ClassroomDetailScreen />
+          </ScreenWrapper>
+        )}
+      />
     </Stack.Navigator>
   );
 };
 
 /**
- * Communications Stack Navigator
- * Para Familia: contiene CommunicationsScreen (receive) y CommunicationDetailScreen
+ * Mensajes Stack Navigator
+ * Pestaña Mensajes (Mensajes | Classroom) y los detalles de cada uno
  */
-const CommunicationsStackNavigator = () => {
+const MensajesStackNavigator = ({ type }: { type: 'send' | 'receive' }) => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -78,10 +87,10 @@ const CommunicationsStackNavigator = () => {
       }}
     >
       <Stack.Screen
-        name="CommunicationsList"
+        name="MensajesList"
         children={() => (
           <ScreenWrapper>
-            <CommunicationsScreen type="receive" />
+            <MensajesTabScreen type={type} />
           </ScreenWrapper>
         )}
       />
@@ -93,13 +102,25 @@ const CommunicationsStackNavigator = () => {
           </ScreenWrapper>
         )}
       />
+      <Stack.Screen
+        name="ClassroomDetail"
+        children={() => (
+          <ScreenWrapper>
+            <ClassroomDetailScreen />
+          </ScreenWrapper>
+        )}
+      />
     </Stack.Navigator>
   );
 };
 
+// Componentes estables: pasarlos a component= evita que el stack se reinicie en cada render.
+const MensajesReceiveStack = () => <MensajesStackNavigator type="receive" />;
+const MensajesSendStack = () => <MensajesStackNavigator type="send" />;
+
 /**
  * FAMILIA TABS (2 tabs)
- * - Mensajes (recibe)
+ * - Mensajes (recibe; incluye Classroom)
  * - Perfil
  */
 const FamiliaTabNavigator = () => {
@@ -124,7 +145,7 @@ const FamiliaTabNavigator = () => {
     >
       <Tab.Screen
         name="ComunicacionesRecibidas"
-        component={CommunicationsStackNavigator}
+        component={MensajesReceiveStack}
         options={{
           title: 'Mensajes',
           tabBarLabel: 'Mensajes',
@@ -149,8 +170,8 @@ const FamiliaTabNavigator = () => {
 };
 
 /**
- * ADMIN TABS (4 tabs)
- * - Comunicaciones (envía)
+ * ADMIN TABS (5 tabs)
+ * - Mensajes (envía; incluye Classroom)
  * - Salas
  * - Historial
  * - Usuarios
@@ -179,13 +200,9 @@ const AdminTabNavigator = () => {
     >
       <Tab.Screen
         name="ComunicacionesAdmin"
-        children={() => (
-          <ScreenWrapper>
-            <CommunicationsScreen type="send" />
-          </ScreenWrapper>
-        )}
+        component={MensajesSendStack}
         options={{
-          title: 'Comunicaciones',
+          title: 'Mensajes',
           tabBarLabel: 'Mensaje',
           tabBarIcon: ({ color }) => <TabIcon name="mail" color={color} />,
         }}
@@ -244,7 +261,7 @@ const AdminTabNavigator = () => {
 
 /**
  * PRECEPTOR TABS (3 tabs)
- * - Comunicaciones (envía)
+ * - Mensajes (envía; incluye Classroom)
  * - Historial
  * - Perfil
  */
@@ -271,13 +288,9 @@ const PreceptorTabNavigator = () => {
     >
       <Tab.Screen
         name="ComunicacionesPreceptor"
-        children={() => (
-          <ScreenWrapper>
-            <CommunicationsScreen type="send" />
-          </ScreenWrapper>
-        )}
+        component={MensajesSendStack}
         options={{
-          title: 'Comunicaciones',
+          title: 'Mensajes',
           tabBarLabel: 'Mensaje',
           tabBarIcon: ({ color }) => <TabIcon name="mail" color={color} />,
         }}
@@ -350,6 +363,9 @@ export const AppNavigator = () => {
       />
       <Stack.Screen name="NotificationDetail">
         {() => <ScreenWrapper><CommunicationDetailScreen /></ScreenWrapper>}
+      </Stack.Screen>
+      <Stack.Screen name="ClassroomNotificationDetail">
+        {() => <ScreenWrapper><ClassroomDetailScreen /></ScreenWrapper>}
       </Stack.Screen>
     </Stack.Navigator>
   );

@@ -14,11 +14,13 @@ Al confirmar el método, el perfil actualizado se guarda en Redux y AsyncStorage
 
 Tocar el avatar o Editar perfil permite agregar/cambiar una foto desde la galería o la cámara frontal. La foto se muestra como vista previa y se sube al tocar Guardar, junto con los demás cambios. Cancelar el selector mantiene la foto anterior. Se admiten JPG, PNG y WebP de hasta 5 MB.
 
-Las fotos se guardan en `profile-photos/{uid}/{photoId}`. Las reglas de Storage permiten que cada usuario habilitado, incluidas las familias, cargue y modifique solo sus fotos. La función comprueba la ruta del propietario, el tipo y el tamaño del archivo antes de guardar su URL en Firebase Auth y Firestore. No acepta URLs arbitrarias proporcionadas por el cliente.
+La pantalla de perfil delega su estado y acciones en `useProfileLogic.ts`; `ProfileScreen.tsx` se ocupa solo del render.
+
+Las fotos se guardan en `profile-photos/{uid}/{photoId}`. Cada cambio sube un archivo nuevo, así que la función programada `cleanupProfilePhotos` borra cada tres meses (1 de enero, abril, julio y octubre, 03:00 hora de Argentina) los archivos de esa carpeta que ningún perfil referencia y que tienen más de 7 días. Si la URL de un usuario no se puede interpretar, su carpeta no se toca. Las reglas de Storage permiten que cada usuario habilitado, incluidas las familias, cargue y modifique solo sus fotos. La función comprueba la ruta del propietario, el tipo y el tamaño del archivo antes de guardar su URL en Firebase Auth y Firestore. No acepta URLs arbitrarias proporcionadas por el cliente.
 
 ## Activar biometría
 
-Abrir Perfil → Datos biométricos. Confirmar la contraseña actual y luego Face ID o huella. El dispositivo debe tener una biometría configurada. Se usa el módulo nativo `react-native-biometrics`; en iOS se agrega el permiso de Face ID y en Android el permiso biométrico. La app debe recompilarse después de instalar la dependencia. Las dos compilaciones nativas se verificaron; el flujo de sensor debe comprobarse en un dispositivo compatible real. El simulador no reemplaza esa comprobación.
+Abrir Perfil → Datos biométricos. Confirmar la contraseña actual y luego Face ID o huella. El dispositivo debe tener una biometría configurada. Se usa el módulo nativo `react-native-biometrics`; en iOS se agrega el permiso de Face ID y en Android el permiso biométrico. La app debe recompilarse después de instalar la dependencia. Las dos compilaciones nativas se verificaron. El flujo de sensor se validó en un dispositivo real: activación e ingreso con biometría funcionan. El simulador no reemplaza esa comprobación.
 
 Se crea una clave RSA de 2048 bits protegida por la autenticación biométrica del sistema. La clave privada permanece en el almacenamiento seguro nativo. El servidor guarda únicamente la clave pública y su vinculación al UID. La app guarda localmente el UID, el identificador derivado de la clave y la clave pública; no guarda huellas, imágenes de Face ID ni contraseñas.
 

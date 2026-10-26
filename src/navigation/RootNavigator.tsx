@@ -9,7 +9,7 @@ import { RootState } from '@/redux/store';
 import { AuthNavigator } from './AuthNavigator';
 import { AppNavigator } from './AppNavigator';
 import messaging from '@react-native-firebase/messaging';
-import { communicationIdFromURL, notificationURL } from './notificationLinks';
+import { classroomIdFromURL, communicationIdFromURL, notificationURL } from './notificationLinks';
 import { View, ActivityIndicator, Text, Linking } from 'react-native';
 
 /**
@@ -24,7 +24,15 @@ import { View, ActivityIndicator, Text, Linking } from 'react-native';
  * - Deep Linking
  */
 
-const navigationRef = createNavigationContainerRef<{ MainApp: undefined; NotificationDetail: { communicationId: string } }>();
+type PendingDetail =
+  | { route: 'NotificationDetail'; communicationId: string }
+  | { route: 'ClassroomNotificationDetail'; classroomId: string };
+
+const navigationRef = createNavigationContainerRef<{
+  MainApp: undefined;
+  NotificationDetail: { communicationId: string };
+  ClassroomNotificationDetail: { classroomId: string };
+}>();
 
 const SplashScreen = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -38,25 +46,28 @@ export const RootNavigator = () => {
   const { isAuthenticated, isLoading, user } = useSelector((state: RootState) => state.auth);
   const [isReady, setIsReady] = React.useState(false);
 
-  const pendingMessage = useRef<string | null>(null);
+  const pendingMessage = useRef<PendingDetail | null>(null);
   const canNavigate = useRef(false);
   canNavigate.current = isReady && isAuthenticated && !isLoading;
   const openPendingMessage = useCallback(() => {
-    if (!canNavigate.current || !navigationRef.isReady() || !pendingMessage.current) return;
+    const pending = pendingMessage.current;
+    if (!canNavigate.current || !navigationRef.isReady() || !pending) return;
     // Esperar a que el stack autenticado esté montado.
-    if (!navigationRef.getRootState()?.routeNames.includes('NotificationDetail')) return;
-    const communicationId = pendingMessage.current;
+    if (!navigationRef.getRootState()?.routeNames.includes(pending.route)) return;
     pendingMessage.current = null;
-    navigationRef.navigate('NotificationDetail', { communicationId });
+    if (pending.route === 'NotificationDetail') navigationRef.navigate('NotificationDetail', { communicationId: pending.communicationId });
+    else navigationRef.navigate('ClassroomNotificationDetail', { classroomId: pending.classroomId });
   }, []);
 
   useEffect(() => {
     let active = true;
     const openURL = (url: string | null) => {
       if (!active || !url) return;
-      const id = communicationIdFromURL(url);
-      if (!id) return;
-      pendingMessage.current = id;
+      const classroomId = classroomIdFromURL(url);
+      const communicationId = communicationIdFromURL(url);
+      if (classroomId) pendingMessage.current = { route: 'ClassroomNotificationDetail', classroomId };
+      else if (communicationId) pendingMessage.current = { route: 'NotificationDetail', communicationId };
+      else return;
       openPendingMessage();
     };
     const unsubscribe = messaging().onNotificationOpenedApp(message => openURL(notificationURL(message.data)));

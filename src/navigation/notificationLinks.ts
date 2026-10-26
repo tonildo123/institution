@@ -1,4 +1,9 @@
 export function notificationURL(data?: { [key: string]: unknown }): string | null {
+  if (data?.type === 'classroom') {
+    const id = data.classroomId;
+    return typeof id === 'string' && id.length > 0 && !id.includes('/')
+      ? `institucion://classroom/${encodeURIComponent(id)}` : null;
+  }
   const id = data?.communicationId;
   return typeof id === 'string' && id.length > 0 && !id.includes('/')
     ? `institucion://message/${encodeURIComponent(id)}` : null;
@@ -6,6 +11,15 @@ export function notificationURL(data?: { [key: string]: unknown }): string | nul
 
 export function communicationIdFromURL(url: string): string | null {
   const match = /^institucion:\/\/message\/([^/?#]+)$/.exec(url);
+  if (!match) return null;
+  try {
+    const id = decodeURIComponent(match[1]);
+    return id && !id.includes('/') ? id : null;
+  } catch { return null; }
+}
+
+export function classroomIdFromURL(url: string): string | null {
+  const match = /^institucion:\/\/classroom\/([^/?#]+)$/.exec(url);
   if (!match) return null;
   try {
     const id = decodeURIComponent(match[1]);
