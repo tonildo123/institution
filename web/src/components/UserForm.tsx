@@ -173,14 +173,14 @@ const UserForm: React.FC<UserFormProps> = ({
             >
               <option value="familia">Familia (DNI + Contraseña)</option>
               <option value="admin">Administrador (Email + Contraseña)</option>
-              <option value="preceptor">Preceptor (Email + Contraseña)</option>
+              <option value="preceptor">Docente (Email + Contraseña)</option>
             </select>
             {errors.role && (
               <span className="error-message">{errors.role}</span>
             )}
           </div>
 
-          {/* Email - para admin y preceptor */}
+          {/* Email - para admin y docente */}
           {(role === 'admin' || role === 'preceptor') && (
             <div className="form-group">
               <label htmlFor="email">

@@ -1,6 +1,10 @@
 // Web App Types (shared with mobile types)
 
-export type UserRole = 'admin' | 'familia' | 'preceptor';
+/** Roles de la app móvil. Un usuario puede tener uno o varios (multirol, pendiente). */
+export type UserRole = 'admin' | 'equipo directivo' | 'representante legal' | 'preceptor' | 'familia' | 'user';
+
+/** Roles con acceso al panel de administración de la web. */
+export const ADMIN_ROLES: UserRole[] = ['admin', 'equipo directivo', 'representante legal'];
 
 export interface User {
   id: string;

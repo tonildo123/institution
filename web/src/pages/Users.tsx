@@ -156,7 +156,7 @@ const Users = () => {
             <div className="stat-value">
               {users.filter((u) => u.role === 'preceptor').length}
             </div>
-            <div className="stat-label">Preceptores</div>
+            <div className="stat-label">Docentes</div>
           </div>
           <div className="stat">
             <div className="stat-value">

@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Linking,
   Modal,
   TextInput,
   KeyboardAvoidingView,
@@ -16,6 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './styles';
+import { TERMS_URL, PRIVACY_URL } from '@/config/links';
 import { useProfileLogic } from './useProfileLogic';
 
 /**
@@ -117,6 +119,19 @@ export const ProfileScreen = () => {
             <TouchableOpacity style={[styles.actionRow, styles.lastRow]} onPress={handleLogout} accessibilityRole="button">
               <Text style={[styles.actionIcon, styles.dangerText]} accessible={false}>↪</Text>
               <Text style={[styles.actionText, styles.dangerText]}>Cerrar sesión</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>LEGAL</Text>
+          <View style={styles.card}>
+            <TouchableOpacity style={styles.actionRow} accessibilityRole="link" accessibilityLabel="Conocé nuestros términos y condiciones" onPress={() => { void Linking.openURL(TERMS_URL); }}>
+              <Text style={styles.actionText}>Conocé nuestros términos y condiciones</Text>
+              <Text style={styles.chevron} accessible={false}>›</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionRow, styles.lastRow]} accessibilityRole="link" accessibilityLabel="Conocé nuestra política de privacidad" onPress={() => { void Linking.openURL(PRIVACY_URL); }}>
+              <Text style={styles.actionText}>Conocé nuestra política de privacidad</Text>
+              <Text style={styles.chevron} accessible={false}>›</Text>
             </TouchableOpacity>
           </View>
         </View>

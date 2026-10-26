@@ -1,0 +1,29 @@
+/* Ingreso al panel de administración. */
+.login-page {
+  min-height: 100vh; display: grid; place-items: center; padding: 24px;
+  background: linear-gradient(160deg, #e7f3f0 0%, #f7fbfa 60%, #ffffff 100%);
+}
+.login-card {
+  width: 100%; max-width: 400px; background: #fff; border-radius: 20px; padding: 36px 32px;
+  box-shadow: 0 18px 40px rgba(12, 107, 88, 0.12); border: 1px solid #e3ebe8;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.login-brand { font-weight: 800; font-size: 22px; color: #0c6b58; margin: 0; letter-spacing: 0.3px; }
+.login-subtitle { margin: -10px 0 4px; color: #5b6b73; font-size: 14px; }
+.login-card label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #1d2a33; }
+.login-card input {
+  height: 46px; border-radius: 12px; border: 1px solid #cfdcd8; padding: 0 14px; font-size: 15px;
+  color: #1d2a33; background: #fff; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.login-card input:focus { border-color: #0c6b58; box-shadow: 0 0 0 3px rgba(12, 107, 88, 0.15); }
+.login-card button[type='submit'] {
+  height: 48px; border: none; border-radius: 12px; background: #0c6b58; color: #fff; font-size: 15px;
+  font-weight: 700; cursor: pointer; transition: background 0.15s;
+}
+.login-card button[type='submit']:hover:not(:disabled) { background: #094f42; }
+.login-card button[type='submit']:disabled { opacity: 0.6; cursor: default; }
+.login-error {
+  margin: 0; padding: 10px 12px; border-radius: 10px; background: #fdecea; color: #a12622; font-size: 14px;
+}
+.login-back { text-align: center; font-size: 14px; }
+.login-back a { color: #0c6b58; text-decoration: none; font-weight: 600; }

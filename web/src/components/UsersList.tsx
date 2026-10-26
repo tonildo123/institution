@@ -28,20 +28,26 @@ const UsersList: React.FC<UsersListProps> = ({
   filter = 'all',
   onFilterChange,
 }) => {
-  const roles: Array<UserRole | 'all'> = ['all', 'admin', 'familia', 'preceptor'];
+  const roles: Array<UserRole | 'all'> = ['all', 'admin', 'equipo directivo', 'representante legal', 'preceptor', 'familia', 'user'];
 
   const roleLabels: Record<UserRole | 'all', string> = {
     all: 'Todos',
     admin: 'Administrador',
+    'equipo directivo': 'Equipo directivo',
+    'representante legal': 'Representante legal',
+    preceptor: 'Docente',
     familia: 'Familia',
-    preceptor: 'Preceptor',
+    user: 'Usuario',
   };
 
   const getRoleColor = (role: UserRole): string => {
     const colors: Record<UserRole, string> = {
       admin: '#e74c3c',
-      familia: '#3498db',
+      'equipo directivo': '#9b59b6',
+      'representante legal': '#8e44ad',
       preceptor: '#f39c12',
+      familia: '#3498db',
+      user: '#7f8c8d',
     };
     return colors[role];
   };

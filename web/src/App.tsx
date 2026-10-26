@@ -1,47 +1,34 @@
-import React, { useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from '@/auth/AuthProvider';
+import AdminLayout from '@/layouts/AdminLayout';
+import AdminLogin from '@/pages/AdminLogin';
 import Users from '@/pages/Users';
-import Communications from '@/pages/Communications';
+import { About, Landing, Placeholder, Privacy, Terms } from '@/pages/PublicPages';
 import './App.css';
 
 /**
- * Aplicación Principal
- * Panel de Administración
+ * Sitio público (inicio, nosotros, privacidad, términos) y panel de administración en /admin.
  */
-
-type PageType = 'users' | 'communications';
-
 function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>('users');
-
   return (
-    <div className="app">
-      {/* Navbar */}
-      <nav className="app-navbar">
-        <div className="navbar-brand">
-          <h1>📚 Instituto Admin</h1>
-        </div>
-        <div className="navbar-menu">
-          <button
-            className={`nav-link ${currentPage === 'users' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('users')}
-          >
-            👥 Usuarios
-          </button>
-          <button
-            className={`nav-link ${currentPage === 'communications' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('communications')}
-          >
-            📤 Comunicaciones
-          </button>
-        </div>
-      </nav>
-
-      {/* Contenido Principal */}
-      <main className="app-main">
-        {currentPage === 'users' && <Users />}
-        {currentPage === 'communications' && <Communications />}
-      </main>
-    </div>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/nosotros" element={<About />} />
+          <Route path="/privacidad" element={<Privacy />} />
+          <Route path="/terminos" element={<Terms />} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="usuarios" element={<Users />} />
+            <Route path="reportes" element={<Placeholder title="Reportes" />} />
+            <Route path="salas" element={<Placeholder title="Salas" />} />
+            <Route path="carga" element={<Placeholder title="Carga masiva" />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
