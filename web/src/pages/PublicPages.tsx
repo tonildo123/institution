@@ -12,7 +12,6 @@ const PublicShell = ({ title, children }: { title?: string; children: React.Reac
         <Link to="/nosotros">Nosotros</Link>
         <Link to="/privacidad">Privacidad</Link>
         <Link to="/terminos">Términos</Link>
-        <Link to="/admin">Administración</Link>
       </nav>
     </header>
     <main className="public-main">

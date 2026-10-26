@@ -1,6 +1,6 @@
 import { ProblemReportsModal } from './ProblemReportsModal';
 import { canManageReports } from '@/services/firebase/problemReports';
-import React from 'react';
+import React, { useState } from 'react';
 import Svg, { Path, Circle, Line } from 'react-native-svg';
 import {
   View,
@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Linking,
   Modal,
   TextInput,
   KeyboardAvoidingView,
@@ -17,7 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './styles';
-import { TERMS_URL, PRIVACY_URL } from '@/config/links';
+import { WebSiteModal } from '@/components/WebSiteModal';
 import { useProfileLogic } from './useProfileLogic';
 
 /**
@@ -35,6 +34,7 @@ export const ProfileScreen = () => {
     editing, setEditing, saving, form, setForm, openEditor, save,
     handleLogout,
   } = useProfileLogic();
+  const [webPage, setWebPage] = useState<{ path: string; title: string } | null>(null);
 
   return (
     <View style={styles.container}>
@@ -125,17 +125,18 @@ export const ProfileScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>LEGAL</Text>
           <View style={styles.card}>
-            <TouchableOpacity style={styles.actionRow} accessibilityRole="link" accessibilityLabel="Conocé nuestros términos y condiciones" onPress={() => { void Linking.openURL(TERMS_URL); }}>
+            <TouchableOpacity style={styles.actionRow} accessibilityRole="link" accessibilityLabel="Conocé nuestros términos y condiciones" onPress={() => setWebPage({ path: '/terminos', title: 'Términos y condiciones' })}>
               <Text style={styles.actionText}>Conocé nuestros términos y condiciones</Text>
               <Text style={styles.chevron} accessible={false}>›</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionRow, styles.lastRow]} accessibilityRole="link" accessibilityLabel="Conocé nuestra política de privacidad" onPress={() => { void Linking.openURL(PRIVACY_URL); }}>
+            <TouchableOpacity style={[styles.actionRow, styles.lastRow]} accessibilityRole="link" accessibilityLabel="Conocé nuestra política de privacidad" onPress={() => setWebPage({ path: '/privacidad', title: 'Política de privacidad' })}>
               <Text style={styles.actionText}>Conocé nuestra política de privacidad</Text>
               <Text style={styles.chevron} accessible={false}>›</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+      <WebSiteModal visible={webPage !== null} path={webPage?.path ?? '/'} title={webPage?.title ?? ''} onClose={() => setWebPage(null)} />
       {reportsOpen && user && <ProblemReportsModal user={user} onClose={() => setReportsOpen(false)} />}
       <Modal visible={biometricOpen} animationType="slide" transparent onRequestClose={() => { if (!biometricBusy) setBiometricOpen(false); }}>
         <SafeAreaProvider><SafeAreaView style={styles.modalOverlay} edges={['top', 'left', 'right']}>
