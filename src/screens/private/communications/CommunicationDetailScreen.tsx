@@ -1,9 +1,5 @@
-import { MessageVideo } from '@/components/MessageVideo';
-import { MessageAudio } from '@/components/MessageAudio';
-import { MessageLink } from '@/components/MessageLink';
-import { MessageDocument } from '@/components/MessageDocument';
-import { MessageImage } from '@/components/MessageImage';
 import { MessageText } from '@/components/MessageText';
+import { MessageAttachments } from '@/components/MessageAttachments';
 import React, { useState } from 'react';
 import {
   View,
@@ -207,15 +203,7 @@ export const CommunicationDetailScreen = () => {
         <View style={styles.noticeCard}>
           <MessageText style={styles.noticeTitle}>{communication.title}</MessageText>
           <MessageText style={styles.noticeContent}>{communication.description || communication.body}</MessageText>
-          {communication.data?.videoUrl && <MessageVideo uri={communication.data.videoUrl} name={communication.data.videoName} size={Number(communication.data.videoSize) || undefined} />}
-          {communication.data?.audioUrl && <MessageAudio uri={communication.data.audioUrl} name={communication.data.audioName || 'Audio adjunto'} durationMs={Number(communication.data.audioDurationMs) || 0} />}
-          {communication.data?.linkUrl && <MessageLink url={communication.data.linkUrl} preview={{ title: communication.data.linkTitle, description: communication.data.linkDescription, imageUrl: communication.data.linkImageUrl }} />}
-          {communication.data?.documentUrl && (
-            <MessageDocument name={communication.data.documentName || 'Documento adjunto'}
-              size={Number(communication.data.documentSize) || 0} url={communication.data.documentUrl} />
-          )}
-          {communication.data?.imageUrl && <MessageImage key={communication.data.imageUrl} uri={communication.data.imageUrl} />}
-          {communication.data?.photoUrl && <MessageImage key={communication.data.photoUrl} uri={communication.data.photoUrl} />}
+          <MessageAttachments data={communication.data as Record<string, string | undefined> | undefined} />
         </View>
 
       </ScrollView>

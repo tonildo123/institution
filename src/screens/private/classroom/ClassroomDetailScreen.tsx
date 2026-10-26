@@ -1,8 +1,3 @@
-import { MessageVideo } from '@/components/MessageVideo';
-import { MessageAudio } from '@/components/MessageAudio';
-import { MessageLink } from '@/components/MessageLink';
-import { MessageDocument } from '@/components/MessageDocument';
-import { MessageImage } from '@/components/MessageImage';
 import { MessageText } from '@/components/MessageText';
 import React, { useState } from 'react';
 import {
@@ -21,6 +16,7 @@ import { RootState } from '@/redux/store';
 import { getClassroom, deleteClassroom, updateClassroom, Classroom } from '@/services/firebase/classroom';
 import { ClassroomSubmission, getOwnSubmission, listSubmissions } from '@/services/firebase/classroomSubmissions';
 import { SubmissionComposer } from './SubmissionComposer';
+import { MessageAttachments } from '@/components/MessageAttachments';
 import { BookIcon } from '@/components/BookIcon';
 import { classroomStyles, classroomColors } from './classroomStyles';
 
@@ -31,18 +27,6 @@ import { classroomStyles, classroomColors } from './classroomStyles';
 
 // Mantener la edición implementada, pero oculta para todos los roles.
 const SHOW_EDIT_ACTION = false;
-
-/** Adjuntos de una publicación o de una entrega, con los mismos renderizadores de Mensajes. */
-const Attachments = ({ data }: { data?: Record<string, string> }) => (
-  <>
-    {data?.videoUrl && <MessageVideo uri={data.videoUrl} name={data.videoName} size={Number(data.videoSize) || undefined} />}
-    {data?.audioUrl && <MessageAudio uri={data.audioUrl} name={data.audioName || 'Audio adjunto'} durationMs={Number(data.audioDurationMs) || 0} />}
-    {data?.linkUrl && <MessageLink url={data.linkUrl} preview={{ title: data.linkTitle, description: data.linkDescription, imageUrl: data.linkImageUrl }} />}
-    {data?.documentUrl && <MessageDocument name={data.documentName || 'Documento adjunto'} size={Number(data.documentSize) || 0} url={data.documentUrl} />}
-    {data?.imageUrl && <MessageImage key={data.imageUrl} uri={data.imageUrl} />}
-    {data?.photoUrl && <MessageImage key={data.photoUrl} uri={data.photoUrl} />}
-  </>
-);
 
 export const ClassroomDetailScreen = () => {
   const navigation = useNavigation();
@@ -233,7 +217,7 @@ export const ClassroomDetailScreen = () => {
           </Text>
           <MessageText style={classroomStyles.detailText}>{classroom.description || classroom.body}</MessageText>
           {classroom.dueDate && <Text style={classroomStyles.dueChipText}>Entrega hasta: {new Date(classroom.dueDate).toLocaleDateString('es-AR')}</Text>}
-          <Attachments data={classroom.data as Record<string, string> | undefined} />
+          <MessageAttachments data={classroom.data as Record<string, string> | undefined} />
         </View>
 
         {user?.role === 'familia' && (
@@ -242,7 +226,7 @@ export const ClassroomDetailScreen = () => {
               <Text style={classroomStyles.pill}>Tu entrega</Text>
               <Text style={classroomStyles.detailDate}>Enviada el {new Date(mySubmission.createdAt).toLocaleDateString('es-AR')}</Text>
               {Boolean(mySubmission.body) && <MessageText style={classroomStyles.detailText}>{mySubmission.body}</MessageText>}
-              <Attachments data={mySubmission.data} />
+              <MessageAttachments data={mySubmission.data} />
             </View>
           ) : classroom.dueDate && Date.now() > Date.parse(classroom.dueDate) ? (
             <Text style={[classroomStyles.hint, { marginHorizontal: 16, marginTop: 16 }]}>El plazo para entregar esta tarea venció.</Text>
@@ -261,7 +245,7 @@ export const ClassroomDetailScreen = () => {
                 <Text style={classroomStyles.detailTitle}>{item.studentName}</Text>
                 <Text style={classroomStyles.detailDate}>{new Date(item.createdAt).toLocaleDateString('es-AR')} · {new Date(item.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}</Text>
                 {Boolean(item.body) && <MessageText style={classroomStyles.detailText}>{item.body}</MessageText>}
-                <Attachments data={item.data} />
+                <MessageAttachments data={item.data} />
               </View>
             ))}
           </View>
