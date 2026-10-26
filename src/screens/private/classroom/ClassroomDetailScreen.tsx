@@ -19,11 +19,12 @@ import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/nativ
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { getClassroom, deleteClassroom, updateClassroom, Classroom } from '@/services/firebase/classroom';
-import { styles } from './detailStyles';
+import { BookIcon } from '@/components/BookIcon';
+import { classroomStyles, classroomColors } from './classroomStyles';
 
 /**
- * Pantalla de Detalle de Comunicación
- * Maquetado tipo chat con header verde
+ * Pantalla de Detalle de publicación de Classroom
+ * Encabezado morado y publicación en tarjeta
  */
 
 // Mantener la edición implementada, pero oculta para todos los roles.
@@ -137,43 +138,35 @@ export const ClassroomDetailScreen = () => {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color="#d21f1a" />
+      <View style={[classroomStyles.surface, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={classroomColors.primary} />
       </View>
     );
   }
 
   if (!classroom) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[classroomStyles.surface, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text>Comunicación no disponible o sin acceso</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={classroomStyles.surface}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backArrow}>←</Text>
+      <View style={classroomStyles.detailHeader}>
+        <TouchableOpacity onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Volver">
+          <Text style={classroomStyles.detailBack}>←</Text>
         </TouchableOpacity>
 
-        <View style={styles.headerAvatar}>
-          <View style={styles.avatarBadge}>
-            <View style={styles.avatarBars}>
-              <View style={[styles.avatarBar, { backgroundColor: '#e63946' }]} />
-              <View style={[styles.avatarBar, { backgroundColor: '#f4a300' }]} />
-              <View style={[styles.avatarBar, { backgroundColor: '#2a9d5c' }]} />
-              <View style={[styles.avatarBar, { backgroundColor: '#2a4d9d' }]} />
-            </View>
-            <Text style={styles.avatarBadgeText}>IMEP</Text>
-          </View>
+        <View style={classroomStyles.detailBadge}>
+          <BookIcon color="#fff" />
         </View>
 
-        <View style={styles.headerText}>
-          <Text style={styles.headerTitle}>KIT IMEP</Text>
-          <Text style={styles.headerSub}>Comunicación</Text>
+        <View style={classroomStyles.detailHeaderText}>
+          <Text style={classroomStyles.detailHeaderTitle}>Classroom</Text>
+          <Text style={classroomStyles.detailHeaderSub}>Publicación</Text>
         </View>
 
         {/* Acciones disponibles según el rol; edición oculta. */}
@@ -185,28 +178,31 @@ export const ClassroomDetailScreen = () => {
               disabled={saving}
               style={{ opacity: saving ? 0.5 : 1 }}
             >
-              <Text style={styles.menuDots}>✏️</Text>
+              <Text style={classroomStyles.detailAction}>✏️</Text>
             </TouchableOpacity>
             )}
             <TouchableOpacity
               onPress={handleDelete}
               accessibilityRole="button"
-              accessibilityLabel="Eliminar comunicación"
+              accessibilityLabel="Eliminar publicación"
               disabled={deleting}
               style={{ opacity: deleting ? 0.5 : 1 }}
             >
-              <Text style={styles.menuDots}>{deleting ? '⏳' : '🗑️'}</Text>
+              <Text style={classroomStyles.detailAction}>{deleting ? '⏳' : '🗑️'}</Text>
             </TouchableOpacity>
           </View>
         )}
       </View>
 
-      {/* Chat Content */}
-      <ScrollView style={styles.chatArea} contentContainerStyle={styles.chatContent}>
-        {/* Notice Card */}
-        <View style={styles.noticeCard}>
-          <MessageText style={styles.noticeTitle}>{classroom.title}</MessageText>
-          <MessageText style={styles.noticeContent}>{classroom.description || classroom.body}</MessageText>
+      {/* Contenido */}
+      <ScrollView style={classroomStyles.surface} contentContainerStyle={{ paddingBottom: 24 }}>
+        {/* Tarjeta de la publicación */}
+        <View style={classroomStyles.detailCard}>
+          <MessageText style={classroomStyles.detailTitle}>{classroom.title}</MessageText>
+          <Text style={classroomStyles.detailDate}>
+            {new Date(classroom.createdAt).toLocaleDateString('es-AR')} · {new Date(classroom.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}
+          </Text>
+          <MessageText style={classroomStyles.detailText}>{classroom.description || classroom.body}</MessageText>
           {classroom.data?.videoUrl && <MessageVideo uri={classroom.data.videoUrl} name={classroom.data.videoName} size={Number(classroom.data.videoSize) || undefined} />}
           {classroom.data?.audioUrl && <MessageAudio uri={classroom.data.audioUrl} name={classroom.data.audioName || 'Audio adjunto'} durationMs={Number(classroom.data.audioDurationMs) || 0} />}
           {classroom.data?.linkUrl && <MessageLink url={classroom.data.linkUrl} preview={{ title: classroom.data.linkTitle, description: classroom.data.linkDescription, imageUrl: classroom.data.linkImageUrl }} />}

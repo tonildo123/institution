@@ -1,3 +1,4 @@
+export {};
 const mockSend = jest.fn().mockResolvedValue('message-id');
 const mockSet = jest.fn().mockResolvedValue(undefined);
 const mockUpdate = jest.fn().mockResolvedValue(undefined);

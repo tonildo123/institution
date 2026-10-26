@@ -38,3 +38,12 @@ firebase deploy --only functions:sendClassroomToAll,functions:sendClassroomToUse
 ```
 
 Y las reglas, según la fase en la que esté el proyecto (ver `message-privacy.md`).
+
+## Diseño visual
+
+- Paleta propia en `src/screens/private/classroom/classroomStyles.ts` (morado). Mensajes conserva el verde.
+- El encabezado de la pestaña Mensajes cambia de color según la sección activa. Su icono de Classroom es `src/components/BookIcon.tsx`.
+- Recepción: tarjetas con icono de libro, título de sección "PUBLICACIONES DE CLASSROOM" y botón "Ver más".
+- Envío: formulario con píldoras de sección ("Elegir destinatario", "Título de la publicación", "Escribe el contenido") y botón "Publicar en Classroom". La lógica de adjuntos, emojis, negrita y envío no cambió.
+- Detalle de publicación (`ClassroomDetailScreen`): encabezado morado con icono de libro, fecha y publicación en tarjeta blanca. Eliminar sigue disponible según el rol.
+- Pendiente de datos: el chip "Entrega: [fecha]" del mockup no tiene campo de datos todavía.

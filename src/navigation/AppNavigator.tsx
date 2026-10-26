@@ -88,11 +88,7 @@ const MensajesStackNavigator = ({ type }: { type: 'send' | 'receive' }) => {
     >
       <Stack.Screen
         name="MensajesList"
-        children={() => (
-          <ScreenWrapper>
-            <MensajesTabScreen type={type} />
-          </ScreenWrapper>
-        )}
+        children={() => <MensajesTabScreen type={type} />}
       />
       <Stack.Screen
         name="CommunicationDetail"

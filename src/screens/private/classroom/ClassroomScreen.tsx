@@ -16,7 +16,6 @@ import { MessageText } from '@/components/MessageText';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
-  Image,
   Text,
   ScrollView,
   TouchableOpacity,
@@ -37,7 +36,9 @@ import { sendClassroomToAll, sendClassroomToUsers } from '@/services/classroomSe
 import { Classroom } from '@/services/firebase/classroom';
 import { getTeacherCursos, TeacherCurso, getSalaUsers, getDestinatarios, SalaLevel } from '@/services/firebase/salas';
 import { FamiliasModal } from '@/components/salas/FamiliasModal';
+import { BookIcon } from '@/components/BookIcon';
 import { styles } from './styles';
+import { classroomStyles, classroomColors } from './classroomStyles';
 
 /**
  * Pantalla de Comunicaciones - Estilo Chat
@@ -349,27 +350,23 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
   if (type === 'send') {
     return (
       <KeyboardAvoidingView
-        style={styles.chatContainerWithHeader}
+        style={classroomStyles.form}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={insets.top}
       >
-        {/* Chat Area */}
+        {/* Formulario de publicación */}
         <ScrollView
           ref={messageScrollRef}
-          style={styles.chatMessages}
+          style={{ flex: 1 }}
+          contentContainerStyle={classroomStyles.formContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           onLayout={keepMessageVisible}
           onContentSizeChange={keepMessageVisible}
         >
-          {/* User message: Elegir destinatario */}
-          <View style={styles.messageRow}>
-            <View style={[styles.chatBubble, styles.sentBubble]}>
-              <Text style={styles.bubbleText}>Elegir destinatario</Text>
-            </View>
-          </View>
+          <Text style={classroomStyles.pill}>Elegir destinatario</Text>
 
-          {isTeacher && <Text style={styles.bubbleText}>{teacherLoading ? 'Cargando tus salas...' : teacherError ? 'No se pudieron cargar tus salas. Volvé a abrir esta pantalla.' : teacherCursos.length === 0 ? 'No tenés salas asignadas. Solicitá la asignación a la institución.' : 'Elegí una de tus salas asignadas.'}</Text>}
+          {isTeacher && <Text style={classroomStyles.hint}>{teacherLoading ? 'Cargando tus salas...' : teacherError ? 'No se pudieron cargar tus salas. Volvé a abrir esta pantalla.' : teacherCursos.length === 0 ? 'No tenés salas asignadas. Solicitá la asignación a la institución.' : 'Elegí una de tus salas asignadas.'}</Text>}
           {/* Level options */}
           {levels.filter(level => !isTeacher || teacherCursos.some(curso => curso.level === level.id)).map((level) => (
             <View key={level.id}>
@@ -385,14 +382,10 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
                   }
                 }}
               >
-                <View style={styles.messageRow}>
-                  <View style={[styles.chatBubble, styles.receivedBubble, { width: '90%' }]}>
-                    <View
-                      style={[styles.levelSwatch, { backgroundColor: level.color }]}
-                    />
-                    <Text style={styles.bubbleText}>{level.label}</Text>
-                    <Text style={styles.chevron}>{selectedLevel === level.id ? '✓' : ''}</Text>
-                  </View>
+                <View style={[classroomStyles.optionCard, selectedLevel === level.id && classroomStyles.optionCardSelected]}>
+                  <View style={[classroomStyles.optionSwatch, { backgroundColor: level.color }]} />
+                  <Text style={classroomStyles.optionLabel}>{level.label}</Text>
+                  <Text style={classroomStyles.optionCheck}>{selectedLevel === level.id ? '✓' : ''}</Text>
                 </View>
               </TouchableOpacity>
 
@@ -400,20 +393,16 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
                 <View>
                   {(isTeacher ? cursos : [{ id: undefined, label: 'TODO EL NIVEL' }, ...cursos]).map(curso => (
                     <TouchableOpacity key={curso.id || 'nivel'} disabled={loading} onPress={() => setSelectedCurso(curso.id)}>
-                      <View style={styles.messageRow}>
-                        <View style={[styles.chatBubble, styles.receivedBubble]}>
-                          <Text style={styles.bubbleText}>{cursoDisplayLabel(curso.label)}</Text>
-                          <Text style={styles.chevron}>{selectedCurso === curso.id ? '✓' : ''}</Text>
-                        </View>
+                      <View style={[classroomStyles.optionCard, classroomStyles.subOption, selectedCurso === curso.id && classroomStyles.optionCardSelected]}>
+                        <Text style={classroomStyles.optionLabel}>{cursoDisplayLabel(curso.label)}</Text>
+                        <Text style={classroomStyles.optionCheck}>{selectedCurso === curso.id ? '✓' : ''}</Text>
                       </View>
                     </TouchableOpacity>
                   ))}
                   {!isTeacher && selectedCurso && !selectedCurso.startsWith('turno-') && (
                     <TouchableOpacity disabled={loading} onPress={() => setManagingCourse(true)}>
-                      <View style={styles.messageRow}>
-                        <View style={[styles.chatBubble, styles.receivedBubble]}>
-                          <Text style={styles.bubbleText}>+ Agregar / ver familias y docentes</Text>
-                        </View>
+                      <View style={[classroomStyles.optionCard, classroomStyles.subOption]}>
+                        <Text style={[classroomStyles.optionLabel, { color: classroomColors.primary }]}>+ Agregar / ver familias y docentes</Text>
                       </View>
                     </TouchableOpacity>
                   )}
@@ -423,18 +412,14 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
             </View>
           ))}
 
-          {/* Input: Titulo del mensaje */}
-          <View style={styles.messageRow}>
-            <View style={[styles.chatBubble, styles.sentBubble]}>
-              <Text style={styles.bubbleText}>Titulo del mensaje</Text>
-            </View>
-          </View>
+          {/* Input: Título de la publicación */}
+          <Text style={classroomStyles.pill}>Título de la publicación</Text>
 
           {/* Input Field: Title */}
-          <View style={styles.messageRow}>
+          <View>
             <BoldMessageInput
               key={`title-${messageInputKey}`}
-              style={styles.titleInputBubble}
+              style={classroomStyles.inputBox}
               placeholder="Escribe el titulo..."
               placeholderTextColor="#999"
               onMessageChange={setTitle}
@@ -470,26 +455,22 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
           ]} />
 
           {/* Message input label */}
-          <View style={styles.messageRow}>
-            <View style={[styles.chatBubble, styles.sentBubble]}>
-              <Text style={styles.bubbleText}>Escribe el mensaje</Text>
-            </View>
-          </View>
+          <Text style={classroomStyles.pill}>Escribe el contenido</Text>
 
           
           {/* Input Field: Description */}
-          <View style={styles.messageComposer}>
+          <View style={classroomStyles.toolRow}>
             <TouchableOpacity
               accessibilityRole="button" accessibilityLabel="Agregar emoji"
               disabled={loading}
-              style={styles.composerIconButton}
+              style={classroomStyles.toolButton}
               onPress={() => { Keyboard.dismiss(); setShowEmojis(true); }}>
-              <Text style={styles.composerIcon}>☺</Text>
+              <Text style={classroomStyles.toolIcon}>☺</Text>
             </TouchableOpacity>
             <BoldMessageInput
               ref={messageInputRef}
               key={messageInputKey}
-              style={[styles.descriptionInputBubble, styles.composerInput]}
+              style={[classroomStyles.inputBox, classroomStyles.contentBox, { flex: 1 }]}
               onFocus={() => {
                 descriptionFocused.current = true;
                 keepMessageVisible();
@@ -504,15 +485,15 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
               editable={!loading}
             />
             <TouchableOpacity
-              style={styles.composerIconButton}
+              style={classroomStyles.toolButton}
               accessibilityRole="button"
               accessibilityLabel="Adjuntar archivo"
               disabled={loading || pickingImage}
               onPress={() => { Keyboard.dismiss(); setShowAttachments(true); }}>
-              <Text style={styles.composerIcon}>+</Text>
+              <Text style={classroomStyles.toolIcon}>+</Text>
             </TouchableOpacity>
           </View>
-          {pickingImage && <ActivityIndicator color="#0c6b58" />}
+          {pickingImage && <ActivityIndicator color={classroomColors.primary} />}
 
         </ScrollView>
 
@@ -526,16 +507,16 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
             onClose={() => setManagingCourse(false)} />
         )}
 
-        {/* Send Button Bar */}
-        <View style={styles.sendButtonBar}>
+        {/* Botón de publicar */}
+        <View style={classroomStyles.publishBar}>
           <TouchableOpacity
-            style={[styles.sendButtonChat, (loading || (isTeacher && (teacherLoading || teacherCursos.length === 0))) && { opacity: 0.6 }]}
+            style={[classroomStyles.publishButton, (loading || (isTeacher && (teacherLoading || teacherCursos.length === 0))) && classroomStyles.disabled]}
             onPress={handleSend}
             disabled={loading || pickingImage || (isTeacher && (teacherLoading || teacherCursos.length === 0))}
           >
-            <Image source={require('../../../assets/icons/send-message.png')} style={styles.sendButtonChatIcon} resizeMode="contain" accessible={false} />
-            <Text style={styles.sendButtonChatText}>
-              {uploadingImage ? 'Subiendo adjunto...' : loading ? 'Enviando...' : 'Enviar'}
+            <BookIcon color="#fff" />
+            <Text style={classroomStyles.publishButtonText}>
+              {uploadingImage ? 'Subiendo adjunto...' : loading ? 'Publicando...' : 'Publicar en Classroom'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -553,35 +534,25 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
     return colors[level] || '#0c6b58';
   };
 
-  const getLevelIcon = (level: string) => {
-    const icons: { [key: string]: string } = {
-      inicial: 'I',
-      primario: 'P',
-      secundario: 'S',
-      todos: 'T',
-    };
-    return icons[level] || '•';
-  };
-
-
   if (loadingClassroom) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color="#25D366" />
+      <View style={[classroomStyles.surface, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={classroomColors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={classroomStyles.surface}>
       {Boolean(loadError) && <View style={{ padding: 16 }}>
         <Text accessibilityRole="alert">{loadError}</Text>
         <TouchableOpacity accessibilityRole="button" onPress={() => loadClassroomData(true)}><Text>Reintentar</Text></TouchableOpacity>
       </View>}
       <FlatList
+        ListHeaderComponent={<Text style={classroomStyles.sectionLabel}>PUBLICACIONES DE CLASSROOM</Text>}
         ListFooterComponent={messageLimit === 30 && !loadError ? <TouchableOpacity
-          accessibilityRole="button" style={{ padding: 20, alignItems: 'center' }} onPress={() => setMessageLimit(100)}>
-          <Text style={{ color: '#0c6b58', fontWeight: '700' }}>Ver más</Text>
+          accessibilityRole="button" style={classroomStyles.moreButton} onPress={() => setMessageLimit(100)}>
+          <Text style={classroomStyles.moreButtonText}>Ver más</Text>
         </TouchableOpacity> : undefined}
         data={classroom}
         keyExtractor={(item) => item.id}
@@ -589,61 +560,51 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => loadClassroomData(true)}
-            colors={['#0c6b58']}
+            colors={[classroomColors.primary]}
           />
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.levelRow}
+            style={classroomStyles.card}
+            accessibilityRole="button"
             onPress={() => {
               navigation.navigate('ClassroomDetail' as any, {
                 classroomId: item.id,
               });
             }}
           >
-            <View
-              style={[
-                styles.levelAvatar,
-                { backgroundColor: getLevelColor(item.level) },
-              ]}
-            >
-              <Text style={styles.levelAvatarText}>{getLevelIcon(item.level)}</Text>
+            <View style={[classroomStyles.cardAvatar, { backgroundColor: getLevelColor(item.level) }]}>
+              <BookIcon color="#fff" />
             </View>
 
-            <View style={styles.levelInfo}>
-              <View style={styles.levelTop}>
-                <MessageText style={styles.levelName}>{item.title}</MessageText>
-                <Text style={styles.levelTime}>
-                  {new Date(item.createdAt).toLocaleDateString('es-AR')} · {new Date(item.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}
+            <View style={classroomStyles.cardBody}>
+              <MessageText style={classroomStyles.cardTitle}>{item.title}</MessageText>
+              <Text style={classroomStyles.cardDate}>
+                {new Date(item.createdAt).toLocaleDateString('es-AR')} · {new Date(item.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}
+              </Text>
+
+              <View style={[classroomStyles.cardTag, { borderColor: getLevelColor(item.level) }]}>
+                <Text style={[classroomStyles.cardTagText, { color: getLevelColor(item.level) }]}>
+                  {getDestinationLabel(item)}
                 </Text>
               </View>
 
-              <View style={styles.tagRow}>
-                <View style={[styles.destinationTag, { borderColor: getLevelColor(item.level) }]}>
-                  <Text style={[styles.destinationTagText, { color: getLevelColor(item.level) }]}>
-                    {getDestinationLabel(item)}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.levelBottom}>
-                <MessageText style={styles.levelPreview} numberOfLines={1}>
-                  {item.description}
-                </MessageText>
-              </View>
+              <MessageText style={classroomStyles.cardText} numberOfLines={1}>
+                {item.description}
+              </MessageText>
             </View>
           </TouchableOpacity>
         )}
-        contentContainerStyle={styles.levelListContent}
+        contentContainerStyle={{ paddingTop: 0, paddingBottom: 16 }}
         ListEmptyComponent={loadError ? undefined :
           <View style={{ padding: 30, alignItems: 'center' }}>
-            <Text style={{ fontSize: 16, fontWeight: '600', color: '#666', marginBottom: 6 }}>
-              Sin comunicaciones
+            <Text style={classroomStyles.emptyTitle}>
+              Sin publicaciones
             </Text>
-            <Text style={{ fontSize: 13, color: '#999', textAlign: 'center' }}>
+            <Text style={classroomStyles.emptyText}>
               {currentUser?.role === 'familia'
-                ? 'No tenés nuevos comunicados para tu sala o nivel.'
-                : 'No hay comunicaciones enviadas todavía.'}
+                ? 'No tenés nuevas publicaciones para tu sala o nivel.'
+                : 'No hay publicaciones enviadas todavía.'}
             </Text>
           </View>
         }
