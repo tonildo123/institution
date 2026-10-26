@@ -35,6 +35,13 @@ service cloud.firestore {
       allow update: if manager() && participant() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'description', 'body', 'updatedAt']);
     }
+    match /classroom/{taskId}/submissions/{studentId} {
+      // Cada alumno lee su entrega; administración y la docente que publicó la tarea leen todas.
+      allow read: if request.auth != null && (request.auth.uid == studentId || manager() ||
+        get(/databases/$(database)/documents/classroom/$(taskId)).data.sentBy == request.auth.uid);
+      // Las entregas se crean exclusivamente en Cloud Functions (submitClassroomTask).
+      allow create, update, delete: if false;
+    }
     match /users/{userId} {
       // Se conserva la búsqueda de perfiles previa al login por email/DNI.
       // Las contraseñas se almacenan exclusivamente en Firebase Auth.

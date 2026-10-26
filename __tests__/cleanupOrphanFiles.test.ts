@@ -5,7 +5,7 @@ jest.mock('firebase-functions', () => ({
 jest.mock('firebase-admin/storage', () => ({ getStorage: () => ({ bucket: () => ({}) }) }), { virtual: true });
 jest.mock('firebase-admin/firestore', () => ({ getFirestore: () => ({ collection: () => ({}) }) }), { virtual: true });
 
-import { selectOrphanPhotos, storagePathFromDownloadURL } from '../functions/src/cleanupProfilePhotos';
+import { selectOrphanFiles, storagePathFromDownloadURL } from '../functions/src/cleanupOrphanFiles';
 
 const NOW = Date.parse('2026-10-26T12:00:00Z');
 const OLD = '2026-08-01T00:00:00Z';
@@ -22,31 +22,45 @@ describe('storagePathFromDownloadURL', () => {
   });
 });
 
-describe('selectOrphanPhotos', () => {
+describe('selectOrphanFiles', () => {
   it('borra fotos viejas no referenciadas y conserva la foto actual', () => {
     const files = [
       { name: 'profile-photos/uid1/actual.jpg', timeCreated: OLD },
       { name: 'profile-photos/uid1/anterior.jpg', timeCreated: OLD },
     ];
-    expect(selectOrphanPhotos(files, new Set(['profile-photos/uid1/actual.jpg']), new Set(), NOW))
+    expect(selectOrphanFiles(files, new Set(['profile-photos/uid1/actual.jpg']), new Set(), NOW))
       .toEqual(['profile-photos/uid1/anterior.jpg']);
   });
 
   it('respeta la ventana de gracia de archivos recientes', () => {
     const files = [{ name: 'profile-photos/uid1/subiendo.jpg', timeCreated: RECENT }];
-    expect(selectOrphanPhotos(files, new Set(), new Set(), NOW)).toEqual([]);
+    expect(selectOrphanFiles(files, new Set(), new Set(), NOW)).toEqual([]);
   });
 
   it('no borra carpetas de usuarios cuya URL no se pudo verificar', () => {
     const files = [{ name: 'profile-photos/uid2/vieja.jpg', timeCreated: OLD }];
-    expect(selectOrphanPhotos(files, new Set(), new Set(['uid2']), NOW)).toEqual([]);
+    expect(selectOrphanFiles(files, new Set(), new Set(['uid2']), NOW)).toEqual([]);
   });
 
-  it('ignora archivos fuera de profile-photos y sin fecha válida', () => {
+  it('ignora carpetas no administradas y archivos sin fecha válida', () => {
     const files = [
-      { name: 'problem-report-images/uid1/x.jpg', timeCreated: OLD },
+      { name: 'otra-carpeta/uid1/x.jpg', timeCreated: OLD },
       { name: 'profile-photos/uid1/sinfecha.jpg' },
     ];
-    expect(selectOrphanPhotos(files, new Set(), new Set(), NOW)).toEqual([]);
+    expect(selectOrphanFiles(files, new Set(), new Set(), NOW)).toEqual([]);
+  });
+
+  it('incluye adjuntos de mensajes, entregas y reportes cuando nadie los referencia', () => {
+    const files = [
+      { name: 'communication-documents/uid1/id1/doc.pdf', timeCreated: OLD },
+      { name: 'classroom-submissions/uid1/t1/foto.jpg', timeCreated: OLD },
+      { name: 'problem-report-images/uid1/r1', timeCreated: OLD },
+      { name: 'classroom-submissions/uid1/t1/usada.jpg', timeCreated: OLD },
+    ];
+    expect(selectOrphanFiles(files, new Set(['classroom-submissions/uid1/t1/usada.jpg']), new Set(), NOW)).toEqual([
+      'communication-documents/uid1/id1/doc.pdf',
+      'classroom-submissions/uid1/t1/foto.jpg',
+      'problem-report-images/uid1/r1',
+    ]);
   });
 });

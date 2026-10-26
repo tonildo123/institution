@@ -46,4 +46,17 @@ Y las reglas, según la fase en la que esté el proyecto (ver `message-privacy.m
 - Recepción: tarjetas con icono de libro, título de sección "PUBLICACIONES DE CLASSROOM" y botón "Ver más".
 - Envío: formulario con píldoras de sección ("Elegir destinatario", "Título de la publicación", "Escribe el contenido") y botón "Publicar en Classroom". La lógica de adjuntos, emojis, negrita y envío no cambió.
 - Detalle de publicación (`ClassroomDetailScreen`): encabezado morado con icono de libro, fecha y publicación en tarjeta blanca. Eliminar sigue disponible según el rol.
-- Pendiente de datos: el chip "Entrega: [fecha]" del mockup no tiene campo de datos todavía.
+- Chip "Entrega: fecha": implementado con fecha límite de 7 días por defecto.
+
+## Entregas de tareas
+
+Las publicaciones de Classroom son tareas. Ver el plan y las decisiones en [classroom-tareas.md](classroom-tareas.md). Para desplegar:
+
+```sh
+cd functions && npm run build && cd ..
+firebase deploy --only functions:submitClassroomTask,functions:cleanupOrphanFiles --project institucion-59d9a
+firebase deploy --only storage --project institucion-59d9a
+firebase deploy --only firestore:rules --config firebase.sending.json --project institucion-59d9a
+```
+
+`cleanupOrphanFiles` requiere plan Blaze y reemplaza a `cleanupProfilePhotos`, que todavía no se había desplegado.

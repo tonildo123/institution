@@ -16,7 +16,7 @@ Tocar el avatar o Editar perfil permite agregar/cambiar una foto desde la galer�
 
 La pantalla de perfil delega su estado y acciones en `useProfileLogic.ts`; `ProfileScreen.tsx` se ocupa solo del render.
 
-Las fotos se guardan en `profile-photos/{uid}/{photoId}`. Cada cambio sube un archivo nuevo, así que la función programada `cleanupProfilePhotos` borra cada tres meses (1 de enero, abril, julio y octubre, 03:00 hora de Argentina) los archivos de esa carpeta que ningún perfil referencia y que tienen más de 7 días. Si la URL de un usuario no se puede interpretar, su carpeta no se toca. Las reglas de Storage permiten que cada usuario habilitado, incluidas las familias, cargue y modifique solo sus fotos. La función comprueba la ruta del propietario, el tipo y el tamaño del archivo antes de guardar su URL en Firebase Auth y Firestore. No acepta URLs arbitrarias proporcionadas por el cliente.
+Las fotos se guardan en `profile-photos/{uid}/{photoId}`. Cada cambio sube un archivo nuevo, así que la función programada `cleanupOrphanFiles` borra cada tres meses (1 de enero, abril, julio y octubre, 03:00 hora de Argentina) los archivos de esa carpeta que ningún perfil referencia y que tienen más de 7 días. Si la URL de un usuario no se puede interpretar, su carpeta no se toca. Las reglas de Storage permiten que cada usuario habilitado, incluidas las familias, cargue y modifique solo sus fotos. La función comprueba la ruta del propietario, el tipo y el tamaño del archivo antes de guardar su URL en Firebase Auth y Firestore. No acepta URLs arbitrarias proporcionadas por el cliente.
 
 ## Activar biometría
 

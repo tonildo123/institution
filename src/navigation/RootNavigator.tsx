@@ -11,6 +11,7 @@ import { AppNavigator } from './AppNavigator';
 import messaging from '@react-native-firebase/messaging';
 import { classroomIdFromURL, communicationIdFromURL, notificationURL } from './notificationLinks';
 import { View, ActivityIndicator, Text, Linking } from 'react-native';
+import { OfflineBanner } from '../components/OfflineBanner';
 
 /**
  * Root Navigator
@@ -127,6 +128,8 @@ export const RootNavigator = () => {
   }
 
   return (
+    <View style={{ flex: 1 }}>
+      <OfflineBanner />
     <NavigationContainer
       ref={navigationRef}
       onStateChange={openPendingMessage}
@@ -141,6 +144,7 @@ export const RootNavigator = () => {
         <AuthNavigator />
       )}
     </NavigationContainer>
+    </View>
   );
 };
 

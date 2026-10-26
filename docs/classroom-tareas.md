@@ -1,6 +1,28 @@
 # Plan: entrega de tareas en Classroom
 
-Estado: **plan, sin implementar**.
+Estado: **implementado**, pendiente de desplegar (funciones, reglas de Firestore y Storage) y de probar en dispositivo.
+
+## Decisiones tomadas
+
+- **Cuenta del alumno:** la entrega la envía la cuenta de familia que el alumno tiene asignada. No existe todavía el rol `alumno`.
+- **Editar o borrar:** no se edita. Borrar una entrega queda para más adelante.
+- **Cupo:** la cantidad de destinatarios al momento de publicar (`maxSubmissions`).
+- **Fecha límite:** 7 días desde la publicación por defecto (`dueDate`). Después del plazo no se aceptan entregas.
+- **Aviso a la docente:** queda para más adelante.
+
+## Qué quedó hecho
+
+- Función `submitClassroomTask`: valida sesión, rol, asignación, plazo, duplicado, cupo y rutas de archivos. Escribe la entrega y suma el contador en una transacción.
+- Publicaciones de Classroom guardan `dueDate`, `maxSubmissions` y `submissionsCount`.
+- Reglas: lectura de entregas para el alumno, administración y la docente que publicó. Escritura solo por función.
+- Storage: `classroom-submissions/{uid}/{tarea}/{archivo}`, escritura solo para el alumno.
+- App: el alumno ve el composer (texto, imagen, cámara, documento, audio, video y enlace) o su entrega ya enviada. La docente ve el conteo "X de N" y la lista.
+- Chip "Entrega: fecha" en la lista y en el detalle.
+- Tests: `submitClassroomTask.test.ts` (9) y `classroomSubmissions.test.ts` (2).
+
+## Limpieza de archivos huérfanos
+
+Al borrar un mensaje o una tarea sólo se borra su documento, no sus archivos. La función `cleanupOrphanFiles` (cada 3 meses) borra archivos de las carpetas administradas que ningún documento referencia y que tienen más de 7 días.
 
 ## Qué se pide
 

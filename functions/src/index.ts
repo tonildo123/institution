@@ -15,6 +15,9 @@ const app = initializeApp();
 const db = getFirestore(app);
 const messaging = getMessaging(app);
 
+/** Plazo por defecto para entregar una tarea de Classroom. */
+const CLASSROOM_TASK_DAYS = 7;
+
 const COLLECTIONS = {
   USERS: 'users',
   COMMUNICATIONS: 'communications',
@@ -386,6 +389,9 @@ export const sendClassroomToAll = functions.https.onRequest(
         cursoLabel: null,
         targetUserIds: usersSnapshot.docs.map(user => user.id),
         id: classroomRef.id,
+        dueDate: new Date(Date.now() + CLASSROOM_TASK_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+        maxSubmissions: usersSnapshot.docs.length,
+        submissionsCount: 0,
         title,
         description: description || body,
         body,
@@ -550,6 +556,9 @@ export const sendClassroomToUsers = functions.https.onRequest(
         cursoLabel,
         targetUserIds: docs.map(user => user.id),
         id: classroomRef.id,
+        dueDate: new Date(Date.now() + CLASSROOM_TASK_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+        maxSubmissions: docs.length,
+        submissionsCount: 0,
         title,
         description: description || body,
         body,
@@ -675,7 +684,8 @@ export { getLinkPreview } from "./getLinkPreview.js";
 
 export { setFamilyPassword, setUserPassword } from './setFamilyPassword.js';
 export { updateOwnProfile } from './updateOwnProfile.js';
-export { cleanupProfilePhotos } from './cleanupProfilePhotos.js';
+export { cleanupOrphanFiles } from './cleanupOrphanFiles.js';
+export { submitClassroomTask } from './submitClassroomTask.js';
 export { deactivateOwnAccount } from './deactivateOwnAccount.js';
 
 export { enrollBiometrics, disableBiometrics, biometricChallenge, verifyBiometricLogin, verifyBiometricUnlock } from './biometrics.js';

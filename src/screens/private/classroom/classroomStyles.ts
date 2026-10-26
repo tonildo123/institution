@@ -26,6 +26,8 @@ export const classroomStyles = StyleSheet.create({
   cardDate: { fontSize: 12, color: classroomColors.muted, marginTop: 2 },
   cardTag: { alignSelf: 'flex-start', borderWidth: 1, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2, marginTop: 8 },
   cardTagText: { fontSize: 11, fontWeight: '700' },
+  dueChip: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, backgroundColor: classroomColors.pill, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4, marginTop: 8 },
+  dueChipText: { fontSize: 12, fontWeight: '700', color: classroomColors.pillText },
   cardText: { fontSize: 14, color: '#4a4670', marginTop: 8 },
   moreButton: {
     marginHorizontal: 16, marginBottom: 16, paddingVertical: 14, borderRadius: 14, borderWidth: 1,

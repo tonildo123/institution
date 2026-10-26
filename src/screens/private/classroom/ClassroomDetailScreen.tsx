@@ -19,6 +19,8 @@ import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/nativ
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { getClassroom, deleteClassroom, updateClassroom, Classroom } from '@/services/firebase/classroom';
+import { ClassroomSubmission, getOwnSubmission, listSubmissions } from '@/services/firebase/classroomSubmissions';
+import { SubmissionComposer } from './SubmissionComposer';
 import { BookIcon } from '@/components/BookIcon';
 import { classroomStyles, classroomColors } from './classroomStyles';
 
@@ -29,6 +31,18 @@ import { classroomStyles, classroomColors } from './classroomStyles';
 
 // Mantener la edición implementada, pero oculta para todos los roles.
 const SHOW_EDIT_ACTION = false;
+
+/** Adjuntos de una publicación o de una entrega, con los mismos renderizadores de Mensajes. */
+const Attachments = ({ data }: { data?: Record<string, string> }) => (
+  <>
+    {data?.videoUrl && <MessageVideo uri={data.videoUrl} name={data.videoName} size={Number(data.videoSize) || undefined} />}
+    {data?.audioUrl && <MessageAudio uri={data.audioUrl} name={data.audioName || 'Audio adjunto'} durationMs={Number(data.audioDurationMs) || 0} />}
+    {data?.linkUrl && <MessageLink url={data.linkUrl} preview={{ title: data.linkTitle, description: data.linkDescription, imageUrl: data.linkImageUrl }} />}
+    {data?.documentUrl && <MessageDocument name={data.documentName || 'Documento adjunto'} size={Number(data.documentSize) || 0} url={data.documentUrl} />}
+    {data?.imageUrl && <MessageImage key={data.imageUrl} uri={data.imageUrl} />}
+    {data?.photoUrl && <MessageImage key={data.photoUrl} uri={data.photoUrl} />}
+  </>
+);
 
 export const ClassroomDetailScreen = () => {
   const navigation = useNavigation();
@@ -50,6 +64,20 @@ export const ClassroomDetailScreen = () => {
     }, [classroomId, user?.id])
   );
 
+  const [mySubmission, setMySubmission] = useState<ClassroomSubmission | null>(null);
+  const [submissions, setSubmissions] = useState<ClassroomSubmission[]>([]);
+
+  const loadSubmissions = async (task: Classroom) => {
+    if (!user?.id) return;
+    const manages = ['admin', 'equipo directivo', 'representante legal'].includes(user.role) || (user.role === 'preceptor' && task.sentBy === user.id);
+    try {
+      if (user.role === 'familia') setMySubmission(await getOwnSubmission(classroomId, user.id));
+      else if (manages) setSubmissions(await listSubmissions(classroomId));
+    } catch (error) {
+      console.error('❌ Error al cargar entregas:', error);
+    }
+  };
+
   const loadClassroom = async () => {
     try {
       setLoading(true);
@@ -57,6 +85,7 @@ export const ClassroomDetailScreen = () => {
       if (!user?.id) return;
       const data = await getClassroom(classroomId, user?.id);
       setClassroom(data);
+      if (data) await loadSubmissions(data);
     } catch (error) {
       setClassroom(null);
       console.error('❌ Error:', error);
@@ -203,17 +232,40 @@ export const ClassroomDetailScreen = () => {
             {new Date(classroom.createdAt).toLocaleDateString('es-AR')} · {new Date(classroom.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}
           </Text>
           <MessageText style={classroomStyles.detailText}>{classroom.description || classroom.body}</MessageText>
-          {classroom.data?.videoUrl && <MessageVideo uri={classroom.data.videoUrl} name={classroom.data.videoName} size={Number(classroom.data.videoSize) || undefined} />}
-          {classroom.data?.audioUrl && <MessageAudio uri={classroom.data.audioUrl} name={classroom.data.audioName || 'Audio adjunto'} durationMs={Number(classroom.data.audioDurationMs) || 0} />}
-          {classroom.data?.linkUrl && <MessageLink url={classroom.data.linkUrl} preview={{ title: classroom.data.linkTitle, description: classroom.data.linkDescription, imageUrl: classroom.data.linkImageUrl }} />}
-          {classroom.data?.documentUrl && (
-            <MessageDocument name={classroom.data.documentName || 'Documento adjunto'}
-              size={Number(classroom.data.documentSize) || 0} url={classroom.data.documentUrl} />
-          )}
-          {classroom.data?.imageUrl && <MessageImage key={classroom.data.imageUrl} uri={classroom.data.imageUrl} />}
-          {classroom.data?.photoUrl && <MessageImage key={classroom.data.photoUrl} uri={classroom.data.photoUrl} />}
+          {classroom.dueDate && <Text style={classroomStyles.dueChipText}>Entrega hasta: {new Date(classroom.dueDate).toLocaleDateString('es-AR')}</Text>}
+          <Attachments data={classroom.data as Record<string, string> | undefined} />
         </View>
 
+        {user?.role === 'familia' && (
+          mySubmission ? (
+            <View style={classroomStyles.detailCard}>
+              <Text style={classroomStyles.pill}>Tu entrega</Text>
+              <Text style={classroomStyles.detailDate}>Enviada el {new Date(mySubmission.createdAt).toLocaleDateString('es-AR')}</Text>
+              {Boolean(mySubmission.body) && <MessageText style={classroomStyles.detailText}>{mySubmission.body}</MessageText>}
+              <Attachments data={mySubmission.data} />
+            </View>
+          ) : classroom.dueDate && Date.now() > Date.parse(classroom.dueDate) ? (
+            <Text style={[classroomStyles.hint, { marginHorizontal: 16, marginTop: 16 }]}>El plazo para entregar esta tarea venció.</Text>
+          ) : (
+            <View style={classroomStyles.detailCard}>
+              <SubmissionComposer taskId={classroomId} onSubmitted={() => { void loadClassroom(); }} />
+            </View>
+          )
+        )}
+
+        {submissions.length > 0 || (user?.role !== 'familia' && classroom.maxSubmissions !== undefined) ? (
+          <View style={{ marginTop: 16 }}>
+            <Text style={[classroomStyles.sectionLabel]}>ENTREGAS: {submissions.length} DE {classroom.maxSubmissions ?? submissions.length}</Text>
+            {submissions.map(item => (
+              <View key={item.id} style={classroomStyles.detailCard}>
+                <Text style={classroomStyles.detailTitle}>{item.studentName}</Text>
+                <Text style={classroomStyles.detailDate}>{new Date(item.createdAt).toLocaleDateString('es-AR')} · {new Date(item.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}</Text>
+                {Boolean(item.body) && <MessageText style={classroomStyles.detailText}>{item.body}</MessageText>}
+                <Attachments data={item.data} />
+              </View>
+            ))}
+          </View>
+        ) : null}
       </ScrollView>
 
       {/* Edit Modal */}

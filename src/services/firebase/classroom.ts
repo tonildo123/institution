@@ -29,6 +29,10 @@ export interface Classroom {
   sentBy: string;
   sentAt: string;
   createdAt: string;
+  /** Fecha límite para entregar la tarea (ISO). */
+  dueDate?: string;
+  maxSubmissions?: number;
+  submissionsCount?: number;
   status: string;
   level: string;
   cursoId?: string | null;

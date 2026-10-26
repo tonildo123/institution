@@ -27,6 +27,19 @@ service firebase.storage {
         && request.resource.size > 0 && request.resource.size <= 5 * 1024 * 1024
         && request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp'];
     }
+    match /classroom-submissions/{uid}/{taskId}/{fileName} {
+      function submitter() {
+        return request.auth != null && request.auth.uid == uid &&
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isEnabled == true &&
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'familia';
+      }
+      function manager() {
+        return request.auth != null && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in ['admin', 'equipo directivo'];
+      }
+      allow read: if request.auth != null && (request.auth.uid == uid || manager());
+      allow create: if submitter() && request.resource.size > 0 && request.resource.size <= 50 * 1024 * 1024;
+      allow update, delete: if false;
+    }
     match /communication-documents/{uid}/{documentId}/{fileName} {
       allow read: if request.auth != null && request.auth.uid == uid && sender();
       allow create, update: if request.auth != null && request.auth.uid == uid && sender()

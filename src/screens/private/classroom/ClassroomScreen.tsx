@@ -618,6 +618,11 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
                 </Text>
               </View>
 
+              {item.dueDate && (
+                <View style={classroomStyles.dueChip}>
+                  <Text style={classroomStyles.dueChipText}>Entrega: {new Date(item.dueDate).toLocaleDateString('es-AR')}</Text>
+                </View>
+              )}
               <MessageText style={classroomStyles.cardText} numberOfLines={1}>
                 {item.description}
               </MessageText>
