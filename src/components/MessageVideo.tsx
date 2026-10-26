@@ -23,13 +23,16 @@ export const MessageVideo = ({ uri, name = 'Video adjunto', size, compact = fals
     </TouchableOpacity>
     <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}>
       <SafeAreaView style={styles.screen}>
-        <TouchableOpacity accessibilityRole="button" onPress={() => setOpen(false)} style={styles.close}><Text style={styles.white}>Cerrar ✕</Text></TouchableOpacity>
+        <View style={styles.topBar}>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Cerrar video" onPress={() => setOpen(false)} style={styles.closeTop}><Text style={styles.white}>Cerrar ✕</Text></TouchableOpacity>
+        </View>
         <Text numberOfLines={2} style={styles.caption}>{name}</Text>
         {/* Sin pantalla completa nativa: el reproductor nativo tapaba el botón Cerrar. */}
         {open && !failed && <Video source={{ uri }} style={styles.video} controls controlsStyles={{ hideFullscreen: true }} resizeMode="contain"
           playInBackground={false} playWhenInactive={false} ignoreSilentSwitch="ignore"
           onLoad={() => setBusy(false)} onBuffer={({ isBuffering }) => setBusy(isBuffering)}
           onError={() => { setBusy(false); setFailed(true); }} />}
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Cerrar video" onPress={() => setOpen(false)} style={styles.closeBottom}><Text style={styles.white}>Cerrar</Text></TouchableOpacity>
         {busy && !failed && <ActivityIndicator color="#fff" style={styles.loading} />}
         {failed && <View style={styles.error}><Text style={styles.white}>No se pudo reproducir el video. Revisá la conexión o probá abrirlo con otra aplicación.</Text>
           <TouchableOpacity onPress={() => { setFailed(false); setBusy(true); }} style={styles.close}><Text style={styles.white}>Reintentar</Text></TouchableOpacity>
@@ -46,5 +49,7 @@ const styles = StyleSheet.create({
   compact: { padding: 0, marginVertical: 0, backgroundColor: 'transparent' },
   play: { color: '#3973d1', fontSize: 28 }, info: { flex: 1 }, name: { color: '#202b3b', fontWeight: '700' }, subtitle: { color: '#697386', fontSize: 12, marginTop: 4 },
   screen: { flex: 1, backgroundColor: '#111' }, close: { padding: 18, alignSelf: 'flex-end' }, white: { color: '#fff', fontSize: 16 }, caption: { color: '#fff', paddingHorizontal: 18 },
+  topBar: { paddingTop: 16, paddingHorizontal: 12 }, closeTop: { alignSelf: 'flex-end', paddingVertical: 10, paddingHorizontal: 14 },
+  closeBottom: { alignSelf: 'center', marginVertical: 16, paddingVertical: 12, paddingHorizontal: 32, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.15)' },
   video: { flex: 1 }, loading: { position: 'absolute', top: '50%', alignSelf: 'center' }, error: { flex: 1, padding: 24, justifyContent: 'center' },
 });

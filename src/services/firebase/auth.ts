@@ -7,6 +7,7 @@ import {
   User as FirebaseUser,
 } from 'firebase/auth';
 import { getUserByDNI } from './users';
+import { messageForError } from '@/utils/connectionErrors';
 import { auth, db } from './firebaseConfig';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { LoginCredentials, SignUpCredentials, User } from '@/types';
@@ -144,7 +145,12 @@ export const updateUserData = async (
 
 /** El DNI identifica el perfil; Firebase Auth verifica la contraseña. */
 export const authenticateFamily = async (dni: string, password: string): Promise<User> => {
-  const profile = await getUserByDNI(dni.trim());
+  let profile: User | null;
+  try {
+    profile = await getUserByDNI(dni.trim());
+  } catch (error) {
+    throw new Error(messageForError(error, 'No se pudo verificar la cuenta. Intentá nuevamente.'));
+  }
   if (!profile || profile.role !== 'familia' || !profile.isEnabled) throw new Error('DNI o contraseña incorrectos, o cuenta no habilitada.');
   try {
     const result = await signInWithEmailAndPassword(auth, `${profile.id}@familias.imep.invalid`, password);

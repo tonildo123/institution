@@ -9,6 +9,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { auth, db } from './firebaseConfig';
+import { isConnectionError, CONNECTION_MESSAGE } from '@/utils/connectionErrors';
 
 export const COMMUNICATIONS_LIMIT = 30;
 
@@ -16,10 +17,7 @@ export function canReadCommunication(message: Pick<Communication, 'sentBy' | 'ta
   return Boolean(userId && (message.sentBy === userId || message.targetUserIds?.includes(userId)));
 }
 export function communicationLoadError(error: unknown): string {
-  const code = (error as { code?: string })?.code;
-  if (['unavailable', 'auth/network-request-failed', 'deadline-exceeded'].includes(code || '')) {
-    return 'No se pudo conectar con Firebase. Revisá la conexión y tocá Reintentar.';
-  }
+  if (isConnectionError(error)) return CONNECTION_MESSAGE + ' Luego tocá Reintentar.';
   return 'No se pudieron cargar las comunicaciones. Intentá nuevamente.';
 }
 

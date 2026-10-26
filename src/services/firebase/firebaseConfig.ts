@@ -5,7 +5,7 @@ const { getReactNativePersistence } = require('firebase/auth') as {
   getReactNativePersistence: (storage: typeof AsyncStorage) => Persistence;
 };
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { ENV } from '@/config/env';
 
@@ -35,7 +35,8 @@ const app = initializeApp(firebaseConfig);
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
 });
-export const db = getFirestore(app);
+// Long polling: el canal WebChannel falla en algunas redes Android y deja la app sin conexión.
+export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 export const storage = getStorage(app);
 
 export default app;

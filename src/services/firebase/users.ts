@@ -6,6 +6,7 @@ import {
   deleteDoc,
   getDoc,
   getDocs,
+  getDocsFromServer,
   query,
   where,
   Timestamp,
@@ -169,7 +170,8 @@ export const getUserByDNI = async (dni: string): Promise<User | null> => {
       collection(db, USERS_COLLECTION),
       where('dni', '==', dni)
     );
-    const snapshot = await getDocs(q);
+    // Desde el servidor: sin conexión debe fallar, no responder "no existe" desde la caché.
+    const snapshot = await getDocsFromServer(q);
 
     console.log('📊 Resultados encontrados:', snapshot.size);
 
