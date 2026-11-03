@@ -4,6 +4,7 @@ import AdminLayout from '@/layouts/AdminLayout';
 import AdminLogin from '@/pages/AdminLogin';
 import Users from '@/pages/Users';
 import { About, Landing, Placeholder, Privacy, Terms } from '@/pages/PublicPages';
+import Support from '@/pages/Support';
 import './App.css';
 
 /**
@@ -18,6 +19,7 @@ function App() {
           <Route path="/nosotros" element={<About />} />
           <Route path="/privacidad" element={<Privacy />} />
           <Route path="/terminos" element={<Terms />} />
+          <Route path="/soporte" element={<Support />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="usuarios" element={<Users />} />

@@ -71,14 +71,19 @@ npm run android
 
 ### Desplegar en Firebase Hosting
 
+Para cambios de la web, publicar solo Hosting. `firebase deploy` sin `--only`
+también intenta desplegar Functions y Firestore; un error en esos servicios puede
+bloquear la publicación. Las Functions todavía declaran Node.js 20 en
+`functions/package.json`: ese runtime debe migrarse antes de volver a desplegarlas.
+
 ```bash
 # Compilar la web
 cd web
 npm run build
 cd ..
 
-# Desplegar
-firebase deploy --only hosting
+# Publicar solo la web (incluye términos y privacidad)
+firebase deploy --only hosting --project institucion-59d9a
 ```
 
 ---
@@ -323,3 +328,30 @@ quitar, previsualizar, enviar a un curso de prueba, reproducir como familia,
 pausar/adelantar/cerrar, salir de la pantalla y bloquear el teléfono. Comprobar
 el rechazo de archivos mayores a 50 MB y el error de conexión. Una subida fallida
 conserva el borrador y no envía el comunicado.
+
+## Soporte y solicitudes de eliminación de datos (3 de noviembre de 2026)
+
+Se agregó la ruta pública `/soporte`, accesible desde la navegación y el pie de
+página, sin iniciar sesión. Permite preparar solicitudes de soporte, eliminación
+parcial de datos o eliminación de cuenta y datos asociados para
+`kit.institucional@gmail.com`. El usuario debe enviar el mensaje desde su cliente
+de correo: el sitio no envía emails automáticamente ni almacena el formulario.
+
+URL prevista para Play Console, después de publicar y verificar:
+`https://institucion-59d9a.web.app/soporte#eliminacion-de-datos`.
+
+Pendiente antes de dar por cerrada esta configuración: confirmar que administración
+recibe ese correo y los tipos y períodos concretos de retención de registros.
+El plazo de atención confirmado es de 24 horas desde la recepción del correo;
+no implica que la eliminación se complete dentro de ese mismo plazo. Completar esa información en la página y mantenerla
+coherente con la política de privacidad. No se implementó borrado automático;
+la administración debe verificar y atender cada solicitud.
+
+Validación manual: abrir `/soporte` sin sesión, completar el formulario, comprobar
+el destinatario y el texto del email, enviar una solicitud de prueba y confirmar
+su recepción con administración. Verificar también el enlace en un teléfono.
+
+Publicación realizada el 3 de noviembre de 2026: build web correcto y
+`firebase deploy --only hosting --project institucion-59d9a` completado.
+La página de soporte incluye atención dentro de 24 horas y solicitud por correo;
+el borrado/anonimización automático sigue pendiente y no se desplegó.

@@ -1,15 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './public.css';
+import { PrivacyContent, TermsContent } from './LegalContent';
 
-/** Páginas públicas. Los textos de privacidad y términos son provisionales hasta recibir los oficiales. */
+/** Páginas públicas de la institución. */
 
-const PublicShell = ({ title, children }: { title?: string; children: React.ReactNode }) => (
+export const PublicShell = ({ title, children }: { title?: string; children: React.ReactNode }) => (
   <div className="public-page">
     <header className="public-header">
       <Link to="/" className="public-brand">IMEP</Link>
       <nav>
         <Link to="/nosotros">Nosotros</Link>
+        <Link to="/soporte">Soporte</Link>
         <Link to="/privacidad">Privacidad</Link>
         <Link to="/terminos">Términos</Link>
       </nav>
@@ -22,6 +24,7 @@ const PublicShell = ({ title, children }: { title?: string; children: React.Reac
       <div className="public-footer-inner">
         <span>© Instituto IMEP · KIT IMEP</span>
         <span>
+          <Link to="/soporte">Soporte y eliminación de datos</Link>
           <Link to="/privacidad">Política de privacidad</Link>
           <Link to="/terminos">Términos y condiciones</Link>
         </span>
@@ -109,13 +112,13 @@ export const About = () => (
 
 export const Privacy = () => (
   <PublicShell title="Política de privacidad">
-    <p>Texto provisional. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    <PrivacyContent />
   </PublicShell>
 );
 
 export const Terms = () => (
   <PublicShell title="Términos y condiciones">
-    <p>Texto provisional. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    <TermsContent />
   </PublicShell>
 );
 

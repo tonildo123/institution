@@ -173,3 +173,15 @@ bibliotecas y el funcionamiento en un dispositivo de 16 KB requieren validación
 - [Firma y Play App Signing](https://developer.android.com/studio/publish/app-signing)
 - [Requisitos de API de Google Play](https://support.google.com/googleplay/android-developer/answer/11926878)
 - [Compatibilidad con páginas de 16 KB](https://developer.android.com/guide/practices/page-sizes)
+
+## AAB código 2 — 3 de noviembre de 2026
+
+- `APP_VERSION_CODE=2`; versión visible conservada en `1.0.0`.
+- `:app:bundleRelease`: BUILD SUCCESSFUL.
+- `bundletool validate` correcto; manifest del AAB confirma código `2`.
+- Firma revisada con `jarsigner` (mantiene las advertencias del ZIP/certificado
+  mencionadas en la verificación anterior).
+- Archivo: `android/app/build/outputs/bundle/release/app-release.aab` (~60 MB).
+- SHA-256: `6a0fb0ae783bfd48f2b8fb120490edbe2956180b74e093bc30e32c1f896d4239`.
+- No se subió a Play Console. No se repitieron pruebas en dispositivos ni la
+  auditoría de 16 KB; las observaciones anteriores siguen pendientes.

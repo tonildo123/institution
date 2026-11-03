@@ -137,17 +137,17 @@ Esto abrirá tu navegador para autenticar.
 firebase projects:list
 ```
 
-Deberías ver `institution-59d9a` ✅
+Deberías ver `institucion-59d9a` ✅
 
 ### Paso 3: Deploy
 ```bash
-firebase deploy
+firebase deploy --only hosting --project institucion-59d9a
 ```
 
 **Esperado:**
 ```
 ✓ Deploy complete!
-Hosting URL: https://institution-59d9a.web.app
+Hosting URL: https://institucion-59d9a.web.app
 ```
 
 ---
@@ -212,12 +212,12 @@ firebase --version
 
 Una vez hecho el deploy:
 ```
-https://institution-59d9a.web.app
+https://institucion-59d9a.web.app
 ```
 
 También estará en:
 ```
-https://institution-59d9a.firebaseapp.com (alias)
+https://institucion-59d9a.firebaseapp.com (alias)
 ```
 
 ---
@@ -232,7 +232,7 @@ https://institution-59d9a.firebaseapp.com (alias)
 ### Si hay error en deploy:
 1. Verifica `firebase login` funcionó
 2. Verifica `firebase projects:list` muestra tu proyecto
-3. Corre: `firebase deploy --debug`
+3. Corre: `firebase deploy --only hosting --project institucion-59d9a --debug`
 
 ### Si el sitio no carga:
 1. Verifica `firebase.json` tiene los rewrites
@@ -250,7 +250,7 @@ https://institution-59d9a.firebaseapp.com (alias)
 - [x] firebase.json creado
 - [x] Firebase CLI instalado
 - [ ] `firebase login` ejecutado (próximo paso)
-- [ ] `firebase deploy` ejecutado (último paso)
+- [ ] `firebase deploy --only hosting --project institucion-59d9a` ejecutado (último paso)
 
 ---
 
@@ -273,12 +273,12 @@ https://institution-59d9a.firebaseapp.com (alias)
 ```bash
 cd /Users/xetro/Desktop/Projects/tony/institucion
 firebase login
-firebase deploy
+firebase deploy --only hosting --project institucion-59d9a
 ```
 
 **En 1-2 minutos tu sitio estará en:**
 ```
-https://institution-59d9a.web.app
+https://institucion-59d9a.web.app
 ```
 
 ---
