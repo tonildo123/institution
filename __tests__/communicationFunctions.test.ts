@@ -20,6 +20,7 @@ jest.mock('../functions/src/createManagedUser.js', () => ({}), { virtual: true }
 jest.mock('../functions/src/setFamilyPassword.js', () => ({}), { virtual: true });
 jest.mock('../functions/src/biometrics.js', () => ({ verifySendBiometrics: jest.fn().mockResolvedValue(undefined) }), { virtual: true });
 jest.mock('../functions/src/deactivateOwnAccount.js', () => ({}), { virtual: true });
+jest.mock('../functions/src/imageReports.js', () => ({}), { virtual: true });
 jest.mock('../functions/src/updateOwnProfile.js', () => ({}), { virtual: true });
 jest.mock('../functions/src/cleanupOrphanFiles.js', () => ({}), { virtual: true });
 jest.mock('../functions/src/submitClassroomTask.js', () => ({}), { virtual: true });

@@ -203,7 +203,10 @@ export const CommunicationDetailScreen = () => {
         <View style={styles.noticeCard}>
           <MessageText style={styles.noticeTitle}>{communication.title}</MessageText>
           <MessageText style={styles.noticeContent}>{communication.description || communication.body}</MessageText>
-          <MessageAttachments data={communication.data as Record<string, string | undefined> | undefined} />
+          <MessageAttachments
+            data={communication.data as Record<string, string | undefined> | undefined}
+            reportSource={{ sourcePath: `communications/${communication.id}`, ownerId: communication.sentBy }}
+          />
         </View>
 
       </ScrollView>

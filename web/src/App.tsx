@@ -3,6 +3,7 @@ import { AuthProvider } from '@/auth/AuthProvider';
 import AdminLayout from '@/layouts/AdminLayout';
 import AdminLogin from '@/pages/AdminLogin';
 import Users from '@/pages/Users';
+import ImageReports from '@/pages/ImageReports';
 import { About, Landing, Placeholder, Privacy, Terms } from '@/pages/PublicPages';
 import Support from '@/pages/Support';
 import './App.css';
@@ -23,7 +24,7 @@ function App() {
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="usuarios" element={<Users />} />
-            <Route path="reportes" element={<Placeholder title="Reportes" />} />
+            <Route path="reportes" element={<ImageReports />} />
             <Route path="salas" element={<Placeholder title="Salas" />} />
             <Route path="carga" element={<Placeholder title="Carga masiva" />} />
           </Route>

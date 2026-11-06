@@ -687,5 +687,6 @@ export { updateOwnProfile } from './updateOwnProfile.js';
 export { cleanupOrphanFiles } from './cleanupOrphanFiles.js';
 export { submitClassroomTask } from './submitClassroomTask.js';
 export { deactivateOwnAccount } from './deactivateOwnAccount.js';
+export { adminDeleteReportedImage, adminSetUserEnabled } from './imageReports.js';
 
 export { enrollBiometrics, disableBiometrics, biometricChallenge, verifyBiometricLogin, verifyBiometricUnlock } from './biometrics.js';

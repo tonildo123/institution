@@ -9,7 +9,7 @@
     "build": "tsc"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
-    "@types/node": "^20.0.0",
+    "@types/node": "^22.0.0",
     "typescript": "^5.0.0"
   },
   "main": "lib/index.js"

@@ -86,6 +86,16 @@ service cloud.firestore {
       allow update: if manager() || (enabled() && request.auth.uid == userId &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL', 'pushTokens', 'updatedAt']));
     }
+    // Reportes de imágenes de mensajes, publicaciones y entregas. Los crea la app; la revisión la hace el panel web.
+    match /imageReports/{reportId} {
+      allow read: if reportManager();
+      allow create: if request.auth != null;
+      allow update: if reportManager() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']) &&
+        request.resource.data.status in ['pendiente', 'en_revision', 'resuelto'] && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
     match /salas/{level} {
       allow read: if enabled();
       allow write: if manager();

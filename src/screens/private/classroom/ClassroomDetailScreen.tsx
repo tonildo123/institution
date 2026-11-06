@@ -217,7 +217,10 @@ export const ClassroomDetailScreen = () => {
           </Text>
           <MessageText style={classroomStyles.detailText}>{classroom.description || classroom.body}</MessageText>
           {classroom.dueDate && <Text style={classroomStyles.dueChipText}>Entrega hasta: {new Date(classroom.dueDate).toLocaleDateString('es-AR')}</Text>}
-          <MessageAttachments data={classroom.data as Record<string, string> | undefined} />
+          <MessageAttachments
+            data={classroom.data as Record<string, string> | undefined}
+            reportSource={{ sourcePath: `classroom/${classroom.id}`, ownerId: classroom.sentBy }}
+          />
         </View>
 
         {user?.role === 'familia' && (
@@ -226,7 +229,7 @@ export const ClassroomDetailScreen = () => {
               <Text style={classroomStyles.pill}>Tu entrega</Text>
               <Text style={classroomStyles.detailDate}>Enviada el {new Date(mySubmission.createdAt).toLocaleDateString('es-AR')}</Text>
               {Boolean(mySubmission.body) && <MessageText style={classroomStyles.detailText}>{mySubmission.body}</MessageText>}
-              <MessageAttachments data={mySubmission.data} />
+              <MessageAttachments data={mySubmission.data} reportSource={{ sourcePath: `classroom/${classroomId}/submissions/${mySubmission.id}`, ownerId: mySubmission.id }} />
             </View>
           ) : classroom.dueDate && Date.now() > Date.parse(classroom.dueDate) ? (
             <Text style={[classroomStyles.hint, { marginHorizontal: 16, marginTop: 16 }]}>El plazo para entregar esta tarea venció.</Text>
@@ -245,7 +248,7 @@ export const ClassroomDetailScreen = () => {
                 <Text style={classroomStyles.detailTitle}>{item.studentName}</Text>
                 <Text style={classroomStyles.detailDate}>{new Date(item.createdAt).toLocaleDateString('es-AR')} · {new Date(item.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}</Text>
                 {Boolean(item.body) && <MessageText style={classroomStyles.detailText}>{item.body}</MessageText>}
-                <MessageAttachments data={item.data} />
+                <MessageAttachments data={item.data} reportSource={{ sourcePath: `classroom/${classroomId}/submissions/${item.id}`, ownerId: item.id }} />
               </View>
             ))}
           </View>

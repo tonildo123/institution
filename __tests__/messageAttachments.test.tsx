@@ -9,6 +9,7 @@ jest.mock('../src/components/MessageAudio', () => ({ MessageAudio: probe('audio'
 jest.mock('../src/components/MessageLink', () => ({ MessageLink: probe('link') }));
 jest.mock('../src/components/MessageDocument', () => ({ MessageDocument: probe('document') }));
 jest.mock('../src/components/MessageImage', () => ({ MessageImage: probe('image') }));
+jest.mock('../src/components/ReportImageButton', () => ({ ReportImageButton: probe('report') }));
 
 import { MessageAttachments } from '../src/components/MessageAttachments';
 

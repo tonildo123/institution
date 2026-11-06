@@ -1,10 +1,31 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MessageVideo } from './MessageVideo';
 import { MessageAudio } from './MessageAudio';
 import { MessageLink } from './MessageLink';
 import { MessageDocument } from './MessageDocument';
 import { MessageImage } from './MessageImage';
+import { ReportImageButton } from './ReportImageButton';
+import type { ImageField, ImageReportTarget } from '@/services/firebase/imageReports';
+
+/** De dónde viene el adjunto: mensaje, publicación o entrega. Sirve para reportar la imagen. */
+export interface ReportSource { sourcePath: string; ownerId: string }
+
+const reportTarget = (source: ReportSource | undefined, data: AttachmentData | undefined, field: ImageField): ImageReportTarget | undefined => {
+  const imageURL = data?.[field];
+  if (!source || !imageURL) return undefined;
+  const pathField = field === 'imageUrl' ? 'imagePath' : 'photoPath';
+  return { ...source, imageField: field, imageURL, imagePath: data?.[pathField] };
+};
+
+/** Agrega los tres puntitos sobre la imagen cuando se puede reportar. */
+const Reportable = ({ target, children }: { target?: ImageReportTarget; children: React.ReactNode }) =>
+  target ? (
+    <View>
+      {children}
+      <ReportImageButton target={target} />
+    </View>
+  ) : <>{children}</>;
 
 type AttachmentData = Record<string, string | undefined>;
 
@@ -24,14 +45,14 @@ export const LazyMedia = ({ label, children }: { label: string; children: React.
 };
 
 /** Adjuntos de un mensaje, entrega o publicación. Ninguno se carga sin que se pida. */
-export const MessageAttachments = ({ data }: { data?: AttachmentData }) => (
+export const MessageAttachments = ({ data, reportSource }: { data?: AttachmentData; reportSource?: ReportSource }) => (
   <>
     {data?.videoUrl && <LazyMedia label="Video"><MessageVideo uri={data.videoUrl} name={data.videoName} size={Number(data.videoSize) || undefined} /></LazyMedia>}
     {data?.audioUrl && <LazyMedia label="Audio"><MessageAudio uri={data.audioUrl} name={data.audioName || 'Audio adjunto'} durationMs={Number(data.audioDurationMs) || 0} /></LazyMedia>}
     {data?.linkUrl && <LazyMedia label="Enlace"><MessageLink url={data.linkUrl} preview={{ title: data.linkTitle, description: data.linkDescription, imageUrl: data.linkImageUrl }} /></LazyMedia>}
     {data?.documentUrl && <LazyMedia label="Documento"><MessageDocument name={data.documentName || 'Documento adjunto'} size={Number(data.documentSize) || 0} url={data.documentUrl} /></LazyMedia>}
-    {data?.imageUrl && <LazyMedia label="Imagen"><MessageImage key={data.imageUrl} uri={data.imageUrl} /></LazyMedia>}
-    {data?.photoUrl && <LazyMedia label="Foto"><MessageImage key={data.photoUrl} uri={data.photoUrl} /></LazyMedia>}
+    {data?.imageUrl && <LazyMedia label="Imagen"><Reportable target={reportTarget(reportSource, data, 'imageUrl')}><MessageImage key={data.imageUrl} uri={data.imageUrl} /></Reportable></LazyMedia>}
+    {data?.photoUrl && <LazyMedia label="Foto"><Reportable target={reportTarget(reportSource, data, 'photoUrl')}><MessageImage key={data.photoUrl} uri={data.photoUrl} /></Reportable></LazyMedia>}
   </>
 );
 
