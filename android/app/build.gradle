@@ -94,6 +94,7 @@ android {
         applicationId "com.institucion"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+        manifestPlaceholders = [usesCleartextTraffic: "false"]
         versionCode providers.gradleProperty("APP_VERSION_CODE").get().toInteger()
         versionName providers.gradleProperty("APP_VERSION_NAME").get()
     }
