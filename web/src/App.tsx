@@ -6,6 +6,7 @@ import Users from '@/pages/Users';
 import ImageReports from '@/pages/ImageReports';
 import { About, Landing, Placeholder, Privacy, Terms } from '@/pages/PublicPages';
 import Support from '@/pages/Support';
+import { TutorialesIndex, TutorialesRole } from '@/pages/Tutoriales';
 import './App.css';
 
 /**
@@ -21,6 +22,8 @@ function App() {
           <Route path="/privacidad" element={<Privacy />} />
           <Route path="/terminos" element={<Terms />} />
           <Route path="/soporte" element={<Support />} />
+          <Route path="/tutoriales" element={<TutorialesIndex />} />
+          <Route path="/tutoriales/:rol" element={<TutorialesRole />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="usuarios" element={<Users />} />

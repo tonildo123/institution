@@ -5,6 +5,8 @@ Los valores se definen en `android/gradle.properties` (`APP_VERSION_CODE`, `APP_
 
 | versionCode | versionName | Fecha | Artefactos | Notas |
 |---|---|---|---|---|
+| 5 | 1.0.0 | 2026-11-09 | `app-internal.apk` (firma debug), `app-release.aab` (firma upload) | Sin permisos `AD_ID` ni `ACCESS_ADSERVICES_AD_ID` (requisito de Play). Verificado: 0 coincidencias en el AAB. |
+| 4 | 1.0.0 | 2026-11-06 | `app-internal.apk`, `app-release.aab` | Build con `AD_ID` removido. |
 | 3 | 1.0.0 | 2026-11-06 | `app-internal.apk` (firma debug), `app-release.aab` (firma upload) | Build con fix de `usesCleartextTraffic=false` en `app/build.gradle`. |
 | 2 | 1.0.0 | — | — | Versión previa en `gradle.properties`. No hay registro de qué se subió. |
 

@@ -11,6 +11,7 @@ export const PublicShell = ({ title, children }: { title?: string; children: Rea
       <Link to="/" className="public-brand">IMEP</Link>
       <nav>
         <Link to="/nosotros">Nosotros</Link>
+        <Link to="/tutoriales">Tutoriales</Link>
         <Link to="/soporte">Soporte</Link>
         <Link to="/privacidad">Privacidad</Link>
         <Link to="/terminos">Términos</Link>
