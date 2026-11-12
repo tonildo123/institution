@@ -64,6 +64,9 @@
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
 }
 .download p { margin: 0; }
+.app-store-badge { display: inline-block; line-height: 0; border-radius: 8px; }
+.app-store-badge:focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
+.app-store-badge img { width: 150px; height: 50px; }
 
 .public-footer { border-top: 1px solid #e3ebe8; padding: 28px clamp(16px, 4vw, 48px); color: var(--muted); font-size: 14px; }
 .public-footer-inner { max-width: 1080px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }

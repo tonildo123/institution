@@ -98,9 +98,16 @@ export const Landing = () => (
     <section className="download">
       <div>
         <h2 className="section-title" style={{ margin: 0 }}>Descargá la aplicación</h2>
-        <p>Disponible próximamente para iOS y Android.</p>
+        <p>Ya disponible para iPhone. Android, próximamente.</p>
       </div>
-      <span className="button button-solid" aria-disabled="true">Próximamente</span>
+      <a
+        className="app-store-badge"
+        href="https://apps.apple.com/ar/app/kit-imep/id6825474671"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src="/app-store-badge.svg" alt="Descargar en el App Store" width="150" height="50" />
+      </a>
     </section>
   </PublicShell>
 );
