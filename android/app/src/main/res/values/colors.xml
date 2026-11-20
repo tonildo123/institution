@@ -1,0 +1,4 @@
+<resources>
+    <!-- Fondo del splash: blanco, igual al fondo del logo -->
+    <color name="splash_background">#FFFFFF</color>
+</resources>

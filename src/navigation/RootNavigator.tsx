@@ -10,7 +10,8 @@ import { AuthNavigator } from './AuthNavigator';
 import { AppNavigator } from './AppNavigator';
 import messaging from '@react-native-firebase/messaging';
 import { classroomIdFromURL, communicationIdFromURL, notificationURL } from './notificationLinks';
-import { View, ActivityIndicator, Text, Linking } from 'react-native';
+import { View, Linking } from 'react-native';
+import { AppSplash } from '../components/ui/AppSplash';
 import { OfflineBanner } from '../components/OfflineBanner';
 
 /**
@@ -35,12 +36,8 @@ const navigationRef = createNavigationContainerRef<{
   ClassroomNotificationDetail: { classroomId: string };
 }>();
 
-const SplashScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <ActivityIndicator size="large" color="#007AFF" />
-    <Text style={{ marginTop: 20, fontSize: 16 }}>Cargando...</Text>
-  </View>
-);
+// Mismo ícono y nombre que el splash nativo, mientras se recupera la sesión
+const SplashScreen = AppSplash;
 
 export const RootNavigator = () => {
   const dispatch = useDispatch();

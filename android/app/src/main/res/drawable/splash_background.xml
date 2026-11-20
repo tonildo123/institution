@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash (Android 11 o anterior): fondo blanco con el logo (ícono + nombre) centrado, 256dp como en JS -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background" />
+    <item
+        android:width="256dp"
+        android:height="256dp"
+        android:gravity="center"
+        android:drawable="@drawable/splash_logo" />
+</layer-list>

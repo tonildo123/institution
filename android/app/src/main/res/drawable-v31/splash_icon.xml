@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ícono del splash del sistema (Android 12+). Sin fondo de ícono, el contenedor mide 288dp y se recorta
+  a un círculo de 192dp. Con 16dp de margen el logo queda en 256dp (mismo tamaño que en JS) y todo su
+  contenido (ícono y nombre) entra en el círculo; lo que se recorta es solo margen blanco.
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/splash_logo"
+    android:inset="16dp" />

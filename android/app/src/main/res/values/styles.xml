@@ -6,4 +6,9 @@
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     </style>
 
+    <!-- Tema de arranque: muestra el splash hasta que MainActivity vuelve a AppTheme -->
+    <style name="AppTheme.Launch">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+
 </resources>
