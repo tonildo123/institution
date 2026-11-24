@@ -15,6 +15,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getAllCommunications, communicationLoadError, Communication } from '@/services/firebase/communications';
 import { getAllClassroom, classroomLoadError, Classroom } from '@/services/firebase/classroom';
 import { SourceTabs } from '@/components/SourceTabs';
+import { ClassroomIcon } from '@/components/ClassroomIcon';
+import { classroomColors } from '@/screens/private/classroom/classroomStyles';
 import { styles } from './styles';
 
 /**
@@ -26,9 +28,12 @@ import { styles } from './styles';
 
 type HistorySource = 'mensajes' | 'classroom';
 
-const sources: { id: HistorySource; label: string }[] = [
+const MENSAJES_COLOR = '#0c6b58';
+
+// Mismas pestañas que en Mensajes: Aula Kit con su ícono y su color morado
+const sources: { id: HistorySource; label: string; icon?: (active: boolean) => React.ReactNode }[] = [
   { id: 'mensajes', label: 'Mensajes' },
-  { id: 'classroom', label: 'Aula Kit' },
+  { id: 'classroom', label: 'Aula Kit', icon: active => <ClassroomIcon color={active ? classroomColors.primary : '#fff'} /> },
 ];
 
 export const HistoryScreen = () => {
@@ -46,6 +51,9 @@ export const HistoryScreen = () => {
     [item.title, item.description].some(value => value?.toLocaleLowerCase().includes(term)),
   );
   const emptyLabel = source === 'classroom' ? 'mensajes de Aula Kit' : 'comunicaciones';
+  // Color de la sección activa: verde para Mensajes, morado para Aula Kit
+  const onClassroom = source === 'classroom';
+  const accent = onClassroom ? classroomColors.primary : MENSAJES_COLOR;
 
   // Recargar cuando la screen obtiene el foco (después de volver del detalle)
   useFocusEffect(
@@ -103,8 +111,8 @@ export const HistoryScreen = () => {
 
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, onClassroom && { backgroundColor: classroomColors.surface }]}>
+      <View style={[styles.header, { backgroundColor: accent }]}>
         <Text style={styles.headerTitle}>Historial</Text>
         <TouchableOpacity
           style={styles.searchButton}
@@ -123,9 +131,9 @@ export const HistoryScreen = () => {
           )}
         </TouchableOpacity>
       </View>
-      <SourceTabs options={sources} selected={source} onSelect={selectSource} />
+      <SourceTabs options={sources} selected={source} onSelect={selectSource} backgroundColor={accent} />
       {showSearch && (
-        <View style={styles.searchContainer}>
+        <View style={[styles.searchContainer, { backgroundColor: accent }]}>
           <TextInput
             style={styles.searchInput}
             value={search}
@@ -148,7 +156,7 @@ export const HistoryScreen = () => {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0c6b58" />
+          <ActivityIndicator size="large" color={accent} />
         </View>
       ) : <FlatList
         refreshing={loading}
@@ -156,7 +164,7 @@ export const HistoryScreen = () => {
         keyboardShouldPersistTaps="handled"
         ListFooterComponent={messageLimit === 30 && !error ? <TouchableOpacity
           accessibilityRole="button" style={{ padding: 20, alignItems: 'center' }} onPress={() => setMessageLimit(100)}>
-          <Text style={{ color: '#0c6b58', fontWeight: '700' }}>Ver más</Text>
+          <Text style={{ color: accent, fontWeight: '700' }}>Ver más</Text>
         </TouchableOpacity> : undefined}
         data={filteredItems}
         keyExtractor={(item) => item.id}

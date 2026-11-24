@@ -5,7 +5,7 @@ import { CommunicationsScreen } from '@/screens/private/communications/Communica
 import { ClassroomScreen } from '@/screens/private/classroom/ClassroomScreen';
 import { classroomColors } from '@/screens/private/classroom/classroomStyles';
 import { SourceTabs } from '@/components/SourceTabs';
-import { BookIcon } from '@/components/BookIcon';
+import { ClassroomIcon } from '@/components/ClassroomIcon';
 
 type MessageSource = 'mensajes' | 'classroom';
 
@@ -13,7 +13,7 @@ const MENSAJES_COLOR = '#0c6b58';
 
 const sources: { id: MessageSource; label: string; icon?: (active: boolean) => React.ReactNode }[] = [
   { id: 'mensajes', label: 'Mensajes' },
-  { id: 'classroom', label: 'Aula Kit', icon: active => <BookIcon color={active ? classroomColors.primary : '#fff'} /> },
+  { id: 'classroom', label: 'Aula Kit', icon: active => <ClassroomIcon color={active ? classroomColors.primary : '#fff'} /> },
 ];
 
 /**
