@@ -26,59 +26,10 @@ export const styles = StyleSheet.create({
     marginBottom: 60,
   },
 
-  logoBars: {
-    flexDirection: 'row',
-    height: 118,
-    marginBottom: 16,
-  },
-
-  bar: {
-    width: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  barI: {
-    backgroundColor: '#d32b26',
-  },
-
-  barM: {
-    backgroundColor: '#e39a0c',
-  },
-
-  barE: {
-    backgroundColor: '#1f9d55',
-  },
-
-  barP: {
-    backgroundColor: '#3266ad',
-  },
-
-  barText: {
-    color: '#fff',
-    fontWeight: '800',
-    fontSize: 46,
-    fontFamily: 'Georgia',
-  },
-
-  tagline: {
-    color: '#2b2b2b',
-    fontSize: 14,
-    letterSpacing: 6,
-    marginTop: 10,
-    fontWeight: '600',
-  },
-
-  underline: {
-    flexDirection: 'row',
-    width: '100%',
-    height: 4,
-    marginTop: 10,
-    gap: 0,
-  },
-
-  underlineBar: {
-    flex: 1,
+  logoCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    overflow: 'hidden',
   },
 
   // Fields

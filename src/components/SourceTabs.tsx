@@ -8,7 +8,7 @@ export interface SourceOption<T extends string> {
   icon?: (active: boolean) => React.ReactNode;
 }
 
-/** Selector superior "Mensajes | Classroom" compartido por Mensajes e Historial. */
+/** Selector superior "Mensajes | Aula Kit" compartido por Mensajes e Historial. */
 export function SourceTabs<T extends string>({ options, selected, onSelect, backgroundColor = '#0c6b58' }: {
   options: SourceOption<T>[];
   selected: T;

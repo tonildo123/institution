@@ -22,36 +22,11 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
+  // Ícono de IMEP (icon_round.png ya trae el círculo blanco)
   headerAvatar: {
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  avatarBadge: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  avatarBars: {
-    flexDirection: 'row',
-    gap: 1.5,
-    marginBottom: 2,
-  },
-
-  avatarBar: {
-    width: 3,
-    height: 8,
-  },
-
-  avatarBadgeText: {
-    color: '#fff',
-    fontSize: 8,
-    fontWeight: '800',
-    letterSpacing: 0.5,
   },
 
   headerText: {

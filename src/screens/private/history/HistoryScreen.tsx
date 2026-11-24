@@ -28,7 +28,7 @@ type HistorySource = 'mensajes' | 'classroom';
 
 const sources: { id: HistorySource; label: string }[] = [
   { id: 'mensajes', label: 'Mensajes' },
-  { id: 'classroom', label: 'Classroom' },
+  { id: 'classroom', label: 'Aula Kit' },
 ];
 
 export const HistoryScreen = () => {
@@ -45,7 +45,7 @@ export const HistoryScreen = () => {
   const filteredItems = items.filter(item =>
     [item.title, item.description].some(value => value?.toLocaleLowerCase().includes(term)),
   );
-  const emptyLabel = source === 'classroom' ? 'mensajes de Classroom' : 'comunicaciones';
+  const emptyLabel = source === 'classroom' ? 'mensajes de Aula Kit' : 'comunicaciones';
 
   // Recargar cuando la screen obtiene el foco (después de volver del detalle)
   useFocusEffect(

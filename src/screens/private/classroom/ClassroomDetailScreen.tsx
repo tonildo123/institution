@@ -178,7 +178,7 @@ export const ClassroomDetailScreen = () => {
         </View>
 
         <View style={classroomStyles.detailHeaderText}>
-          <Text style={classroomStyles.detailHeaderTitle}>Classroom</Text>
+          <Text style={classroomStyles.detailHeaderTitle}>Aula Kit</Text>
           <Text style={classroomStyles.detailHeaderSub}>Publicación</Text>
         </View>
 

@@ -39,7 +39,7 @@ export const Landing = () => (
     <section className="hero">
       <p className="hero-eyebrow">Instituto IMEP</p>
       <h1>Comunicación clara entre la escuela, las familias y los docentes</h1>
-      <p>Comunicados, tareas de Classroom y seguimiento en un mismo lugar, desde el teléfono.</p>
+      <p>Comunicados, tareas de Aula Kit y seguimiento en un mismo lugar, desde el teléfono.</p>
       <div className="hero-actions">
         <Link className="button button-light" to="/nosotros">Conocé el instituto</Link>
         <Link className="button button-outline" to="/privacidad">Privacidad</Link>
@@ -57,7 +57,7 @@ export const Landing = () => (
         </article>
         <article className="card">
           <div className="card-icon">📖</div>
-          <h3>Classroom</h3>
+          <h3>Aula Kit</h3>
           <p>Tareas y materiales de cada curso, con entrega de las familias y fecha límite.</p>
         </article>
         <article className="card">

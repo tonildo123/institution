@@ -545,7 +545,7 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
           >
             <BookIcon color="#fff" />
             <Text style={classroomStyles.publishButtonText}>
-              {uploadingImage ? 'Subiendo adjunto...' : loading ? 'Publicando...' : 'Publicar en Classroom'}
+              {uploadingImage ? 'Subiendo adjunto...' : loading ? 'Publicando...' : 'Publicar en Aula Kit'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -578,7 +578,7 @@ export const ClassroomScreen: React.FC<ClassroomScreenProps> = ({
         <TouchableOpacity accessibilityRole="button" onPress={() => loadClassroomData(true)}><Text>Reintentar</Text></TouchableOpacity>
       </View>}
       <FlatList
-        ListHeaderComponent={<Text style={classroomStyles.sectionLabel}>PUBLICACIONES DE CLASSROOM</Text>}
+        ListHeaderComponent={<Text style={classroomStyles.sectionLabel}>PUBLICACIONES DE AULA KIT</Text>}
         ListFooterComponent={messageLimit === 30 && !loadError ? <TouchableOpacity
           accessibilityRole="button" style={classroomStyles.moreButton} onPress={() => setMessageLimit(100)}>
           <Text style={classroomStyles.moreButtonText}>Ver más</Text>

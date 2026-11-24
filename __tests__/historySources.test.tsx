@@ -30,15 +30,15 @@ afterEach(async () => { await act(async () => { tree?.unmount(); }); });
 const tab = (label: string) => tree.root.findAllByType(TouchableOpacity).find(item => item.props.accessibilityLabel === label)!;
 const texts = () => tree.root.findAllByType(Text).map(item => item.props.children);
 
-test('muestra Mensajes por defecto y Classroom al elegir la otra pestaña', async () => {
+test('muestra Mensajes por defecto y Aula Kit al elegir la otra pestaña', async () => {
   await act(async () => { tree = create(<HistoryScreen />); });
   expect(getAllCommunications).toHaveBeenCalledWith(30, 'admin-1');
   expect(getAllClassroom).not.toHaveBeenCalled();
   expect(texts()).toContain('Mensajes');
   expect(tab('Mensajes').props.accessibilityState).toEqual({ selected: true });
 
-  await act(async () => { tab('Classroom').props.onPress(); });
+  await act(async () => { tab('Aula Kit').props.onPress(); });
   expect(getAllClassroom).toHaveBeenCalledWith(30, 'admin-1');
-  expect(tab('Classroom').props.accessibilityState).toEqual({ selected: true });
+  expect(tab('Aula Kit').props.accessibilityState).toEqual({ selected: true });
   expect(tab('Mensajes').props.accessibilityState).toEqual({ selected: false });
 });

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
@@ -155,17 +156,11 @@ export const CommunicationDetailScreen = () => {
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
 
-        <View style={styles.headerAvatar}>
-          <View style={styles.avatarBadge}>
-            <View style={styles.avatarBars}>
-              <View style={[styles.avatarBar, { backgroundColor: '#e63946' }]} />
-              <View style={[styles.avatarBar, { backgroundColor: '#f4a300' }]} />
-              <View style={[styles.avatarBar, { backgroundColor: '#2a9d5c' }]} />
-              <View style={[styles.avatarBar, { backgroundColor: '#2a4d9d' }]} />
-            </View>
-            <Text style={styles.avatarBadgeText}>IMEP</Text>
-          </View>
-        </View>
+        <Image
+          source={require('../../../assets/images/icon_round.png')}
+          style={styles.headerAvatar}
+          accessibilityLabel="IMEP"
+        />
 
         <View style={styles.headerText}>
           <Text style={styles.headerTitle}>KIT IMEP</Text>

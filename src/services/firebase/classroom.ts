@@ -18,7 +18,7 @@ export function canReadClassroom(message: Pick<Classroom, 'sentBy' | 'targetUser
 }
 export function classroomLoadError(error: unknown): string {
   if (isConnectionError(error)) return CONNECTION_MESSAGE + ' Luego tocá Reintentar.';
-  return 'No se pudieron cargar los mensajes de Classroom. Intentá nuevamente.';
+  return 'No se pudieron cargar los mensajes de Aula Kit. Intentá nuevamente.';
 }
 
 export interface Classroom {

@@ -16,9 +16,10 @@ import styles from './styles';
 /**
  * ForgotPasswordScreen
  *
- * Pantalla de recuperación de contraseña
+ * Pantalla de recuperación de contraseña (mismo diseño que el login)
  * - Envío de email de recuperación
  * - Mensaje de confirmación
+ * - Solo se vuelve al login con el botón de arriba (sin acceso a crear cuenta)
  */
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
@@ -38,25 +39,28 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={styles.flex}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Header con botón atrás */}
+          {/* Volver al login */}
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation?.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Volver"
+            hitSlop={8}
           >
-            <Text style={styles.backButtonText}>← Atrás</Text>
+            <Text style={styles.backButtonText}>← Volver</Text>
           </TouchableOpacity>
 
-          {/* Main Content */}
+          {/* Encabezado */}
           <View style={styles.header}>
             <Text style={styles.title}>¿Olvidaste tu contraseña?</Text>
             <Text style={styles.subtitle}>
-              Te enviaremos un email con instrucciones para recuperarla
+              Te enviaremos un email con instrucciones para recuperarla.
             </Text>
           </View>
 
@@ -76,53 +80,38 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
 
           {/* Formulario */}
           {!successMessage && (
-            <View style={styles.form}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={[styles.input, emailError && styles.inputError]}
-                  placeholder="tu@email.com"
-                  placeholderTextColor="#999"
-                  value={email}
-                  onChangeText={handleEmailChange}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  editable={!isLoading}
-                />
-                {emailError && (
-                  <Text style={styles.fieldErrorText}>{emailError}</Text>
-                )}
-              </View>
+            <View>
+              <Text style={styles.fieldLabel}>Email</Text>
+              <TextInput
+                style={[styles.input, emailError && styles.inputError]}
+                placeholder="tu@email.com"
+                placeholderTextColor="#9a9a9a"
+                value={email}
+                onChangeText={handleEmailChange}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!isLoading}
+              />
+              {emailError && (
+                <Text style={styles.fieldErrorText}>{emailError}</Text>
+              )}
 
-              {/* Send Reset Button */}
+              {/* Botón Enviar */}
               <TouchableOpacity
                 style={[styles.sendButton, isLoading && styles.sendButtonDisabled]}
                 onPress={handleSendReset}
                 disabled={isLoading}
-                activeOpacity={0.7}
+                accessibilityRole="button"
               >
                 {isLoading ? (
                   <ActivityIndicator size="large" color="#fff" />
                 ) : (
-                  <Text style={styles.sendButtonText}>Enviar Email</Text>
+                  <Text style={styles.sendButtonText}>ENVIAR EMAIL</Text>
                 )}
               </TouchableOpacity>
             </View>
           )}
-
-          {/* Spacer */}
-          <View style={{ flex: 1 }} />
-
-          {/* Footer Links */}
-          <View style={styles.footer}>
-            <TouchableOpacity onPress={() => navigation?.navigate('Login')}>
-              <Text style={styles.footerLink}>Volver a Login</Text>
-            </TouchableOpacity>
-            <Text style={styles.separator}>•</Text>
-            <TouchableOpacity onPress={() => navigation?.navigate('Register')}>
-              <Text style={styles.footerLink}>Crear Cuenta</Text>
-            </TouchableOpacity>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

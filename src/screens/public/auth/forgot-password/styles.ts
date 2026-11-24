@@ -1,132 +1,129 @@
 import { StyleSheet } from 'react-native';
 
 /**
- * Estilos para ForgotPasswordScreen
+ * Estilos para ForgotPasswordScreen - Diseño IMEP (mismos colores y medidas que el login)
  */
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#efeae2',
+  },
+
+  flex: {
+    flex: 1,
   },
 
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 40,
+    paddingTop: 24,
+    paddingBottom: 120,
   },
 
-  // Back Button
+  // Volver
   backButton: {
-    marginBottom: 20,
+    alignSelf: 'flex-start',
+    paddingVertical: 12,
+    marginBottom: 24,
   },
 
   backButtonText: {
-    fontSize: 14,
-    color: '#007AFF',
+    color: '#0c6b58',
+    fontSize: 16,
     fontWeight: '600',
   },
 
-  // Header
+  // Encabezado
   header: {
-    marginBottom: 30,
-    alignItems: 'center',
+    marginBottom: 32,
   },
 
   title: {
+    color: '#1f1f1f',
     fontSize: 28,
     fontWeight: '700',
-    color: '#1a1a1a',
     marginBottom: 12,
   },
 
   subtitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 20,
+    color: '#5a5a5a',
+    fontSize: 16,
+    lineHeight: 22,
   },
 
   // Mensajes
   errorContainer: {
-    backgroundColor: '#fee',
-    borderRadius: 8,
+    backgroundColor: '#fff0f0',
+    borderLeftWidth: 4,
+    borderLeftColor: '#d32b26',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#f33',
+    marginBottom: 20,
+    borderRadius: 6,
   },
 
   errorText: {
-    color: '#c00',
-    fontSize: 13,
+    color: '#c62828',
+    fontSize: 14,
     fontWeight: '500',
   },
 
   successContainer: {
-    backgroundColor: '#efe',
-    borderRadius: 8,
+    backgroundColor: '#e6f2ee',
+    borderLeftWidth: 4,
+    borderLeftColor: '#0c6b58',
     paddingHorizontal: 12,
     paddingVertical: 12,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#0a0',
+    marginBottom: 20,
+    borderRadius: 6,
   },
 
   successText: {
-    color: '#060',
-    fontSize: 13,
+    color: '#0b5a49',
+    fontSize: 15,
     fontWeight: '500',
-    lineHeight: 18,
+    lineHeight: 21,
   },
 
-  // Formulario
-  form: {
-    marginBottom: 24,
-  },
-
-  inputGroup: {
-    marginBottom: 16,
-  },
-
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 8,
+  // Campo
+  fieldLabel: {
+    color: '#1f1f1f',
+    fontSize: 22,
+    fontWeight: '700',
+    marginVertical: 14,
   },
 
   input: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#1a1a1a',
+    width: '100%',
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    fontSize: 16,
+    color: '#333',
+    borderWidth: 0,
   },
 
   inputError: {
-    borderColor: '#f33',
-    backgroundColor: '#fff5f5',
+    borderWidth: 1,
+    borderColor: '#d32b26',
   },
 
   fieldErrorText: {
-    color: '#f33',
+    color: '#d32b26',
     fontSize: 12,
-    marginTop: 4,
-    fontWeight: '500',
+    marginTop: 8,
   },
 
-  // Send Button
+  // Botón Enviar (igual al de iniciar sesión)
   sendButton: {
-    backgroundColor: '#007AFF',
+    width: '100%',
+    backgroundColor: '#0b6b57',
     borderRadius: 8,
-    paddingVertical: 14,
+    paddingVertical: 20,
     alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: 28,
   },
 
   sendButtonDisabled: {
@@ -135,28 +132,9 @@ const styles = StyleSheet.create({
 
   sendButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-
-  // Footer
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 16,
-  },
-
-  footerLink: {
-    fontSize: 13,
-    color: '#007AFF',
+    fontSize: 20,
     fontWeight: '600',
-    marginHorizontal: 12,
-  },
-
-  separator: {
-    fontSize: 13,
-    color: '#ccc',
+    letterSpacing: 1,
   },
 });
 

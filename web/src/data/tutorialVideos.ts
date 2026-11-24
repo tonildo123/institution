@@ -30,7 +30,7 @@ const video = {
   leerComunicados: { id: 'f3', title: 'KIT IMEP F3 · Leer comunicados y tareas', youtubeId: 'WL5jbg09VW4' },
   historial: { id: 'd4', title: 'KIT IMEP D4 · Historial', youtubeId: 'IxCLUXDhKao' },
   ingresarFamilias: { id: 'f1', title: 'KIT IMEP F1 · Ingresar familias', youtubeId: 'JDIwLUsKGME' },
-  publicarTarea: { id: 'd3', title: 'KIT IMEP D3 · Publicar tarea Classroom', youtubeId: 'sd02q77z1i4' },
+  publicarTarea: { id: 'd3', title: 'KIT IMEP D3 · Publicar tarea Aula Kit', youtubeId: 'sd02q77z1i4' },
   enviarMensaje: { id: 'd2', title: 'KIT IMEP D2 · Enviar mensaje', youtubeId: 'lQkb9Qowb3Y' },
   ingresarDocentes: { id: 'd1', title: 'KIT IMEP D1 · Ingresar docentes / no docente', youtubeId: '_eBuNKDwDPs' },
   directivoExtra: { id: 'directivo-extra', title: 'Tutorial para directivos y no docentes', youtubeId: 'JtBHaFPi2Ww' },

@@ -13,7 +13,7 @@ const MENSAJES_COLOR = '#0c6b58';
 
 const sources: { id: MessageSource; label: string; icon?: (active: boolean) => React.ReactNode }[] = [
   { id: 'mensajes', label: 'Mensajes' },
-  { id: 'classroom', label: 'Classroom', icon: active => <BookIcon color={active ? classroomColors.primary : '#fff'} /> },
+  { id: 'classroom', label: 'Aula Kit', icon: active => <BookIcon color={active ? classroomColors.primary : '#fff'} /> },
 ];
 
 /**

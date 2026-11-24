@@ -9,6 +9,7 @@ import type { AuthStackParamList } from '@/navigation/AuthNavigator';
 import {
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
   ScrollView,
@@ -17,9 +18,16 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  useWindowDimensions,
 } from 'react-native';
 import { useLoginLogic } from './useLoginLogic';
 import { styles } from './styles';
+
+// logo_login.png mide 960 x 616. Se calcula el tamaño en números: con width '100%' + aspectRatio
+// la imagen se dibujaba en su tamaño original y la tarjeta la recortaba.
+const LOGO_RATIO = 616 / 960;
+const LOGO_MAX_WIDTH = 320;
+const SCREEN_PADDING_X = 40; // paddingHorizontal de scrollContent
 
 /**
  * LoginScreen - Diseño IMEP
@@ -46,6 +54,10 @@ const LoginScreen = ({ navigation }: NativeStackScreenProps<AuthStackParamList, 
     setShowPassword,
   } = useLoginLogic();
 
+  // Ancho del logo: el disponible en pantalla, con tope de LOGO_MAX_WIDTH
+  const { width: screenWidth } = useWindowDimensions();
+  const logoWidth = Math.min(LOGO_MAX_WIDTH, screenWidth - SCREEN_PADDING_X * 2);
+
   const dispatch = useDispatch();
   const [biometricReady, setBiometricReady] = useState(false);
   const [biometricBusy, setBiometricBusy] = useState(false);
@@ -71,30 +83,15 @@ const LoginScreen = ({ navigation }: NativeStackScreenProps<AuthStackParamList, 
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Logo IMEP */}
+          {/* Logo IMEP (imagen oficial, sobre tarjeta blanca porque el logo tiene fondo blanco) */}
           <View style={styles.logoWrap}>
-            <View style={styles.logoBars}>
-              <View style={[styles.bar, styles.barI]}>
-                <Text style={styles.barText}>I</Text>
-              </View>
-              <View style={[styles.bar, styles.barM]}>
-                <Text style={styles.barText}>M</Text>
-              </View>
-              <View style={[styles.bar, styles.barE]}>
-                <Text style={styles.barText}>E</Text>
-              </View>
-              <View style={[styles.bar, styles.barP]}>
-                <Text style={styles.barText}>P</Text>
-              </View>
-            </View>
-
-            <Text style={styles.tagline}>CONOCER, AMAR Y SERVIR</Text>
-
-            <View style={styles.underline}>
-              <View style={[styles.underlineBar, styles.barI]} />
-              <View style={[styles.underlineBar, styles.barM]} />
-              <View style={[styles.underlineBar, styles.barE]} />
-              <View style={[styles.underlineBar, styles.barP]} />
+            <View style={styles.logoCard}>
+              <Image
+                source={require('../../../../assets/images/logo_login.png')}
+                style={{ width: logoWidth, height: logoWidth * LOGO_RATIO }}
+                resizeMode="cover"
+                accessibilityLabel="IMEP. Conocer, amar y servir"
+              />
             </View>
           </View>
 

@@ -14,7 +14,7 @@ export const REPORT_STATUS_LABEL: Record<ImageReportStatus, string> = {
 
 export const SOURCE_LABEL: Record<string, string> = {
   communications: 'Mensaje',
-  classroom: 'Classroom',
+  classroom: 'Aula Kit',
 };
 
 export interface ImageReport {
@@ -42,7 +42,7 @@ const functions = () => getFunctions(undefined, 'us-central1');
 const call = <Input, Output = { ok: boolean }>(name: string) => httpsCallable<Input, Output>(functions(), name);
 
 export const sourceKind = (sourcePath: string): string => {
-  if (sourcePath.includes('/submissions/')) return 'Entrega de Classroom';
+  if (sourcePath.includes('/submissions/')) return 'Entrega de Aula Kit';
   return SOURCE_LABEL[sourcePath.split('/')[0]] ?? 'Imagen';
 };
 
